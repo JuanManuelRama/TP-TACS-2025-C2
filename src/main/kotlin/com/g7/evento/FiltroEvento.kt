@@ -9,11 +9,11 @@ class FiltroPalabrasClave(val palabra: String) : FiltroEvento {
 }
 
 class FiltroFechaAntes (val fecha: LocalDate)  : FiltroEvento {
-    override fun cumple(evento: Evento): Boolean = evento.fecha.isBefore(fecha)
+    override fun cumple(evento: Evento): Boolean = evento.inicio.isBefore(fecha.atStartOfDay())
 }
 
 class FiltroFechaDespues(val fecha: LocalDate) : FiltroEvento {
-    override fun cumple(evento: Evento): Boolean = evento.fecha.isAfter(fecha)
+    override fun cumple(evento: Evento): Boolean = evento.inicio.isAfter(fecha.atStartOfDay())
 }
 
 class FiltroCategoria(val categoria: Categoria): FiltroEvento {

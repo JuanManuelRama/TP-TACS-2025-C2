@@ -1,29 +1,31 @@
 package com.g7.evento
 
 import com.g7.usuario.Usuario
+import kotlinx.serialization.Serializable
 import kotlin.time.Duration
-import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 
+@Serializable
 enum class Categoria {
     FIESTA,
     CONCIERTO,
 }
 /**
  * @constructor Al instanciar esta clase se registra automáticamente la creación
- * del com.g7.com.g7.evento en el log del sistema y se inicializan los contadores internos.
+ * del evento en el usuario correspondiente y se inicializan los contadores internos.
  * */
 class Evento(
+    val id: UUID,
     val organizador: Usuario,
     val titulo: String,
     val descripcion: String,
-    val fecha: LocalDate,
-    val horaInicio: LocalDateTime,
+    val inicio: LocalDateTime,
     val duracion: Duration,
     val cupoMaximo: Int,
     val cupoMinimio: Int?,
     val precio: Float,
-    val categorias: List<Categoria>,
+   val categorias: List<Categoria>,
 ) {
     val inscriptos: MutableSet<Inscripcion> = HashSet()
     val enEspera: ArrayDeque<Espera> = ArrayDeque()
@@ -31,24 +33,58 @@ class Evento(
     var cantEsperaExitosas: Int = 0
     var cantEsperaCancelada: Int = 0
 
-    init {
-        organizador.eventosOrganizados.add(this)
-    }
+    init { organizador.eventosOrganizados.add(this) }
 
     fun isFull(): Boolean = inscriptos.size == cupoMaximo
 
     /**
-     * Intenta inscribir un com.g7.com.g7.usuario en el com.g7.com.g7.evento.
+     * Registra a un usuario en el evento.
      *
-     * Si el com.g7.com.g7.evento ya alcanzó el cupo máximo, devuelve un [Result.failure].
-     * En caso contrario:
-     * - Registra la inscripción en el com.g7.com.g7.usuario.
-     * - Agrega la inscripción al conjunto de inscriptos.
+     * Si el evento todavía no alcanzó su capacidad máxima, se lo inscribe directamente.
+     * En caso contrario, el usuario se agrega a la lista de espera.
      *
-     * @param com.g7.usuario Usuario que intenta inscribirse.
-     * @return [Result.success] si la inscripción fue realizada, o [Result.failure] si no fue posible.
+     * El método está sincronizado para evitar condiciones de carrera al modificar
+     * las listas de inscriptos o de espera.
+     *
+     * @param usuario El usuario que desea registrarse.
+     * @return [Result.success] si la operación fue exitosa (inscripción o espera),
+     * o [Result.failure] si ocurrió un error durante el proceso.
      */
     @Synchronized
+    fun registrar(usuario: Usuario): Result<Unit> {
+        return if (isFull()) inscribir(usuario) else esperar(usuario)
+    }
+
+    /**
+     * Registra a un usuario en el evento.
+     *
+     * Si el evento todavía no alcanzó su capacidad máxima, se lo inscribe directamente.
+     * En caso contrario, el usuario se agrega a la lista de espera.
+     *
+     * El método está sincronizado para evitar condiciones de carrera al modificar
+     * las listas de inscriptos o de espera.
+     *
+     * @param usuario El usuario que desea registrarse.
+     * @return [Result.success] si la operación fue exitosa (inscripción o espera),
+     * o [Result.failure] si ocurrió un error durante el proceso.
+     */
+    @Synchronized
+    fun cancelar(usuario: Usuario): Result<Unit> {
+        val resultado = cancelarInscripcion(usuario)
+        return if (resultado.isSuccess) resultado else cancelarEspera(usuario)
+    }
+
+    /**
+     * Intenta inscribir un usuario en el evento.
+     *
+     * Si el evento ya alcanzó el cupo máximo, devuelve un [Result.failure].
+     * En caso contrario:
+     * - Registra la inscripción en el usuario.
+     * - Agrega la inscripción al conjunto de inscriptos.
+     *
+     * @param usuario Usuario que intenta inscribirse.
+     * @return [Result.success] si la inscripción fue realizada, o [Result.failure] si no fue posible.
+     */
     fun inscribir(usuario: Usuario): Result<Unit> {
         if (this.isFull()) {
             return Result.failure(RuntimeException("No hay espacios disponibles"))
@@ -59,23 +95,23 @@ class Evento(
     }
 
     /**
-     * Cancela la inscripción de un com.g7.com.g7.usuario en el com.g7.com.g7.evento.
+     * Cancela la inscripción de un usuario en el evento.
      *
-     * - Si el com.g7.com.g7.usuario no estaba inscripto, devuelve [Result.failure].
+     * - Si el usuario no estaba inscripto, devuelve [Result.failure].
      * - Si estaba inscripto, se lo elimina de la lista de inscriptos y se intenta
-     *   promover al primer com.g7.com.g7.usuario en espera.
+     *   promover al primer usuario en espera.
      * - En caso de promover a alguien de la lista de espera:
-     *   - Se crea una nueva inscripción para ese com.g7.com.g7.usuario.
+     *   - Se crea una nueva inscripción para ese usuario.
      *   - Se actualizan los contadores de éxito en espera.
-     *   - Se ajustan las colecciones de inscripciones y esperas del com.g7.com.g7.usuario.
+     *   - Se ajustan las colecciones de inscripciones y esperas del usuario.
      *
-     * @param com.g7.usuario Usuario que desea cancelar su inscripción.
-     * @return [Result.success] si se completó correctamente, o [Result.failure] si el com.g7.com.g7.usuario no estaba inscripto.
+     * @param usuario Usuario que desea cancelar su inscripción.
+     * @return [Result.success] si se completó correctamente, o [Result.failure]
+     * si el usuario no estaba inscripto.
      */
-    @Synchronized
     fun cancelarInscripcion(usuario: Usuario): Result<Unit> {
         if (!this.inscriptos.removeIf{i -> i.usuario == usuario}) {
-            return Result.failure(RuntimeException("El com.g7.com.g7.usuario no estaba inscripto"))
+            return Result.failure(RuntimeException("El usuario no estaba inscripto"))
         }
         usuario.removeInscripcion(this).getOrElse { return Result.failure(it) }
         enEspera.removeFirstOrNull()?.let { inscripto ->
@@ -91,22 +127,21 @@ class Evento(
     }
 
     /**
-     * Registra a un com.g7.com.g7.usuario en la lista de espera.
+     * Registra a un usuario en la lista de espera.
      *
-     * - Si el com.g7.com.g7.evento todavía tiene cupo, devuelve [Result.failure], ya que no corresponde esperar.
-     * - Si el com.g7.com.g7.usuario ya estaba inscripto o en espera, devuelve [Result.failure].
+     * - Si el evento todavía tiene cupo, devuelve [Result.failure], ya que no corresponde esperar.
+     * - Si el usuario ya estaba inscripto o en espera, devuelve [Result.failure].
      * - En caso válido, se crea un objeto [Espera] y se agrega a la cola de espera.
      *
-     * @param com.g7.usuario Usuario que desea esperar un lugar en el com.g7.com.g7.evento.
+     * @param com.g7.usuario Usuario que desea esperar un lugar en el evento.
      * @return [Result.success] si fue agregado a la lista de espera, o [Result.failure] en caso contrario.
      */
-    @Synchronized
     fun esperar(usuario: Usuario): Result<Unit> {
         if (!this.isFull()) {
             return Result.failure(RuntimeException("Hay espacios disponibles, no debería esperar"))
         }
         if (usuario.anotado(this)) {
-            return Result.failure(RuntimeException("El com.g7.com.g7.usuario ya estaba anotado"))
+            return Result.failure(RuntimeException("El usuario ya estaba anotado"))
         }
         val espera = Espera(usuario, this, LocalDateTime.now())
         return usuario.addEspera(this)
@@ -117,18 +152,17 @@ class Evento(
     }
 
     /**
-     * Cancela la espera de un com.g7.com.g7.usuario en la cola de espera.
+     * Cancela la espera de un usuario en la cola de espera.
      *
-     * - Si el com.g7.com.g7.usuario no estaba en la cola, devuelve [Result.failure].
+     * - Si el usuario no estaba en la cola, devuelve [Result.failure].
      * - Si estaba, se lo elimina de la lista de espera y se actualizan los contadores de cancelación.
      *
-     * @param com.g7.usuario Usuario que desea cancelar su espera.
-     * @return [Result.success] si la cancelación fue realizada, o [Result.failure] si el com.g7.com.g7.usuario no estaba en espera.
+     * @param usuario Usuario que desea cancelar su espera.
+     * @return [Result.success] si la cancelación fue realizada, o [Result.failure] si el usuario no estaba en espera.
      */
-    @Synchronized
     fun cancelarEspera(usuario: Usuario): Result<Unit> {
         if (!enEspera.removeIf { i -> i.usuario == usuario }) {
-            return Result.failure(RuntimeException("El com.g7.com.g7.usuario no estaba en espera"))
+            return Result.failure(RuntimeException("El usuario no estaba en espera"))
         }
         return usuario.removeEspera(this)
             .onSuccess { cantEsperaCancelada += 1 }
@@ -139,5 +173,5 @@ class Evento(
     fun porcentajeCancelacion(): Float? = ratio(cantEsperaCancelada, cantEspera)
 
     private fun ratio(part: Int, total: Int): Float? =
-        total.takeIf { it > 0 }?.let { (part.toFloat() / it) * 100 }
+        if (total == 0) null else (part.toFloat() / total.toFloat()) * 100
 }
