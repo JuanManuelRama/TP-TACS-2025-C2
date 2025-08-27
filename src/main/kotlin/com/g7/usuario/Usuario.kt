@@ -18,7 +18,7 @@ class Usuario(val id: UUID, val nombre: String) {
 
     private fun add(evento: Evento, eventos: MutableSet<Evento>): Result<Unit> {
         if (this.anotado(evento)) {
-            return Result.failure(RuntimeException("El com.g7.com.g7.usuario ya estaba anotado"))
+            return Result.failure(RuntimeException("El usuario ya estaba anotado"))
         }
         eventos.add(evento)
         return Result.success(Unit)
@@ -28,7 +28,7 @@ class Usuario(val id: UUID, val nombre: String) {
         return if (eventos.remove(evento)) {
             Result.success(Unit)
         } else {
-            Result.failure(RuntimeException("El com.g7.com.g7.usuario no estaba $keyword"))
+            Result.failure(RuntimeException("El usuario no estaba $keyword"))
         }
     }
 
