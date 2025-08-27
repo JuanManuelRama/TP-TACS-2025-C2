@@ -1,8 +1,9 @@
 package com.g7.usuario
 
 import com.g7.evento.Evento
+import java.util.UUID
 
-class Usuario(val nombre: String) {
+class Usuario(val id: UUID, val nombre: String) {
     val inscripciones: MutableSet<Evento> = HashSet()
     val esperas: MutableSet<Evento> = HashSet()
     val eventosOrganizados: MutableSet<Evento> = HashSet()
