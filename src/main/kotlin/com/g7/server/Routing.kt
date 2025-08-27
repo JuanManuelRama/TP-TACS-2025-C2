@@ -6,6 +6,7 @@ import com.g7.evento.toDto
 import com.g7.repo.EventoRepository
 import com.g7.repo.UsuarioRepository
 import com.g7.usuario.UsuarioDto
+import com.g7.usuario.toDto
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -32,22 +33,21 @@ fun Application.configureRouting() {
             call.respondText("Hello World!")
         }
         get("/eventos/{id}") {
-            val idParam = call.parameters["id"] ?: return@get call
-                .respond(HttpStatusCode.BadRequest, "Missing id")
-            val id = try {
-                UUID.fromString(idParam)
-            } catch (_: IllegalArgumentException) {
-                return@get call.respond(HttpStatusCode.BadRequest, "Invalid Id format")
-            }
-            val evento = EventoRepository.getEventos().find { it.id == id }
-                ?: return@get call.respond(HttpStatusCode.NotFound, "Evento no encontrado")
-            call.respond(HttpStatusCode.OK, evento.toDto())
+            val id = call.requireUuidParam("id")?: return@get
+            EventoRepository.findById(id)
+                .onSuccess { evento ->
+                    call.respond(HttpStatusCode.OK, evento.toDto())
+                }
+                .onFailure {
+                    call.respond(HttpStatusCode.NotFound, "${it.message}")
+                }
+
         }
-        post("/usuario") {
+        post("/usuarios") {
             val usuarioDto = call.receive<UsuarioDto>().copy(id = UUID.randomUUID())
             usuarioDto.toDomain()
-                .onSuccess {
-                    UsuarioRepository.save(it)
+                .onSuccess { usuario ->
+                    UsuarioRepository.save(usuario)
                     call.respond(HttpStatusCode.Created, usuarioDto)
                 }
                 .onFailure {
@@ -58,7 +58,7 @@ fun Application.configureRouting() {
         * La id de usuario debería entrar por contexto de la request (jwt),
          * por ahora se pasa en el recurso
         * */
-        post("/evento") {
+        post("/eventos") {
             val eventoDto = call.receive<EventoDto>().copy(id = UUID.randomUUID())
             //TODO: generar una id en serio
             eventoDto.toDomain()
@@ -67,8 +67,38 @@ fun Application.configureRouting() {
                     call.respond(HttpStatusCode.Created, eventoDto)
                 }
                 .onFailure {
-                    call.respond(HttpStatusCode.BadRequest, "Erro al registrar el evento: ${it.message}")
+                    call.respond(HttpStatusCode.BadRequest, "Error al registrar el evento: ${it.message}")
                 }
+        }
+
+        get("/eventos/{id}/inscriptos") {
+            val id = call.requireUuidParam("id")?: return@get
+
+            EventoRepository.findById(id)
+                .onSuccess { evento ->
+                    call.respond(HttpStatusCode.OK, evento.inscriptos.map { it.usuario.toDto() })
+                }
+                .onFailure {
+                    call.respond(HttpStatusCode.NotFound, "${it.message}")
+                }
+        }
+
+        //usuarioId debería venir del contexto (jwt)
+        put ("eventos/{id}/anotados/{usuarioId}") {
+            val id = call.requireUuidParam("id")?: return@put
+            EventoRepository.findById(id)
+                .onSuccess { evento ->
+                    val usuarioId = call.requireUuidParam("usuarioId")?: return@put
+                    UsuarioRepository.getUsuarioFromId(usuarioId)
+                        .onSuccess { usuario ->
+                            evento.inscribir(usuario)
+                                .onSuccess { call.respond(HttpStatusCode.OK) }
+                                .onFailure { call.respond(HttpStatusCode.BadRequest, "${it.message}") }
+                        }
+                        .onFailure {
+                            call.respond(HttpStatusCode.NotFound, "${it.message}")
+                        } }
+                .onFailure { call.respond(HttpStatusCode.NotFound, "Evento no encontrado") }
         }
     }
 }
