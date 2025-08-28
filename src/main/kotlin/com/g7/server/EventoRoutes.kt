@@ -3,7 +3,6 @@ package com.g7.server
 import com.g7.evento.EventoDto
 import com.g7.evento.toDomain
 import com.g7.evento.toDto
-import com.g7.repo.EventoRepo
 import com.g7.repo.EventoRepository
 import com.g7.repo.UsuarioRepository
 import com.g7.usuario.toDto
@@ -42,7 +41,7 @@ fun Route.eventoRoutes() {
                 call.respond(HttpStatusCode.Created, eventoDto)
             }
             .onFailure {
-                call.respond(HttpStatusCode.BadRequest, "Error al registrar el evento: ${it.message}")
+                call.respond(HttpStatusCode.BadRequest, "Error al inscribir el evento: ${it.message}")
             }
     }
 

@@ -51,31 +51,29 @@ class Evento(
      * o [Result.failure] si ocurrió un error durante el proceso.
      */
     @Synchronized
-    fun registrar(usuario: Usuario): Result<Inscripcion> {
-        return if (isFull()) inscribir(usuario) else esperar(usuario)
+    fun inscribir(usuario: Usuario): Result<Inscripcion> {
+        return if (isFull()) confirmar(usuario) else esperar(usuario)
     }
 
     /**
-     * Registra a un usuario en el evento.
+     * Cancela la inscripción de un usuario a un evento
      *
-     * Si el evento todavía no alcanzó su capacidad máxima, se lo inscribe directamente.
-     * En caso contrario, el usuario se agrega a la lista de espera.
      *
      * El método está sincronizado para evitar condiciones de carrera al modificar
      * las listas de inscriptos o de espera.
      *
      * @param usuario El usuario que desea registrarse.
      * @return [Result.success] si la operación fue exitosa (inscripción o espera),
-     * o [Result.failure] si ocurrió un error durante el proceso.
+     * o [Result.failure] si ocurrió un error durante el proceso (no estaba inscripto).
      */
     @Synchronized
     fun cancelar(usuario: Usuario): Result<Unit> {
-        val resultado = cancelarInscripcion(usuario)
+        val resultado = cancelarConfirmacion(usuario)
         return if (resultado.isSuccess) resultado else cancelarEspera(usuario)
     }
 
     /**
-     * Intenta inscribir un usuario en el evento.
+     * Intenta confirmar un usuario en el evento.
      *
      * Si el evento ya alcanzó el cupo máximo, devuelve un [Result.failure].
      * En caso contrario:
@@ -85,7 +83,7 @@ class Evento(
      * @param usuario Usuario que intenta inscribirse.
      * @return [Result.success] si la inscripción fue realizada, o [Result.failure] si no fue posible.
      */
-    fun inscribir(usuario: Usuario): Result<Inscripcion> {
+    fun confirmar(usuario: Usuario): Result<Inscripcion> {
         if (this.isFull()) {
             return Result.failure(RuntimeException("No hay espacios disponibles"))
         }
@@ -112,7 +110,7 @@ class Evento(
      * @return [Result.success] si se completó correctamente, o [Result.failure]
      * si el usuario no estaba inscripto.
      */
-    fun cancelarInscripcion(usuario: Usuario): Result<Unit> {
+    fun cancelarConfirmacion(usuario: Usuario): Result<Unit> {
         if (!this.inscriptos.removeIf{i -> i.usuario == usuario}) {
             return Result.failure(RuntimeException("El usuario no estaba inscripto"))
         }

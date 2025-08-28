@@ -41,7 +41,7 @@ fun Application.configureRouting() {
                     call.respond(HttpStatusCode.Created, usuarioDto)
                 }
                 .onFailure {
-                    call.respond(HttpStatusCode.BadRequest, "Erro al registrar usuario: ${it.message}")
+                    call.respond(HttpStatusCode.BadRequest, "Erro al inscribir usuario: ${it.message}")
                 }
         }
     }
