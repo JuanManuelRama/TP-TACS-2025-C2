@@ -32,17 +32,7 @@ fun Application.configureRouting() {
         get("/") {
             call.respondText("Hello World!")
         }
-        get("/eventos/{id}") {
-            val id = call.requireUuidParam("id")?: return@get
-            EventoRepository.findById(id)
-                .onSuccess { evento ->
-                    call.respond(HttpStatusCode.OK, evento.toDto())
-                }
-                .onFailure {
-                    call.respond(HttpStatusCode.NotFound, "${it.message}")
-                }
-
-        }
+        eventoRoutes()
         post("/usuarios") {
             val usuarioDto = call.receive<UsuarioDto>().copy(id = UUID.randomUUID())
             usuarioDto.toDomain()
@@ -53,52 +43,6 @@ fun Application.configureRouting() {
                 .onFailure {
                     call.respond(HttpStatusCode.BadRequest, "Erro al registrar usuario: ${it.message}")
                 }
-        }
-        /**
-        * La id de usuario debería entrar por contexto de la request (jwt),
-         * por ahora se pasa en el recurso
-        * */
-        post("/eventos") {
-            val eventoDto = call.receive<EventoDto>().copy(id = UUID.randomUUID())
-            //TODO: generar una id en serio
-            eventoDto.toDomain()
-                .onSuccess {
-                    EventoRepository.saveEvento(it)
-                    call.respond(HttpStatusCode.Created, eventoDto)
-                }
-                .onFailure {
-                    call.respond(HttpStatusCode.BadRequest, "Error al registrar el evento: ${it.message}")
-                }
-        }
-
-        get("/eventos/{id}/inscriptos") {
-            val id = call.requireUuidParam("id")?: return@get
-
-            EventoRepository.findById(id)
-                .onSuccess { evento ->
-                    call.respond(HttpStatusCode.OK, evento.inscriptos.map { it.usuario.toDto() })
-                }
-                .onFailure {
-                    call.respond(HttpStatusCode.NotFound, "${it.message}")
-                }
-        }
-
-        //usuarioId debería venir del contexto (jwt)
-        put ("eventos/{id}/anotados/{usuarioId}") {
-            val id = call.requireUuidParam("id")?: return@put
-            EventoRepository.findById(id)
-                .onSuccess { evento ->
-                    val usuarioId = call.requireUuidParam("usuarioId")?: return@put
-                    UsuarioRepository.getUsuarioFromId(usuarioId)
-                        .onSuccess { usuario ->
-                            evento.inscribir(usuario)
-                                .onSuccess { call.respond(HttpStatusCode.OK) }
-                                .onFailure { call.respond(HttpStatusCode.BadRequest, "${it.message}") }
-                        }
-                        .onFailure {
-                            call.respond(HttpStatusCode.NotFound, "${it.message}")
-                        } }
-                .onFailure { call.respond(HttpStatusCode.NotFound, "Evento no encontrado") }
         }
     }
 }

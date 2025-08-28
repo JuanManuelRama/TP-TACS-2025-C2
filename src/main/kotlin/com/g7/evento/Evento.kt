@@ -27,8 +27,8 @@ class Evento(
     val precio: Float,
    val categorias: List<Categoria>,
 ) {
-    val inscriptos: MutableSet<Inscripcion> = HashSet()
-    val enEspera: ArrayDeque<Espera> = ArrayDeque()
+    val inscriptos: MutableSet<Inscripcion.Confirmacion> = HashSet()
+    val enEspera: ArrayDeque<Inscripcion.Espera> = ArrayDeque()
     var cantEspera: Int = 0
     var cantEsperaExitosas: Int = 0
     var cantEsperaCancelada: Int = 0
@@ -51,7 +51,7 @@ class Evento(
      * o [Result.failure] si ocurrió un error durante el proceso.
      */
     @Synchronized
-    fun registrar(usuario: Usuario): Result<Unit> {
+    fun registrar(usuario: Usuario): Result<Inscripcion> {
         return if (isFull()) inscribir(usuario) else esperar(usuario)
     }
 
@@ -85,13 +85,16 @@ class Evento(
      * @param usuario Usuario que intenta inscribirse.
      * @return [Result.success] si la inscripción fue realizada, o [Result.failure] si no fue posible.
      */
-    fun inscribir(usuario: Usuario): Result<Unit> {
+    fun inscribir(usuario: Usuario): Result<Inscripcion> {
         if (this.isFull()) {
             return Result.failure(RuntimeException("No hay espacios disponibles"))
         }
-        val inscripcion = Inscripcion(usuario, this, LocalDateTime.now(), null)
+        val confirmacion = Inscripcion.Confirmacion(usuario, LocalDateTime.now(), null)
         return usuario.addInscripcion(this)
-            .onSuccess { inscriptos.add(inscripcion) }
+            .map {
+                inscriptos.add(confirmacion)
+                confirmacion
+            }
     }
 
     /**
@@ -116,9 +119,8 @@ class Evento(
         usuario.removeInscripcion(this).getOrElse { return Result.failure(it) }
         enEspera.removeFirstOrNull()?.let { inscripto ->
             val usuarioInscripto = inscripto.usuario
-            val nuevaInscripcion = Inscripcion(usuarioInscripto, this, LocalDateTime.now(),
-                inscripto.tiempoEsperando())
-            inscriptos.add(nuevaInscripcion)
+            val nuevaConfirmacion = inscripto.toConfirmacion()
+            inscriptos.add(nuevaConfirmacion)
             cantEsperaExitosas += 1
             usuarioInscripto.esperas.remove(this)
             usuarioInscripto.inscripciones.add(this)
@@ -131,23 +133,24 @@ class Evento(
      *
      * - Si el evento todavía tiene cupo, devuelve [Result.failure], ya que no corresponde esperar.
      * - Si el usuario ya estaba inscripto o en espera, devuelve [Result.failure].
-     * - En caso válido, se crea un objeto [Espera] y se agrega a la cola de espera.
+     * - En caso válido, se crea un objeto [com.g7.evento.Inscripcion.Espera] y se agrega a la cola de espera.
      *
      * @param com.g7.usuario Usuario que desea esperar un lugar en el evento.
      * @return [Result.success] si fue agregado a la lista de espera, o [Result.failure] en caso contrario.
      */
-    fun esperar(usuario: Usuario): Result<Unit> {
+    fun esperar(usuario: Usuario): Result<Inscripcion> {
         if (!this.isFull()) {
             return Result.failure(RuntimeException("Hay espacios disponibles, no debería esperar"))
         }
         if (usuario.anotado(this)) {
             return Result.failure(RuntimeException("El usuario ya estaba anotado"))
         }
-        val espera = Espera(usuario, this, LocalDateTime.now())
+        val espera = Inscripcion.Espera(usuario, LocalDateTime.now())
         return usuario.addEspera(this)
-            .onSuccess {
+            .map {
                 enEspera.add(espera)
                 cantEspera += 1
+                espera
             }
     }
 
