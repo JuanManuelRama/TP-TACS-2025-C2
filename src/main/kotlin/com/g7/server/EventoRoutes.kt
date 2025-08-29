@@ -61,20 +61,17 @@ fun Route.eventoRoutes() {
     post("eventos/{id}/inscriptos/{usuarioId}") {
         val id = call.requireUuidParam("id")?: return@post
         val usuarioId = call.requireUuidParam("usuarioId")?: return@post
-        EventoRepository.findById(id)
-            .onSuccess { evento ->
-                UsuarioRepository.getUsuarioFromId(usuarioId)
-                    .onSuccess { usuario ->
-                        evento.inscribir(usuario)
-                            .onSuccess { call.respond(HttpStatusCode.OK, it.toDto())}
-                            .onFailure {
-                                call.respond(HttpStatusCode.BadRequest, it.message ?: "Unkown error")
-                            }
-                    }
-                    .onFailure {
-                        call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
+        val evento = EventoRepository.findById(id).getOrElse {
+            return@post call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error")
+        }
+        val usuario = UsuarioRepository.getUsuarioFromId(usuarioId).getOrElse {
+            return@post call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error")
+        }
+        evento.inscribir(usuario)
+            .onSuccess { call.respond(HttpStatusCode.OK, it.toDto())}
+            .onFailure {
+                call.respond(HttpStatusCode.BadRequest, it.message ?: "Unkown error")
             }
-            .onFailure { call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
     }
 
     delete ("eventos/{id}/inscriptos/{usuarioId}") {
