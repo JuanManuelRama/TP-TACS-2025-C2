@@ -6,13 +6,14 @@ plugins {
     kotlin("jvm") version "2.1.10"
     kotlin("plugin.serialization") version "2.1.10"
     id("io.ktor.plugin") version "3.2.3"
+    id("com.gradleup.shadow") version "9.0.2"
 }
 
 group = "TACS_G6"  // use underscore instead of dash
 version = "0.0.1"
 
 application {
-    mainClass.set("server.ApplicationKt")  // point to your main Application.kt
+    mainClass.set("com.g7.server.ApplicationKt")
 }
 
 java {
