@@ -52,7 +52,7 @@ class Evento(
      */
     @Synchronized
     fun inscribir(usuario: Usuario): Result<Inscripcion> {
-        return if (isFull()) confirmar(usuario) else esperar(usuario)
+        return if (!isFull()) confirmar(usuario) else esperar(usuario)
     }
 
     /**
@@ -68,8 +68,10 @@ class Evento(
      */
     @Synchronized
     fun cancelar(usuario: Usuario): Result<Unit> {
-        val resultado = cancelarConfirmacion(usuario)
-        return if (resultado.isSuccess) resultado else cancelarEspera(usuario)
+        return if (usuario.inscripciones.contains(this))
+            cancelarConfirmacion(usuario)
+        else
+            cancelarEspera(usuario)
     }
 
     /**
@@ -88,7 +90,7 @@ class Evento(
             return Result.failure(RuntimeException("No hay espacios disponibles"))
         }
         val confirmacion = Inscripcion.Confirmacion(usuario, LocalDateTime.now(), null)
-        return usuario.addInscripcion(this)
+        return usuario.inscribir(this, false)
             .map {
                 inscriptos.add(confirmacion)
                 confirmacion
@@ -114,7 +116,7 @@ class Evento(
         if (!this.inscriptos.removeIf{i -> i.usuario == usuario}) {
             return Result.failure(RuntimeException("El usuario no estaba inscripto"))
         }
-        usuario.removeInscripcion(this).getOrElse { return Result.failure(it) }
+        usuario.cancelarInscripcion(this).getOrElse { return Result.failure(it) }
         enEspera.removeFirstOrNull()?.let { inscripto ->
             val usuarioInscripto = inscripto.usuario
             val nuevaConfirmacion = inscripto.toConfirmacion()
@@ -140,11 +142,8 @@ class Evento(
         if (!this.isFull()) {
             return Result.failure(RuntimeException("Hay espacios disponibles, no debería esperar"))
         }
-        if (usuario.anotado(this)) {
-            return Result.failure(RuntimeException("El usuario ya estaba anotado"))
-        }
         val espera = Inscripcion.Espera(usuario, LocalDateTime.now())
-        return usuario.addEspera(this)
+        return usuario.inscribir(this, true)
             .map {
                 enEspera.add(espera)
                 cantEspera += 1
@@ -162,10 +161,10 @@ class Evento(
      * @return [Result.success] si la cancelación fue realizada, o [Result.failure] si el usuario no estaba en espera.
      */
     fun cancelarEspera(usuario: Usuario): Result<Unit> {
-        if (!enEspera.removeIf { i -> i.usuario == usuario }) {
+        if (!this.enEspera.removeIf {it.usuario == usuario}) {
             return Result.failure(RuntimeException("El usuario no estaba en espera"))
         }
-        return usuario.removeEspera(this)
+        return usuario.cancelarInscripcion(this)
             .onSuccess { cantEsperaCancelada += 1 }
     }
 

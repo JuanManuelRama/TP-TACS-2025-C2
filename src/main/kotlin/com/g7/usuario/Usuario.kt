@@ -8,29 +8,18 @@ class Usuario(val id: UUID, val nombre: String) {
     val esperas: MutableSet<Evento> = HashSet()
     val eventosOrganizados: MutableSet<Evento> = HashSet()
 
-    fun addInscripcion(evento: Evento): Result<Unit> = add(evento, inscripciones)
-
-    fun removeInscripcion(evento: Evento): Result<Unit> = remove(evento, inscripciones, "inscripto")
-
-    fun addEspera(evento: Evento): Result<Unit> = add(evento, esperas)
-
-    fun removeEspera(evento: Evento): Result<Unit> = remove(evento, esperas, "en espera")
-
-    private fun add(evento: Evento, eventos: MutableSet<Evento>): Result<Unit> {
-        if (this.anotado(evento)) {
+    fun inscribir(evento: Evento, espera: Boolean = false): Result<Unit> {
+        if (inscripciones.contains(evento) || esperas.contains(evento)) {
             return Result.failure(RuntimeException("El usuario ya estaba anotado"))
         }
-        eventos.add(evento)
+        if (espera) esperas.add(evento) else inscripciones.add(evento)
         return Result.success(Unit)
     }
 
-    private fun remove(evento: Evento, eventos: MutableSet<Evento>, keyword: String): Result<Unit> {
-        return if (eventos.remove(evento)) {
-            Result.success(Unit)
-        } else {
-            Result.failure(RuntimeException("El usuario no estaba $keyword"))
+    fun cancelarInscripcion(evento: Evento): Result<Unit> {
+        if (inscripciones.remove(evento) || esperas.remove(evento)) {
+            return Result.success(Unit)
         }
+        return Result.failure(RuntimeException("El usuario no estaba inscripto"))
     }
-
-    fun anotado(evento: Evento): Boolean = inscripciones.contains(evento) || esperas.contains(evento)
 }

@@ -51,7 +51,7 @@ fun Route.eventoRoutes() {
         EventoRepository.findById(id)
             .onSuccess { evento ->
                 call.respond(HttpStatusCode.OK,
-                    evento.inscriptos.map { it.usuario.toDto() } + evento.enEspera.map { it.toDto() })
+                    evento.inscriptos.map { it.toDto() } + evento.enEspera.map { it.toDto() })
             }
             .onFailure {
                 call.respond(HttpStatusCode.NotFound, "${it.message}")
