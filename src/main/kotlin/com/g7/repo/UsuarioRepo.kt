@@ -20,6 +20,9 @@ object UsuarioRepository : UsuarioRepo {
         usuarios.add(usuario)
     }
 
+    /**
+     * Retorna result en vez de null porque en un futuro el error puede ser de la db, no del pedido
+     * */
     override fun getUsuarioFromId(id: UUID): Result<Usuario>  =
         usuarios.find { it.id == id }
             ?.let { Result.success(it) }
