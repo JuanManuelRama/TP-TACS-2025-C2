@@ -85,7 +85,7 @@ class Evento(
      * @param usuario Usuario que intenta inscribirse.
      * @return [Result.success] si la inscripción fue realizada, o [Result.failure] si no fue posible.
      */
-    fun confirmar(usuario: Usuario): Result<Inscripcion> {
+    private fun confirmar(usuario: Usuario): Result<Inscripcion> {
         if (this.isFull()) {
             return Result.failure(RuntimeException("No hay espacios disponibles"))
         }
@@ -112,7 +112,7 @@ class Evento(
      * @return [Result.success] si se completó correctamente, o [Result.failure]
      * si el usuario no estaba inscripto.
      */
-    fun cancelarConfirmacion(usuario: Usuario): Result<Unit> {
+    private fun cancelarConfirmacion(usuario: Usuario): Result<Unit> {
         if (!this.inscriptos.removeIf{i -> i.usuario == usuario}) {
             return Result.failure(RuntimeException("El usuario no estaba inscripto"))
         }
@@ -138,7 +138,7 @@ class Evento(
      * @param com.g7.usuario Usuario que desea esperar un lugar en el evento.
      * @return [Result.success] si fue agregado a la lista de espera, o [Result.failure] en caso contrario.
      */
-    fun esperar(usuario: Usuario): Result<Inscripcion> {
+    private fun esperar(usuario: Usuario): Result<Inscripcion> {
         if (!this.isFull()) {
             return Result.failure(RuntimeException("Hay espacios disponibles, no debería esperar"))
         }
@@ -160,7 +160,7 @@ class Evento(
      * @param usuario Usuario que desea cancelar su espera.
      * @return [Result.success] si la cancelación fue realizada, o [Result.failure] si el usuario no estaba en espera.
      */
-    fun cancelarEspera(usuario: Usuario): Result<Unit> {
+    private fun cancelarEspera(usuario: Usuario): Result<Unit> {
         if (!this.enEspera.removeIf {it.usuario == usuario}) {
             return Result.failure(RuntimeException("El usuario no estaba en espera"))
         }

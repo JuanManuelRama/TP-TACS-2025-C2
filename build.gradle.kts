@@ -44,6 +44,7 @@ dependencies {
     // Testing
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("io.mockk:mockk:1.14.5")
 
     //Json
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
