@@ -86,9 +86,6 @@ class Evento(
      * @return [Result.success] si la inscripción fue realizada, o [Result.failure] si no fue posible.
      */
     private fun confirmar(usuario: Usuario): Result<Inscripcion> {
-        if (this.isFull()) {
-            return Result.failure(RuntimeException("No hay espacios disponibles"))
-        }
         val confirmacion = Inscripcion.Confirmacion(usuario, LocalDateTime.now(), null)
         return usuario.inscribir(this, false)
             .map {
@@ -139,9 +136,6 @@ class Evento(
      * @return [Result.success] si fue agregado a la lista de espera, o [Result.failure] en caso contrario.
      */
     private fun esperar(usuario: Usuario): Result<Inscripcion> {
-        if (!this.isFull()) {
-            return Result.failure(RuntimeException("Hay espacios disponibles, no debería esperar"))
-        }
         val espera = Inscripcion.Espera(usuario, LocalDateTime.now())
         return usuario.inscribir(this, true)
             .map {
