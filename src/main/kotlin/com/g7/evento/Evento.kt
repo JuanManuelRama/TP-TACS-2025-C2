@@ -68,7 +68,7 @@ class Evento(
      */
     @Synchronized
     fun cancelar(usuario: Usuario): Result<Unit> {
-        return if (usuario.inscripciones.contains(this))
+        return if (this  in usuario.inscripciones)
             cancelarConfirmacion(usuario)
         else
             cancelarEspera(usuario)

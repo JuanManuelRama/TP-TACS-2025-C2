@@ -14,7 +14,7 @@ class TestUsuario {
     fun inscribirEvento() {
         val result = usuario.inscribir(evento)
         assertTrue(result.isSuccess)
-        assertTrue(usuario.inscripciones.contains(evento))
+        assertTrue(evento in usuario.inscripciones)
         assertTrue(usuario.esperas.isEmpty())
     }
 
@@ -31,7 +31,7 @@ class TestUsuario {
     fun inscribirEspera() {
         val result = usuario.inscribir(evento, espera = true)
         assertTrue(result.isSuccess)
-        assertTrue(usuario.esperas.contains(evento))
+        assertTrue(evento in usuario.esperas)
         assertTrue(usuario.inscripciones.isEmpty())
     }
 

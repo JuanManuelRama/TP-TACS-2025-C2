@@ -22,7 +22,7 @@ class Usuario(val id: UUID, val nombre: String) {
      *         [RuntimeException] si el usuario ya estaba anotado.
      */
     fun inscribir(evento: Evento, espera: Boolean = false): Result<Unit> {
-        if (inscripciones.contains(evento) || esperas.contains(evento)) {
+        if (evento in inscripciones || evento in esperas) {
             return Result.failure(RuntimeException("El usuario ya estaba anotado"))
         }
         if (espera) esperas.add(evento) else inscripciones.add(evento)
