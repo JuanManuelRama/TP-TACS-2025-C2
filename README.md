@@ -1,40 +1,90 @@
-# TP-TACS-2025-C2
+# Trabajo Práctico TACS 2025 C2
 
-This project was created using the [Ktor Project Generator](https://start.ktor.io).
+## Build & Run
 
-Here are some useful links to get you started:
+Existen 3 formas distintas de ejecutar el proyecto
 
-- [Ktor Documentation](https://ktor.io/docs/home.html)
-- [Ktor GitHub page](https://github.com/ktorio/ktor)
-- The [Ktor Slack chat](https://app.slack.com/client/T09229ZC6/C0A974TJ9). You'll need
-  to [request an invite](https://surveys.jetbrains.com/s3/kotlin-slack-sign-up) to join.
+### Gradlew
 
-## Features
+Compilar y ejecutar el servidor directamente:
 
-Here's a list of features included in this project:
-
-| Name                                               | Description                                                 |
-|----------------------------------------------------|-------------------------------------------------------------|
-| [Routing](https://start.ktor.io/p/routing-default) | Allows to define structured routes and associated handlers. |
-
-## Building & Running
-
-To build or run the project, use one of the following tasks:
-
-| Task                          | Description                                                          |
-|-------------------------------|----------------------------------------------------------------------|
-| `./gradlew test`              | Run the tests                                                        |
-| `./gradlew build`             | Build everything                                                     |
-| `buildFatJar`                 | Build an executable JAR of the com.g7.com.g7.server with all dependencies included |
-| `buildImage`                  | Build the docker image to use with the fat JAR                       |
-| `publishImageToLocalRegistry` | Publish the docker image locally                                     |
-| `run`                         | Run the com.g7.com.g7.server                                                       |
-| `runDocker`                   | Run using the local docker image                                     |
-
-If the com.g7.com.g7.server starts successfully, you'll see the following output:
-
-```
-2024-12-04 14:32:45.584 [main] INFO  Application - Application started in 0.303 seconds.
-2024-12-04 14:32:45.682 [main] INFO  Application - Responding at http://0.0.0.0:8080
+```bash
+./gradlew build
+./gradlew run 
 ```
 
+### JAR
+
+Generar un jar ejecutable:
+
+```bash
+./gradlew shadowJar
+java -jar build/libs/TP-TACS-2025-C2-all.jar
+```
+
+### Docker 
+
+Generando el contenedor
+
+```bash
+docker build -t ktor-app .
+docker run -p 8080:8080 ktor-app
+```
+
+## 📖 Documentación de la API
+
+### 🔹 Endpoints disponibles
+
+| Método | Endpoint                                | Descripción                                             | Parámetros                    |
+|--------|-----------------------------------------|---------------------------------------------------------|-------------------------------|
+| GET    | `/usuarios/`                            | Lista todos los usuarios                                |                               |
+| POST   | `/usuarios/`                            | Crea un nuevo usuario, el id es asignado por el backend | JSON body                     |
+| GET    | `/eventos/`                             | Lista todos los eventos                                 |                               |
+| GET    | `/eventos/{id}`                         | Obtiene un evento                                       | `id: UUID`                    |
+| POST   | `/eventos/`                             | Crea un nuevo evento, el id es asignado por el backend  | JSON body                     |
+| POST   | `/eventos/{id}/inscriptos/`             | Muestra todos los inscriptos en un evento               | `id: UUID`                    |
+| POST   | `/eventos/{id}/inscriptos/{usuarioId}/` | Inscribe un usuario en un evento                        | `id: UUID`, `usuarioId: UUID` |
+| DELETE | `/eventos/{id}/inscriptos/{usuarioId}/` | Cancela la inscripción                                  | `id: UUID`, `usuarioId: UUID` |
+
+### 💡 Posibles endpoints
+
+| Método | Endpoint                       | Descripción                                                | Parámetros |
+|--------|--------------------------------|------------------------------------------------------------|------------|
+| GET    | `/usuarios/{id}`               | Obtiene un usuario                                         | `id: UUID` |
+| DELETE | `/usuarios/{id}`               | Borra un usuario                                           | `id: UUID` |
+| GET    | `/usuarios/{id}/inscripciones` | Lista todos las inscripciones de un usuario                | `id: UUID` |
+| GET    | `/usuarios/{id}/eventos`       | Lista todos los eventos organizados por un usuario         | `id: UUID` |
+| GET    | `/eventos/{id}/estadisticas`   | Obtiene las estadísticas de un evento (tasa de conversión) | `id: UUID` |
+
+
+## Decisiones de Diseño
+
+### Manejo de errores
+
+Los errores se tratan mediante `Result<T>`, lo que consideramos superior al manejo de errores por excepciones tradicionales, ya que:
+
++ Obliga a tener en cuenta siempre el caso de error.
++ Simplifica el testing, al poder validar explícitamente los estados fallidos.
++ Hace más predecible la propagación de fallos.
+
+Buscamos, además, que si un objeto retorna `Result.failure` no tenga ningún efecto de lado.
+
+### Data Transfer Objects
+
+Las clases de dominio (`evento`, `usuario`, `inscripción`) no son serializadas directamente \
+En su lugar, se transforman a objetos DTO, con el objetivo de:
+
++ Separar el modelo interno del formato expuesto públicamente.
++ Mantener la flexibilidad de cambiar la estructura interna sin romper la API.
+
+### Arquitectura lógica
+
+No seguimos el modelo de capas rígido de `router->controller->service->domain`. 
+En su lugar favorecemos objetos de dominio ricos en comportamiento \
+Esto, junto con el uso de `Result<T>`, permite que la lógica de los endpoints sea sencilla: consiste principalmente en navegar los distintos estados de cada operación y ejecutar los métodos correspondientes del dominio. 
+## Comentarios
+
++ No está implementado un sistema de sesiones, ni seguridad de los endpoints
++ La información solo es persistida en memoria
++ Los test son de dominio, no se prueban los endpoints
++ 
