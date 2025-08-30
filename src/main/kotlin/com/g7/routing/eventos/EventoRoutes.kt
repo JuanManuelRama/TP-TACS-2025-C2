@@ -1,11 +1,11 @@
-package com.g7.server
+package com.g7.routing.eventos
 
 import com.g7.evento.EventoDto
 import com.g7.evento.toDomain
 import com.g7.evento.toDto
 import com.g7.repo.EventoRepository
 import com.g7.repo.UsuarioRepository
-import com.g7.usuario.toDto
+import com.g7.server.requireUuidParam
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -17,11 +17,11 @@ import java.util.UUID
 
 fun Route.eventoRoutes() {
 
-    get("/eventos/") {
+    get {
         call.respond(HttpStatusCode.OK, EventoRepository.getEventos().map { it.toDto() })
     }
 
-    get("/eventos/{id}") {
+    get("/{id}") {
         val id = call.requireUuidParam("id") ?: return@get
         EventoRepository.findById(id)
             .onSuccess { evento ->
@@ -32,7 +32,7 @@ fun Route.eventoRoutes() {
             }
     }
 
-    post("/eventos") {
+    post {
         val eventoDto = call.receive<EventoDto>().copy(id = UUID.randomUUID())
         //TODO: generar una id en serio
         eventoDto.toDomain()
@@ -45,7 +45,7 @@ fun Route.eventoRoutes() {
             }
     }
 
-    get("/eventos/{id}/inscriptos") {
+    get("/{id}/inscriptos") {
         val id = call.requireUuidParam("id")?: return@get
 
         EventoRepository.findById(id)
@@ -58,7 +58,7 @@ fun Route.eventoRoutes() {
             }
     }
     //usuarioId debería venir del contexto (jwt)
-    post("eventos/{id}/inscriptos/{usuarioId}") {
+    post("/{id}/inscriptos/{usuarioId}") {
         val id = call.requireUuidParam("id")?: return@post
         val usuarioId = call.requireUuidParam("usuarioId")?: return@post
         val evento = EventoRepository.findById(id).getOrElse {
@@ -74,7 +74,7 @@ fun Route.eventoRoutes() {
             }
     }
 
-    delete ("eventos/{id}/inscriptos/{usuarioId}") {
+    delete ("/{id}/inscriptos/{usuarioId}") {
         val id = call.requireUuidParam("id")?: return@delete
         val usuarioId = call.requireUuidParam("usuarioId")?: return@delete
         EventoRepository.findById(id)
