@@ -6,6 +6,7 @@ import com.g7.evento.toDto
 import com.g7.repo.EventoRepository
 import com.g7.repo.UsuarioRepository
 import com.g7.server.requireUuidParam
+import com.g7.server.respondError
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -28,7 +29,7 @@ fun Route.eventoRoutes() {
                 call.respond(HttpStatusCode.OK, evento.toDto())
             }
             .onFailure {
-                call.respond(HttpStatusCode.NotFound, "${it.message}")
+                call.respondError(HttpStatusCode.NotFound, "${it.message}")
             }
     }
 
@@ -41,7 +42,7 @@ fun Route.eventoRoutes() {
                 call.respond(HttpStatusCode.Created, eventoDto)
             }
             .onFailure {
-                call.respond(HttpStatusCode.BadRequest, "Error al inscribir el evento: ${it.message}")
+                call.respondError(HttpStatusCode.BadRequest, "Error al inscribir el evento: ${it.message}")
             }
     }
 
@@ -54,7 +55,7 @@ fun Route.eventoRoutes() {
                     evento.inscriptos.map { it.toDto() } + evento.enEspera.map { it.toDto() })
             }
             .onFailure {
-                call.respond(HttpStatusCode.NotFound, "${it.message}")
+                call.respondError(HttpStatusCode.NotFound, "${it.message}")
             }
     }
     //usuarioId debería venir del contexto (jwt)
@@ -70,7 +71,7 @@ fun Route.eventoRoutes() {
         evento.inscribir(usuario)
             .onSuccess { call.respond(HttpStatusCode.OK, it.toDto())}
             .onFailure {
-                call.respond(HttpStatusCode.BadRequest, it.message ?: "Unkown error")
+                call.respondError(HttpStatusCode.BadRequest, it.message ?: "Unkown error")
             }
     }
 
@@ -83,11 +84,11 @@ fun Route.eventoRoutes() {
                 .onSuccess { usuario ->
                     evento.cancelar(usuario)
                         .onSuccess { call.respond(HttpStatusCode.OK) }
-                        .onFailure { call.respond(HttpStatusCode.BadRequest, it.message ?: "Unkown error") }
+                        .onFailure { call.respondError(HttpStatusCode.BadRequest, it.message ?: "Unkown error") }
                 }
-                .onFailure { call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
+                .onFailure { call.respondError(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
             }
-        .onFailure { call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
+        .onFailure { call.respondError(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
     }
 
 }

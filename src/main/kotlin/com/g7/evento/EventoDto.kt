@@ -4,9 +4,6 @@ import com.g7.repo.UsuarioRepository
 import com.g7.serializable.KotlinDurationSerializer
 import com.g7.serializable.LocalDateTimeSerializer
 import com.g7.serializable.UUIDSerializer
-import com.g7.usuario.Usuario
-import com.g7.usuario.UsuarioDto
-import com.g7.usuario.toDto
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 import java.util.UUID

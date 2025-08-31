@@ -1,9 +1,15 @@
 package com.g7.usuario
 
 import com.g7.evento.Evento
+import org.mindrot.jbcrypt.BCrypt
 import java.util.UUID
 
-class Usuario(val id: UUID, val nombre: String) {
+class Usuario(
+    val id: UUID,
+    val username: String,
+    val password: String,
+    val type: UserType
+) {
     val inscripciones: MutableSet<Evento> = HashSet()
     val esperas: MutableSet<Evento> = HashSet()
     val eventosOrganizados: MutableSet<Evento> = HashSet()
@@ -45,5 +51,9 @@ class Usuario(val id: UUID, val nombre: String) {
             return Result.success(Unit)
         }
         return Result.failure(RuntimeException("El usuario no estaba inscripto"))
+    }
+
+    fun passwordMatches(password: String): Boolean {
+        return BCrypt.checkpw(password, this.password)
     }
 }
