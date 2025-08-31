@@ -71,7 +71,7 @@ Buscamos, además, que si un objeto retorna `Result.failure` no tenga ningún ef
 
 ### Data Transfer Objects
 
-Las clases de dominio (`evento`, `usuario`, `inscripción`) no son serializadas directamente \
+Las clases de dominio (`evento`, `usuario`, etc.) no son serializadas directamente \
 En su lugar, se transforman a objetos DTO, con el objetivo de:
 
 + Separar el modelo interno del formato expuesto públicamente.
@@ -81,10 +81,13 @@ En su lugar, se transforman a objetos DTO, con el objetivo de:
 
 No seguimos el modelo de capas rígido de `router->controller->service->domain`. 
 En su lugar favorecemos objetos de dominio ricos en comportamiento \
-Esto, junto con el uso de `Result<T>`, permite que la lógica de los endpoints sea sencilla: consiste principalmente en navegar los distintos estados de cada operación y ejecutar los métodos correspondientes del dominio. 
-## Comentarios
+Esto, junto con el uso de `Result<T>`, permite que la lógica de los endpoints sea sencilla: consiste principalmente en navegar los distintos estados de cada operación y ejecutar los métodos correspondientes del dominio.
 
-+ No está implementado un sistema de sesiones, ni seguridad de los endpoints
-+ La información solo es persistida en memoria
-+ Los test son de dominio, no se prueban los endpoints
-+ 
+## TODO
+
++ Inicio de sesión
++ Seguridad en los endpoints
++ Test de endpoints
++ Implementación de query params
++ Logging
++ API de Ubicación
