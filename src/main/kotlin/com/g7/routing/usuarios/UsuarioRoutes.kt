@@ -33,7 +33,7 @@ fun Route.usuarioRoutes() {
                     call.respond(HttpStatusCode.Created, usuarioDto.toResponseDto())
             }
             .onFailure {
-                call.respondError(HttpStatusCode.BadRequest, "Erro al inscribir usuario: ${it.message}")
+                call.respondError(HttpStatusCode.BadRequest, "Error al inscribir usuario: ${it.message}")
             }
     }
 
