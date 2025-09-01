@@ -58,6 +58,20 @@ docker run -p 8080:8080 ktor-app
 | GET    | `/eventos/{id}/estadisticas`   | Obtiene las estadísticas de un evento (tasa de conversión) | `id: UUID` |
 
 
+## Testing
+
+### Kotlin
+
+Tenemos test de Kotlin, para corroborar lógica de dominio, los mismos se corren con
+
+```bash
+./gradlew test
+```
+
+### Postman
+
+Para verificar que la API sea funcional, hay un script de Postman. No verifica los casos no felices, ni tampoco es exhaustivo. Pero sirve para ver la API en funcionamiento
+
 ## Decisiones de Diseño
 
 ### Manejo de errores
@@ -83,12 +97,3 @@ En su lugar, se transforman a objetos DTO, con el objetivo de:
 No seguimos el modelo de capas rígido de `router->controller->service->domain`. 
 En su lugar favorecemos objetos de dominio ricos en comportamiento \
 Esto, junto con el uso de `Result<T>`, permite que la lógica de los endpoints sea sencilla: consiste principalmente en navegar los distintos estados de cada operación y ejecutar los métodos correspondientes del dominio.
-
-## TODO
-
-+ Inicio de sesión
-+ Seguridad en los endpoints
-+ Test de endpoints
-+ Implementación de query params
-+ Logging
-+ API de Ubicación
