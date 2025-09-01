@@ -1,6 +1,7 @@
 package com.g7.repo
 
 import com.g7.usuario.Usuario
+import io.ktor.util.collections.ConcurrentSet
 import java.util.UUID
 
 interface UsuarioRepo {
@@ -16,7 +17,7 @@ interface UsuarioRepo {
 }
 
 object UsuarioRepository : UsuarioRepo {
-    private val usuarios = mutableSetOf<Usuario>()
+    private val usuarios = ConcurrentSet<Usuario>()
 
     override fun getUsuarios(): Set<Usuario> = HashSet(usuarios)
     override fun save(usuario: Usuario) {

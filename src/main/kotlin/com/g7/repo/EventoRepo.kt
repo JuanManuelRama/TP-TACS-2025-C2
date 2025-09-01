@@ -2,6 +2,7 @@ package com.g7.repo
 
 import com.g7.evento.Evento
 import com.g7.evento.FiltroEvento
+import io.ktor.util.collections.ConcurrentSet
 import java.util.HashSet
 import java.util.UUID
 
@@ -16,7 +17,7 @@ interface EventoRepo {
 }
 
 object EventoRepository : EventoRepo {
-    private val eventos = mutableSetOf<Evento>()
+    private val eventos = ConcurrentSet<Evento>()
 
     override fun getEventos(): Set<Evento> = HashSet(eventos)
 
