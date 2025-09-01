@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestUsuario {
-    val usuario = Usuario(id = java.util.UUID.randomUUID(), username = "Juan")
+    val usuario = Usuario(java.util.UUID.randomUUID(), "", "", UserType.PARTICIPANTE)
     val evento = mockk<Evento>(relaxed = true)
 
     @Test

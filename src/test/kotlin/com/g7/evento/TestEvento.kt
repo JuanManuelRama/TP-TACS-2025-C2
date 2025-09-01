@@ -1,5 +1,6 @@
 package com.g7.evento
 
+import com.g7.usuario.UserType
 import com.g7.usuario.Usuario
 import java.time.LocalDateTime
 import java.util.UUID
@@ -107,6 +108,4 @@ class TestEvento {
         assertContains(evento.enEspera.map { it.usuario }, tercerUsuario)
     }
 
-    private fun usuario() =
-        Usuario(UUID.randomUUID(), "")
-}
+    private fun usuario() = Usuario(UUID.randomUUID(), "", "", UserType.PARTICIPANTE)}
