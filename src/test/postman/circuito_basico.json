@@ -1,0 +1,338 @@
+{
+	"info": {
+		"_postman_id": "68ea7257-9ee4-4701-b142-15710a845c43",
+		"name": "TACS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47237318",
+		"_collection_link": "https://jrama-83f447c7-4539408.postman.co/workspace/Juan-Manuel-Rama's-Workspace~45c4eb40-9841-4eb5-8e9e-9d02e5b9ce8b/collection/47237318-68ea7257-9ee4-4701-b142-15710a845c43?action=share&source=collection_link&creator=47237318"
+	},
+	"item": [
+		{
+			"name": "usuario",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(201);\r",
+							"});\r",
+							"\r",
+							"const responseJson = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Resoponde Id\", function () {\r",
+							"    pm.expect(responseJson.id).to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"pm.environment.set(\"userId\", responseJson.id);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"username\", \"newUser\" + Math.floor(Math.random() * 100000))"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"hola\",\r\n    \"type\": \"PARTICIPANTE\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{tacs-url}}/usuarios",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "evento",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(201);\r",
+							"});\r",
+							"\r",
+							"const responseJson = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Resoponde Id\", function () {\r",
+							"    pm.expect(responseJson.id).to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"pm.environment.set(\"eventoId\", responseJson.id);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"organizador\": \"{{userId}}\",\r\n    \"titulo\": \"Concierto de Rock\",\r\n    \"descripcion\": \"Un show en vivo\",\r\n    \"inicio\": \"2025-09-10T20:00:00\",\r\n    \"duracion\": 7200,\r\n    \"cupoMaximo\": 100,\r\n    \"cupoMinimio\": null,\r\n    \"precio\": 1500.5,\r\n    \"categorias\": [\r\n        \"FIESTA\"\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{tacs-url}}/eventos",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"eventos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "evento",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"pm.test(\"El evento sabe quien lo creo\", function () {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    const userId = pm.environment.get(\"userId\");\r",
+							"    \r",
+							"    pm.expect(responseJson.organizador).to.equal(userId);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{tacs-url}}/eventos/:id",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"eventos",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{eventoId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "inscribir",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{tacs-url}}/eventos/:id/inscriptos/:usuarioId",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"eventos",
+						":id",
+						"inscriptos",
+						":usuarioId"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{eventoId}}"
+						},
+						{
+							"key": "usuarioId",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "inscriptos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains single usuario with matching id\", function() {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.be.an('array').that.has.lengthOf(1);\r",
+							"    pm.expect(responseJson[0]).to.have.property('usuarioId', pm.environment.get(\"userId\"));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{tacs-url}}/eventos/:id/inscriptos",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"eventos",
+						":id",
+						"inscriptos"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{eventoId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "inscriptos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{tacs-url}}/eventos/:id/inscriptos/:usuarioId",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"eventos",
+						":id",
+						"inscriptos",
+						":usuarioId"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{eventoId}}"
+						},
+						{
+							"key": "usuarioId",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "usuario",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Responds username\", function () {\r",
+							"    const expectedUsername = pm.environment.get(\"username\");\r",
+							"    const actualUsername = pm.response.json().username;\r",
+							"\r",
+							"    pm.expect(actualUsername).to.equal(expectedUsername);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{tacs-url}}/usuarios/:id",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"usuarios",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
