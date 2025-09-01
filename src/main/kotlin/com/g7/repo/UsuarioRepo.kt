@@ -4,11 +4,14 @@ import com.g7.usuario.Usuario
 import java.util.UUID
 
 interface UsuarioRepo {
+
     fun getUsuarios(): Set<Usuario>
 
     fun save(usuario: Usuario)
 
     fun getUsuarioFromId(id: UUID): Result<Usuario>
+
+    fun getOptionalUsuarioFromUsername(username: String): Usuario?
 
 }
 
@@ -28,5 +31,7 @@ object UsuarioRepository : UsuarioRepo {
             ?.let { Result.success(it) }
             ?: Result.failure(NoSuchElementException("Usuario with id $id not found"))
 
+    override fun getOptionalUsuarioFromUsername(username: String): Usuario? =
+        usuarios.find { it.username == username }
 
 }

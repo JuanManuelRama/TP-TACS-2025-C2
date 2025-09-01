@@ -38,7 +38,9 @@ docker run -p 8080:8080 ktor-app
 | Método | Endpoint                                | Descripción                                             | Parámetros                    |
 |--------|-----------------------------------------|---------------------------------------------------------|-------------------------------|
 | GET    | `/usuarios/`                            | Lista todos los usuarios                                |                               |
+| GET    | `/usuarios/{id}`                        | Obtiene un usuario                                      | `id: UUID`                    |
 | POST   | `/usuarios/`                            | Crea un nuevo usuario, el id es asignado por el backend | JSON body                     |
+| POST   | `/usuarios/login`                       | Devuelve un JWT si los datos son validos                | JSON body                     |
 | GET    | `/eventos/`                             | Lista todos los eventos                                 |                               |
 | GET    | `/eventos/{id}`                         | Obtiene un evento                                       | `id: UUID`                    |
 | POST   | `/eventos/`                             | Crea un nuevo evento, el id es asignado por el backend  | JSON body                     |
@@ -50,7 +52,6 @@ docker run -p 8080:8080 ktor-app
 
 | Método | Endpoint                       | Descripción                                                | Parámetros |
 |--------|--------------------------------|------------------------------------------------------------|------------|
-| GET    | `/usuarios/{id}`               | Obtiene un usuario                                         | `id: UUID` |
 | DELETE | `/usuarios/{id}`               | Borra un usuario                                           | `id: UUID` |
 | GET    | `/usuarios/{id}/inscripciones` | Lista todos las inscripciones de un usuario                | `id: UUID` |
 | GET    | `/usuarios/{id}/eventos`       | Lista todos los eventos organizados por un usuario         | `id: UUID` |

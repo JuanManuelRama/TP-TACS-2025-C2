@@ -1,6 +1,11 @@
 ktor:
-    application:
-        modules:
-            - com.g7.server.ApplicationKt.module
-    deployment:
-      port: ${PORT:8080}
+  application:
+    modules:
+      - com.g7.server.ApplicationKt.module
+  deployment:
+    port: ${PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET:Ry9wggNqKu9XdNE/mR1A47HcOIh0mjCSUw+jKCEtS9/SQKX+J80La5HFBSBKvVW1DFZLGqIv4tbReGVrdeIu0g==}
+  issuer: ${JWT_ISSUER:com.g7.backend}
+  audience: ${JWT_AUDIENCE:com.g7.frontend}

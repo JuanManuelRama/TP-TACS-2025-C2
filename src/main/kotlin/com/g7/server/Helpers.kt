@@ -21,3 +21,7 @@ suspend fun ApplicationCall.requireUuidParam(name: String): UUID? {
         null
     }
 }
+
+suspend fun ApplicationCall.respondError(status: HttpStatusCode, message: String) {
+    this.respond(status, mapOf("error" to message))
+}
