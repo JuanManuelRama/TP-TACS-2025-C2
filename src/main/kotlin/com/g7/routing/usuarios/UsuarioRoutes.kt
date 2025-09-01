@@ -19,8 +19,12 @@ fun Route.usuarioRoutes() {
     post {
         val usuarioDto = call.receive<UsuarioDto>()
 
-        UsuarioRepository.getOptionalUsuarioFromUsername(usuarioDto.username)
-            ?: return@post call.respond(HttpStatusCode.Conflict, "El nombre de usuario ya existe")
+        val usuario = UsuarioRepository.getOptionalUsuarioFromUsername(usuarioDto.username)
+
+        if (usuario != null) {
+            call.respond(HttpStatusCode.Conflict, "El nombre de usuario ya existe")
+            return@post
+        }
 
         usuarioDto.register()
             .onSuccess {
