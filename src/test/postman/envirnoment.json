@@ -1,6 +1,6 @@
 {
 	"id": "7e09461f-7d88-4137-89ab-1f0e78a32267",
-	"name": "New Environment",
+	"name": "TACS Environment",
 	"values": [
 		{
 			"key": "tacs-url",
@@ -31,9 +31,21 @@
 			"value": "",
 			"type": "any",
 			"enabled": true
+		},
+		{
+			"key": "password",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "jwt",
+			"value": "",
+			"type": "any",
+			"enabled": true
 		}
 	],
 	"_postman_variable_scope": "environment",
-	"_postman_exported_at": "2025-09-01T15:43:40.541Z",
-	"_postman_exported_using": "Postman/11.60.4"
+	"_postman_exported_at": "2025-09-03T02:15:10.396Z",
+	"_postman_exported_using": "Postman/11.61.4"
 }
