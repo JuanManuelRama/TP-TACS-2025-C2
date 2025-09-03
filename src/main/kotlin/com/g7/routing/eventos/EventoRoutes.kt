@@ -35,12 +35,10 @@ fun Route.eventoRoutes() {
     }
 
     post {
+        val userId = call.loggedUser()?.id ?: return@post call
+            .respondError(HttpStatusCode.Unauthorized, "No se pudo obtener el usuario logueado")
         val eventoDto = call.receive<EventoDto>()
-            .copy(id = UUID.randomUUID())
-            .copy(organizador = call.loggedUser()?.id ?: return@post call.respondError(
-                HttpStatusCode.Unauthorized,
-                "No se pudo obtener el usuario logueado"
-            ))
+            .copy(organizador = userId, id = UUID.randomUUID())
         //TODO: generar una id en serio
         eventoDto.toDomain()
             .onSuccess {
