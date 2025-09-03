@@ -65,7 +65,7 @@ fun Route.eventoRoutes() {
             }
     }
 
-    post("/{id}/inscriptos}") {
+    post("/{id}/inscriptos") {
         val id = call.requireUuidParam("id")?: return@post
         val user = call.loggedUser() ?: return@post call.respond(HttpStatusCode.Unauthorized)
         val evento = EventoRepository.findById(id).getOrElse {
