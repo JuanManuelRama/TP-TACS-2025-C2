@@ -84,17 +84,15 @@ fun Route.eventoRoutes() {
     delete ("/{id}/inscriptos/{usuarioId}") {
         val id = call.requireUuidParam("id")?: return@delete
         val usuarioId = call.requireUuidParam("usuarioId")?: return@delete
-        EventoRepository.findById(id)
-            .onSuccess { evento ->
-                UsuarioRepository.getUsuarioFromId(usuarioId)
-                .onSuccess { usuario ->
-                    evento.cancelar(usuario)
-                        .onSuccess { call.respond(HttpStatusCode.OK) }
-                        .onFailure { call.respondError(HttpStatusCode.BadRequest, it.message ?: "Unkown error") }
-                }
-                .onFailure { call.respondError(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
-            }
-        .onFailure { call.respondError(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
+        val evento = EventoRepository.findById(id).getOrElse {
+            return@delete call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error")
+        }
+        val usuario = UsuarioRepository.getUsuarioFromId(usuarioId).getOrElse {
+            return@delete call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error")
+        }
+        evento.cancelar(usuario)
+            .onSuccess { call.respond(HttpStatusCode.OK) }
+            .onFailure { call.respondError(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
     }
 
 }
