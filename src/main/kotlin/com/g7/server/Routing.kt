@@ -8,6 +8,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.auth.authenticate
 
 fun Application.configureRouting() {
     install(ContentNegotiation) {
@@ -26,7 +27,9 @@ fun Application.configureRouting() {
             log.info("Root endpoint accessed")
         }
         route("/eventos") {
-            eventoRoutes()
+            authenticate("auth-jwt") {
+                eventoRoutes()
+            }
         }
         route("/usuarios") {
             usuarioRoutes()

@@ -14,7 +14,7 @@ data class EventoDto (
     @Serializable(with = UUIDSerializer::class)
     val id: UUID? = null,
     @Serializable(with = UUIDSerializer::class)
-    val organizador: UUID,
+    var organizador: UUID? = null,
     val titulo: String,
     val descripcion: String,
     @Serializable(with = LocalDateTimeSerializer::class)
@@ -59,7 +59,10 @@ fun EventoDto.toDomain(): Result<Evento> {
     if (this.id == null) {
         return Result.failure(RuntimeException("No se puede convertir a dominio sin id de evento"))
     }
-    return UsuarioRepository.getUsuarioFromId(this.organizador)
+    if (this.organizador == null) {
+        return Result.failure(RuntimeException("No se puede convertir a dominio sin organizador"))
+    }
+    return UsuarioRepository.getUsuarioFromId(this.organizador!!)
         .map { organizador ->
             Evento(
                 id = this.id,

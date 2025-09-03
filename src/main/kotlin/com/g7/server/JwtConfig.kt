@@ -6,12 +6,17 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.g7.usuario.Usuario
 import io.ktor.server.config.ApplicationConfig
 import java.util.Date
+import kotlin.properties.Delegates
 
 object JwtConfig {
     private lateinit var secret: String
     private lateinit var issuer: String
     private lateinit var audience: String
-    private const val validityInMs = 36_000_00 * 10 // 10 horas
+    private var validityInMs by Delegates.notNull<Long>()
+
+    lateinit var userIdClaimName: String
+    lateinit var usernameClaimName: String
+    lateinit var typeClaimName: String
 
     private lateinit var algorithm: Algorithm
     lateinit var verifier: JWTVerifier private set
@@ -20,6 +25,11 @@ object JwtConfig {
         secret = config.property("jwt.secret").getString()
         issuer = config.property("jwt.issuer").getString()
         audience = config.property("jwt.audience").getString()
+        validityInMs = config.property("jwt.validity").getString().toLong()
+
+        userIdClaimName = config.property("jwt.claims.userId").getString()
+        usernameClaimName = config.property("jwt.claims.username").getString()
+        typeClaimName = config.property("jwt.claims.type").getString()
 
         algorithm = Algorithm.HMAC512(secret)
         verifier = JWT
@@ -34,8 +44,9 @@ object JwtConfig {
             .withSubject("Authentication")
             .withIssuer(issuer)
             .withAudience(audience)
-            .withClaim("username", usuario.username)
-            .withClaim("type", usuario.type.name)
+            .withClaim(userIdClaimName, usuario.id.toString())
+            .withClaim(usernameClaimName, usuario.username)
+            .withClaim(typeClaimName, usuario.type.name)
             .withExpiresAt(Date(System.currentTimeMillis() + validityInMs))
             .sign(algorithm)
 }

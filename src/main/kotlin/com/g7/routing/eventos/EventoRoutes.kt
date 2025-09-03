@@ -5,6 +5,7 @@ import com.g7.evento.toDomain
 import com.g7.evento.toDto
 import com.g7.repo.EventoRepository
 import com.g7.repo.UsuarioRepository
+import com.g7.server.loggedUser
 import com.g7.server.requireUuidParam
 import com.g7.server.respondError
 import io.ktor.http.HttpStatusCode
@@ -34,7 +35,10 @@ fun Route.eventoRoutes() {
     }
 
     post {
-        val eventoDto = call.receive<EventoDto>().copy(id = UUID.randomUUID())
+        val userId = call.loggedUser()?.id ?: return@post call
+            .respondError(HttpStatusCode.Unauthorized, "No se pudo obtener el usuario logueado")
+        val eventoDto = call.receive<EventoDto>()
+            .copy(organizador = userId, id = UUID.randomUUID())
         //TODO: generar una id en serio
         eventoDto.toDomain()
             .onSuccess {
@@ -58,14 +62,14 @@ fun Route.eventoRoutes() {
                 call.respondError(HttpStatusCode.NotFound, "${it.message}")
             }
     }
-    //usuarioId debería venir del contexto (jwt)
-    post("/{id}/inscriptos/{usuarioId}") {
+
+    post("/{id}/inscriptos") {
         val id = call.requireUuidParam("id")?: return@post
-        val usuarioId = call.requireUuidParam("usuarioId")?: return@post
+        val user = call.loggedUser() ?: return@post call.respond(HttpStatusCode.Unauthorized)
         val evento = EventoRepository.findById(id).getOrElse {
             return@post call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error")
         }
-        val usuario = UsuarioRepository.getUsuarioFromId(usuarioId).getOrElse {
+        val usuario = UsuarioRepository.getUsuarioFromId(user.id).getOrElse {
             return@post call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error")
         }
         evento.inscribir(usuario)
@@ -78,17 +82,15 @@ fun Route.eventoRoutes() {
     delete ("/{id}/inscriptos/{usuarioId}") {
         val id = call.requireUuidParam("id")?: return@delete
         val usuarioId = call.requireUuidParam("usuarioId")?: return@delete
-        EventoRepository.findById(id)
-            .onSuccess { evento ->
-                UsuarioRepository.getUsuarioFromId(usuarioId)
-                .onSuccess { usuario ->
-                    evento.cancelar(usuario)
-                        .onSuccess { call.respond(HttpStatusCode.OK) }
-                        .onFailure { call.respondError(HttpStatusCode.BadRequest, it.message ?: "Unkown error") }
-                }
-                .onFailure { call.respondError(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
-            }
-        .onFailure { call.respondError(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
+        val evento = EventoRepository.findById(id).getOrElse {
+            return@delete call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error")
+        }
+        val usuario = UsuarioRepository.getUsuarioFromId(usuarioId).getOrElse {
+            return@delete call.respond(HttpStatusCode.NotFound, it.message ?: "Unknown error")
+        }
+        evento.cancelar(usuario)
+            .onSuccess { call.respond(HttpStatusCode.OK) }
+            .onFailure { call.respondError(HttpStatusCode.NotFound, it.message ?: "Unknown error") }
     }
 
 }

@@ -95,11 +95,6 @@ http://localhost:8080
 - **Método:** `GET`
 - **Descripción:** Devuelve los datos de un usuario por su ID. TODO: Requerir token JWT en el header.
 
-#### Headers
-
-```
-Authorization: Bearer <token>
-```
 
 #### Response
 
@@ -121,6 +116,45 @@ Authorization: Bearer <token>
 }
 ```
 
+- **401 Unauthorized** si el token es inválido o expiró.
+
+---
+
+### 4. Crear un evento
+
+- **URL:** `/eventos`
+- **Método:** `POST`
+- **Descripción:** Le permite a un organizador **loggeado** crear un evento. Requiere JWT.
+
+#### Headers
+
+```
+Authorization: Bearer <token>
+```
+
+Se obtiene el token en `/login`
+
+#### Request Body
+
+```json
+{
+  "titulo": "Fiesta de prueba",
+  "descripcion": "Evento de prueba para testear la API",
+  "inicio": "2025-09-15T20:00:00",
+  "duracion": 10800,
+  "cupoMaximo": 100,
+  "cupoMinimio": 10,
+  "precio": 1500.5,
+  "categorias": [
+    "FIESTA",
+    "CONCIERTO"
+  ]
+}
+```
+
+#### Response
+
+- **201 Created**
 - **401 Unauthorized** si el token es inválido o expiró.
 
 ---

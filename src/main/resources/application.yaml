@@ -9,3 +9,8 @@ jwt:
   secret: ${JWT_SECRET:Ry9wggNqKu9XdNE/mR1A47HcOIh0mjCSUw+jKCEtS9/SQKX+J80La5HFBSBKvVW1DFZLGqIv4tbReGVrdeIu0g==}
   issuer: ${JWT_ISSUER:com.g7.backend}
   audience: ${JWT_AUDIENCE:com.g7.frontend}
+  validity: ${JWT_VALIDITY:36000000}
+  claims:
+    username: ${JWT_CLAIM_USERNAME:username}
+    type: ${JWT_CLAIM_TYPE:type}
+    userId: ${JWT_CLAIM_USERID:userId}
