@@ -48,6 +48,8 @@ docker run -p 8080:8080 ktor-app
 | POST   | `/eventos/{id}/inscriptos/{usuarioId}/` | Inscribe un usuario en un evento                        | `id: UUID`, `usuarioId: UUID` |
 | DELETE | `/eventos/{id}/inscriptos/{usuarioId}/` | Cancela la inscripción                                  | `id: UUID`, `usuarioId: UUID` |
 
+Las rutas protegidas requieren un header `Authorization Bearer` obtenido en `/login`. 
+
 ### 💡 Posibles endpoints
 
 | Método | Endpoint                       | Descripción                                                | Parámetros |

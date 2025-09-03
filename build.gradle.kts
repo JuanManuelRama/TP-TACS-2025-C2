@@ -54,4 +54,6 @@ dependencies {
 
     // JWT
     implementation("com.auth0:java-jwt:4.4.0")
+    implementation("io.ktor:ktor-server-auth:${ktor_version}")
+    implementation("io.ktor:ktor-server-auth-jwt:${ktor_version}")
 }
