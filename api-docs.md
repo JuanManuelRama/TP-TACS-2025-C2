@@ -4,17 +4,53 @@ Este documento describe los endpoints disponibles en la API, incluyendo métodos
 
 ---
 
-## Base URL
+## Consideraciones previas
 
-```
+### Base URL
+
+``` http
 http://localhost:8080
 ```
+
+### Errores
+
+Ante un error, la API retornará el código de error correspondiente, y el siguiente JSON:
+
+```json
+{
+  "error": "Some error message"
+}
+```
+
+### Autorización
+
+La autorización se realiza mediante JWT, para obtener la misma se debe llamar al endpoint [login](#login), y luego incluirla en el header de la siguiente forma:
+
+```http
+Authorization: Bearer <token>
+```
+
+En caso de intentar acceder a un Endpoint que requiera autorización, y no tener la JWT, se retornara `401 Unauthorized`
 
 ---
 
 ## Endpoints
 
-### 1. Registro de usuario
+### Índice
+
+- [Registro de usuario](#registro-de-usuario)
+- [Login](#login)
+- [Obtener usuarios](#obtener-usuarios)
+- [Obtener usuario por ID](#obtener-usuario-por-id)
+- [Crear un evento](#crear-un-evento)
+- [Obtener eventos](#obtener-eventos)
+- [Obtener evento](#obtener-evento)
+- [Ver Inscriptos](#ver-inscriptos)
+- [Inscribirse](#inscribirse)
+- [Cancelar Inscripcion](#cancelar-inscripcion)
+- [Cancelar Inscripcion de un Usuario](#cancelar-inscripcion-de-un-usuario)
+
+### Registro de usuario
 
 - **URL:** `/usuarios`
 - **Método:** `POST`
@@ -44,17 +80,11 @@ http://localhost:8080
 }
 ```
 
-- **409 Conflict** si el username ya existe:
-
-```json
-{
-  "error": "El nombre de usuario ya existe"
-}
-```
+- **409 Conflict** si el username ya existe
 
 ---
 
-### 2. Login
+### Login
 
 - **URL:** `usuarios/login`
 - **Método:** `POST`
@@ -79,22 +109,40 @@ http://localhost:8080
 }
 ```
 
-- **401 Unauthorized** si usuario o contraseña incorrectos:
-
-```json
-{
-  "error": "Usuario o contraseña incorrectos"
-}
-```
+- **401 Unauthorized** si usuario o contraseña incorrectos
 
 ---
 
-### 3. Obtener usuario por ID
+### Obtener usuarios
+
+- **URL:** `/usuarios`
+- **Método:** `GET`
+- Autorización: TODO: Requerir token JWT en el header.
+- **Descripción:** Devuelve los datos de todos los usuarios.
+
+#### Response
+
+- **200 OK**
+
+```json
+[
+  {
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "username": "pepito",
+  "type": "PARTICIPANTE"
+  }
+]
+```
+
+- **401 Unauthorized** si el token es inválido o expiró
+
+---
+
+### Obtener usuario por ID
 
 - **URL:** `/usuarios/{id}`
 - **Método:** `GET`
-- **Descripción:** Devuelve los datos de un usuario por su ID. TODO: Requerir token JWT en el header.
-
+- **Descripción:** Devuelve los datos de un usuario por su ID. TODO: Requerir token JWT
 
 #### Response
 
@@ -108,31 +156,17 @@ http://localhost:8080
 }
 ```
 
-- **404 Not Found** si no existe:
-
-```json
-{
-  "error": "Usuario with id 123e4567-e89b-12d3-a456-426614174000 not found"
-}
-```
-
-- **401 Unauthorized** si el token es inválido o expiró.
+- **404 Not Found** si no existe
+- **401 Unauthorized** si el token es inválido o expiró
 
 ---
 
-### 4. Crear un evento
+### Crear un evento
 
 - **URL:** `/eventos`
 - **Método:** `POST`
-- **Descripción:** Le permite a un organizador **loggeado** crear un evento. Requiere JWT.
-
-#### Headers
-
-```
-Authorization: Bearer <token>
-```
-
-Se obtiene el token en `/login`
+- **Descripción:** Le permite a un organizador crear un evento
+- **Autorizacion**: Requiere [login](#login)
 
 #### Request Body
 
@@ -155,9 +189,183 @@ Se obtiene el token en `/login`
 #### Response
 
 - **201 Created**
-- **401 Unauthorized** si el token es inválido o expiró.
+
+```json
+{
+  "id" : "570g8400-e29b-41h4-a716-446655440040",
+  "titulo": "Fiesta de prueba", 
+  "descripcion": "Evento de prueba para testear la API", 
+  "inicio": "2025-09-15T20:00:00", 
+  "duracion": 10800, 
+  "cupoMaximo": 100, 
+  "cupoMinimio": 10, 
+  "precio": 1500.5, 
+  "categorias": [
+    "FIESTA", 
+    "CONCIERTO"
+  ]
+}
+```
+
+- **401 Unauthorized** si el token es inválido o expiró
+- **404 Not Found** si el id de usuario de la jwt no se corresponde a un usuario en serio
 
 ---
+
+### Obtener eventos
+
+- **URL:** `/eventos`
+- **Método:** `GET`
+- **Query Params** TODO
+- **Descripción** Obtiene todos los eventos
+
+#### Response
+
+- **200 OK**
+
+```json
+[
+  {
+    "id" : "570g8400-e29b-41h4-a716-446655440040",
+    "titulo": "Fiesta de prueba",
+    "descripcion": "Evento de prueba para testear la API",
+    "inicio": "2025-09-15T20:00:00",
+    "duracion": 10800,
+    "cupoMaximo": 100,
+    "cupoMinimio": 10,
+    "precio": 1500.5,
+    "categorias": [
+    "FIESTA",
+    "CONCIERTO"
+    ]
+  }
+]
+```
+
+---
+
+### Obtener evento
+
+- **URL:** `/eventos/{id}`
+- **Método:** `GET`
+- **Descripción** Obtiene un evento
+
+#### Response
+
+- **200 OK**
+
+```json
+{
+  "id" : "570g8400-e29b-41h4-a716-446655440040",
+  "titulo": "Fiesta de prueba",
+  "descripcion": "Evento de prueba para testear la API",
+  "inicio": "2025-09-15T20:00:00",
+  "duracion": 10800,
+  "cupoMaximo": 100,
+  "cupoMinimio": 10,
+  "precio": 1500.5,
+  "categorias": [
+  "FIESTA",
+  "CONCIERTO"
+  ]
+}
+```
+
+- **404 Not Found** Si no lo encontró
+
+---
+
+### Ver Inscriptos
+
+- **URL:** `/eventos/{id}/inscriptos`
+- **Método:** `GET`
+- **Descripción** Obtiene todos los inscriptos de un evento
+- **Autorizacion**: Requiere [login](#login) y ser el organizador del evento
+
+### Response
+
+- **200 OK**
+
+```json
+[
+  {
+    "usuarioId": "5ed2f21f-8943-44ce-94a1-27d9edac098c", 
+    "horaInscripcion": "2025-09-03T12:01:26.569835", 
+    "tipo": "CONFIRMACION"
+  }, 
+  {
+    "usuarioId": "5ed2f21f-8943-44ce-94a1-27d9edac098c", 
+    "horaInscripcion": "2025-09-03T12:01:26.569835", 
+    "tipo": "ESPERA"
+  }
+]
+```
+
+- **403 Forbidden** Si alguien que no es el organizador intenta acceder
+- **404 Not Found** Si no se encuentra el evento, o el usuario de la JWT
+
+---
+
+### Inscribirse
+
+- **URL:** `/eventos/{id}/inscriptos`
+- **Método:** `POST`
+- **Descripción** Se inscribe a un evento, puede quedar confirmado o en espera
+- **Autorizacion**: Requiere [login](#login) y no ser el organizador del evento
+
+#### Response
+
+- **200 OK**
+
+```json
+{
+  "usuarioId": "5ed2f21f-8943-44ce-94a1-27d9edac098c",
+  "horaInscripcion": "2025-09-03T12:01:26.569835",
+  "tipo": "CONFIRMACION"
+}
+```
+
+o
+
+```json
+{
+  "usuarioId": "5ed2f21f-8943-44ce-94a1-27d9edac098c",
+  "horaInscripcion": "2025-09-03T12:01:26.569835",
+  "tipo": "ESPERA"
+}
+```
+
+- **403 Forbidden**  Si el organizador se intenta inscribir a su propio evento
+- **404 Not Found** Si no encuentra el evento o el usuario de la JWT
+
+### Cancelar Inscripcion
+
+- **URL:** `/eventos/{id}/inscriptos`
+- **Método:** `DELETE`
+- **Descripción** Cancela la inscripción a un evento.
+- **Autorizacion**: Requiere [login](#login)
+
+#### Response
+
+- **200 OK**
+- **400 Bad Request** Si no estaba inscripto
+- **404 Not Found** Si no se encuentra el evento o el usuario de la JWT
+
+---
+
+### Cancelar Inscripcion de un Usuario
+
+- **URL:** `/eventos/{id}/inscriptos/{userId}`
+- **Método:** `DELETE`
+- **Descripción** Cancela la inscripción a un evento de un usuario.
+- **Autorizacion**: Requiere [login](#login) y ser el organizador del evento
+
+#### Response
+
+- **200 OK**
+- **400 Bad Request** Si no estaba inscripto
+- **403 Forbidden** Si el usuario de la JWT no es el organizador
+- **404 Not Found** Si no se encuentra el evento o el usuario de la JWT
 
 ## Notas
 
@@ -172,11 +380,12 @@ Se obtiene el token en `/login`
 2. Definir DTOs de request/response.
 3. Agregar sección al README siguiendo el mismo formato:
 
-```
-### N. Nombre del endpoint
-- URL:
-- Método:
-- Descripción:
-- Request Body:
-- Response:
+```markdown
+### Nombre del endpoint
+- **URL:**
+- **Método:**
+- **Descripción:**
+- **Autorizacion:**
+#### Request Body
+#### Response
 ```

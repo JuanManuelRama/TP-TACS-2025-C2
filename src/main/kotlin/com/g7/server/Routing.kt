@@ -11,25 +11,13 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.auth.authenticate
 
 fun Application.configureRouting() {
-    install(ContentNegotiation) {
-        json(
-            Json {
-                prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
-            }
-        )
-    }
-
     routing {
         get("/") {
             call.respondText("Hello World!")
             log.info("Root endpoint accessed")
         }
         route("/eventos") {
-            authenticate("auth-jwt") {
                 eventoRoutes()
-            }
         }
         route("/usuarios") {
             usuarioRoutes()

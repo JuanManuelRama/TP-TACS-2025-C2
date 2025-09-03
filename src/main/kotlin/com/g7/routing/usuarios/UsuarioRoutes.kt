@@ -1,7 +1,7 @@
 package com.g7.routing.usuarios;
 
 import com.g7.repo.UsuarioRepository
-import com.g7.server.JwtConfig
+import com.g7.server.middleware.login.JwtConfig
 import com.g7.server.requireUuidParam
 import com.g7.server.respondError
 import com.g7.usuario.dto.LoginRequestDto
