@@ -1,33 +1,62 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2022",
-    "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
+      "target": "ES2020",
+      "useDefineForClassFields": true,
+      "lib": ["ES2020", "DOM", "DOM.Iterable"],
+      "module": "ESNext",
+      "skipLibCheck": true,
+      /* Bundler mode */
+      "moduleResolution": "bundler",
+      "allowImportingTsExtensions": true,
+      "isolatedModules": true,
+      "moduleDetection": "force",
+      "noEmit": true,
+      "jsx": "react-jsx",
+      /* Linting */
+      "strict": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "noFallthroughCasesInSwitch": true,
+      /* Vitest */
+      "types": [
+          "node"
+      ],
+      /* Experimental flags */
+      "sourceMap": true,
+      // "declaration": true,
+      "allowJs": true,
+      "pretty": true,
+      "paths": {
+          "$": ["."],
+          "$/*": ["./*"],
+          "@": ["./src"],
+          "@/*": ["./src/*"],
+          "$assets": ["./src/assets"],
+          "$assets/*": ["./src/assets/*"],
+          "$hooks": ["./src/hooks"],
+          "$hooks/*": ["./src/hooks/*"],
+          "$types": ["./src/types"],
+          "$types/*": ["./src/types/*"],
+          "$components": ["./src/components"],
+          "$components/*": ["./src/components/*"],
+          "$lib": ["./src/lib"],
+          "$lib/*": ["./src/lib/*"],
+          "$scss": ["./src/scss"],
+          "$scss/*": ["./src/scss/*"],
+          "$services": ["./src/services"],
+          "$services/*": ["./src/services/*"],
+          "$store": ["./src/store"],
+          "$store/*": ["./src/store/*"],
+          "$util": ["./src/util"],
+          "$util/*": ["./src/util/*"],
+          "$routes": ["./src/routes"],
+          "$routes/*": ["./src/routes/*"],
+          "$pages": ["./src/pages"],
+          "$pages/*": ["./src/pages/*"],
+          "$modules": ["./modules"],
+          "$modules/*": ["./modules/*"],
+          "$mocks": ["./mocks"]
+      } //a
   },
-  "include": ["src"]
+  "include": ["src", "tests", "mocks"]
 }
