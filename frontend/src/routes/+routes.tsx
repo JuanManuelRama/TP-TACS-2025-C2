@@ -2,7 +2,9 @@ import { Suspense } from "react";
 import type { RouteObject } from "react-router";
 import _50X from "./+50X.tsx";
 import Layout from "./+layout.tsx";
+import { route as auth } from './auth/+route.tsx';
 import { route as events } from './events/+route.tsx';
+import { route as profile } from './profile/+route.tsx';
 
 export const routes: RouteObject[] = [
 	{
@@ -25,7 +27,9 @@ export const routes: RouteObject[] = [
 				path: "*",
 				lazy: () => import("./+404.tsx"),
 			},
-            events
+            events,
+            auth,
+            profile
 		],
         
 	},
