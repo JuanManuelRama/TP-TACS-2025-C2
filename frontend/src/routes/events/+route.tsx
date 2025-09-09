@@ -10,6 +10,10 @@ export const route: RouteObject = {
 			path: "",
 			lazy: () => import("./+page"),
 		},
+		{
+			path: ":id",
+			lazy: () => import("./[id]/+page"),
+		},
 	],
 };
 
