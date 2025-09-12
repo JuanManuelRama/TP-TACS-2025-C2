@@ -193,6 +193,11 @@ En caso de intentar acceder a un Endpoint que requiera autorización, y no tener
 ```json
 {
   "id" : "570g8400-e29b-41h4-a716-446655440040",
+  "organizador": {
+    "id": "ac0c2ba5-4139-46d2-b095-e38383a5d9fb",
+    "username": "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a",
+    "type": "PARTICIPANTE"
+  },
   "titulo": "Fiesta de prueba", 
   "descripcion": "Evento de prueba para testear la API", 
   "inicio": "2025-09-15T20:00:00", 
@@ -227,6 +232,11 @@ En caso de intentar acceder a un Endpoint que requiera autorización, y no tener
 [
   {
     "id" : "570g8400-e29b-41h4-a716-446655440040",
+    "organizador": {
+      "id": "ac0c2ba5-4139-46d2-b095-e38383a5d9fb",
+      "username": "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a",
+      "type": "PARTICIPANTE"
+    },
     "titulo": "Fiesta de prueba",
     "descripcion": "Evento de prueba para testear la API",
     "inicio": "2025-09-15T20:00:00",
@@ -289,12 +299,20 @@ En caso de intentar acceder a un Endpoint que requiera autorización, y no tener
 ```json
 [
   {
-    "usuarioId": "5ed2f21f-8943-44ce-94a1-27d9edac098c", 
+    "organizador": {
+      "id": "ac0c2ba5-4139-46d2-b095-e38383a5d9fb",
+      "username": "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a",
+      "type": "PARTICIPANTE"
+    },
     "horaInscripcion": "2025-09-03T12:01:26.569835", 
     "tipo": "CONFIRMACION"
   }, 
   {
-    "usuarioId": "5ed2f21f-8943-44ce-94a1-27d9edac098c", 
+    "organizador": {
+      "id": "ac0c2ba5-4139-46d2-b095-e38383a5d9fb",
+      "username": "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a",
+      "type": "PARTICIPANTE"
+    },
     "horaInscripcion": "2025-09-03T12:01:26.569835", 
     "tipo": "ESPERA"
   }
