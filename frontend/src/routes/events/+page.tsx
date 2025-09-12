@@ -1,31 +1,23 @@
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "$/src/components/ui/card";
 import { Link } from "react-router";
-
-interface Event {
-    id: string;
-    name: string;
-    description: string;
-    date: string;
-    location: string;
-    price: number;
-    image: string;
-}
+import {useEffect, useState} from "react";
+import {Event} from "$types/event"
 
 const EventCard = ({event}: {event: Event}) => {
     return (
     <Link to={`/events/${event.id}`}>
     <Card>
     <CardHeader>
-      <CardDescription>{event.name}</CardDescription>
+      <CardDescription>{event.titulo}</CardDescription>
       <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-        {event.description}
+        {event.descripcion}
       </CardTitle>
-      
+
     </CardHeader>
     <CardFooter className="flex-col items-start gap-1.5 text-sm">
       
       <div className="text-muted-foreground">
-        {event.date}
+          {new Date(event.inicio).toLocaleString()}
       </div>
     </CardFooter>
   </Card>
@@ -34,20 +26,23 @@ const EventCard = ({event}: {event: Event}) => {
 
 
 const Page = () => {
+    const [events, setEvents] = useState<Event[]>([]);
+
+    useEffect(() => {
+        fetch("http://localhost:8080/eventos")
+            .then(res => res.json())
+            .then(data => setEvents(data));
+    }, []);
+
     return (
-        <div>
-            <EventCard event={{
-                id: "1",
-                name: "Event 1",
-                description: "Description 1",
-                date: "2025-09-09",
-                location: "Location 1",
-                price: 100,
-                image: "https://via.placeholder.com/150"
-            }}/>
+        <div className="grid gap-4">
+            {events.map(event => (
+                <EventCard key={event.id} event={event} />
+            ))}
         </div>
-    )
-}
+    );
+};
+
 
 export { Page as Component }; //a
 export default Page; //b
