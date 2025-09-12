@@ -337,7 +337,7 @@ En caso de intentar acceder a un Endpoint que requiera autorización, y no tener
 
 ```json
 {
-  "usuarioId": "5ed2f21f-8943-44ce-94a1-27d9edac098c",
+  "usuario": "5ed2f21f-8943-44ce-94a1-27d9edac098c",
   "horaInscripcion": "2025-09-03T12:01:26.569835",
   "tipo": "CONFIRMACION"
 }
@@ -347,7 +347,7 @@ o
 
 ```json
 {
-  "usuarioId": "5ed2f21f-8943-44ce-94a1-27d9edac098c",
+  "usuario": "5ed2f21f-8943-44ce-94a1-27d9edac098c",
   "horaInscripcion": "2025-09-03T12:01:26.569835",
   "tipo": "ESPERA"
 }
