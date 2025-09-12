@@ -1,7 +1,7 @@
 package com.g7.routing.eventos
 
 import com.g7.evento.EventoDto
-import com.g7.evento.toDomain
+import com.g7.evento.register
 import com.g7.evento.toDto
 import com.g7.repo.EventoRepository
 import com.g7.server.fetchEvento
@@ -16,16 +16,13 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import java.util.UUID
 
 fun Route.eventoLoggedRoutes() {
     post {
         val userId = call.loggedUser()?.id ?: return@post call
             .respondError(HttpStatusCode.Unauthorized, "No se pudo obtener el usuario logueado")
         val eventoDto = call.receive<EventoDto>()
-            .copy(organizador = userId, id = UUID.randomUUID())
-        //TODO: generar una id en serio
-        eventoDto.toDomain()
+        eventoDto.register(userId)
             .onSuccess {
                 EventoRepository.saveEvento(it)
                 call.respond(HttpStatusCode.Created, eventoDto)

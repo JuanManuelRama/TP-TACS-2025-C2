@@ -55,27 +55,22 @@ fun Evento.toDto(): EventoDto = EventoDto(
  *         fue exitosa, o un [Result.failure] en caso de que falte el `id`
  *         o no se pueda obtener el organizador.
  */
-fun EventoDto.toDomain(): Result<Evento> {
-    if (this.id == null) {
-        return Result.failure(RuntimeException("No se puede convertir a dominio sin id de evento"))
-    }
-    if (this.organizador == null) {
-        return Result.failure(RuntimeException("No se puede convertir a dominio sin organizador"))
-    }
-    return UsuarioRepository.getUsuarioFromId(this.organizador!!)
-        .map { organizador ->
-            Evento(
-                id = this.id,
-                organizador = organizador,
-                titulo = this.titulo,
-                descripcion = this.descripcion,
-                inicio = this.inicio,
-                duracion = this.duracion,
-                cupoMaximo = this.cupoMaximo,
-                cupoMinimio = this.cupoMinimio,
-                precio = this.precio,
-                categorias = this.categorias
-            )
-        }
+fun EventoDto.register(organizador: UUID): Result<Evento> {
+    val id = UUID.randomUUID() // temporal hasta que busque de la db
+    val usuario = UsuarioRepository.getUsuarioFromId(organizador)
+        .getOrElse { return Result.failure(it) }
+    return Result.success(Evento(
+        id = id,
+        organizador = usuario,
+        titulo = this.titulo,
+        descripcion = this.descripcion,
+        inicio = this.inicio,
+        duracion = this.duracion,
+        cupoMaximo = this.cupoMaximo,
+        cupoMinimio = this.cupoMinimio,
+        precio = this.precio,
+        categorias = this.categorias
+    )
+    )
 }
 
