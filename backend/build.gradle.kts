@@ -35,8 +35,6 @@ dependencies {
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
-    implementation("io.ktor:ktor-server-content-negotiation:${ktor_version}")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:${ktor_version}")
 
     // Logging
     implementation("ch.qos.logback:logback-classic:$logback_version")
@@ -48,11 +46,16 @@ dependencies {
 
     // Json
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("io.ktor:ktor-server-content-negotiation:${ktor_version}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:${ktor_version}")
 
     // Encryption
     implementation("org.mindrot:jbcrypt:0.4")
 
-    // JWT
+    // CORS
+    implementation("io.ktor:ktor-server-cors:${ktor_version}")
+
+    // Auth
     implementation("com.auth0:java-jwt:4.4.0")
     implementation("io.ktor:ktor-server-auth:${ktor_version}")
     implementation("io.ktor:ktor-server-auth-jwt:${ktor_version}")
