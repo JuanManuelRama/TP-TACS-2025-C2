@@ -4,6 +4,9 @@ import com.g7.repo.UsuarioRepository
 import com.g7.serializable.KotlinDurationSerializer
 import com.g7.serializable.LocalDateTimeSerializer
 import com.g7.serializable.UUIDSerializer
+import com.g7.usuario.dto.UsuarioDto
+import com.g7.usuario.dto.UsuarioResponseDto
+import com.g7.usuario.dto.toResponseDto
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 import java.util.UUID
@@ -13,8 +16,7 @@ import kotlin.time.Duration
 data class EventoDto (
     @Serializable(with = UUIDSerializer::class)
     val id: UUID? = null,
-    @Serializable(with = UUIDSerializer::class)
-    var organizador: UUID? = null,
+    var organizador: UsuarioResponseDto? = null,
     val titulo: String,
     val descripcion: String,
     @Serializable(with = LocalDateTimeSerializer::class)
@@ -29,7 +31,7 @@ data class EventoDto (
 
 fun Evento.toDto(): EventoDto = EventoDto(
     id = this.id,
-    organizador = this.organizador.id,
+    organizador = this.organizador.toResponseDto(),
     titulo = this.titulo,
     descripcion = this.descripcion,
     inicio = this.inicio,

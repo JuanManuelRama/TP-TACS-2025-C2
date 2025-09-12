@@ -23,9 +23,9 @@ fun Route.eventoLoggedRoutes() {
             .respondError(HttpStatusCode.Unauthorized, "No se pudo obtener el usuario logueado")
         val eventoDto = call.receive<EventoDto>()
         eventoDto.register(userId)
-            .onSuccess {
-                EventoRepository.saveEvento(it)
-                call.respond(HttpStatusCode.Created, eventoDto)
+            .onSuccess { evento ->
+                EventoRepository.saveEvento(evento)
+                call.respond(HttpStatusCode.Created, evento.toDto())
             }
             .onFailure { call.respondError(HttpStatusCode.BadRequest, it.message) }
     }

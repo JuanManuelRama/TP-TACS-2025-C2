@@ -3,6 +3,9 @@ package com.g7.evento
 import com.g7.serializable.LocalDateTimeSerializer
 import com.g7.serializable.UUIDSerializer
 import com.g7.usuario.Usuario
+import com.g7.usuario.dto.UsuarioDto
+import com.g7.usuario.dto.UsuarioResponseDto
+import com.g7.usuario.dto.toResponseDto
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 import java.util.UUID
@@ -31,8 +34,7 @@ sealed class Inscripcion {
 
 @Serializable
 data class InscripcionDto(
-    @Serializable(with = UUIDSerializer::class)
-    val usuarioId: UUID,
+    val usuario: UsuarioResponseDto,
     @Serializable(with = LocalDateTimeSerializer::class)
     val horaInscripcion: LocalDateTime,
     val espera: Duration? = null,
@@ -41,13 +43,13 @@ data class InscripcionDto(
 
 fun Inscripcion.toDto(): InscripcionDto = when (this) {
     is Inscripcion.Confirmacion -> InscripcionDto(
-        usuarioId = usuario.id,
+        usuario = usuario.toResponseDto(),
         horaInscripcion = horaInscripcion,
         espera = espera,
         tipo = "CONFIRMACION"
     )
     is Inscripcion.Espera -> InscripcionDto(
-        usuarioId = usuario.id,
+        usuario = usuario.toResponseDto(),
         horaInscripcion = horaInscripcion,
         espera = null,
         tipo = "ESPERA"
