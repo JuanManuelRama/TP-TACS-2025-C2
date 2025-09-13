@@ -6,7 +6,4 @@ export interface Registration {
     tipo: RegistrationType;
 }
 
-enum RegistrationType {
-    CONFIRMACION  = "CONFIRMACION",
-    ESPERA = "ESPERA",
-}
+type RegistrationType = "CONFIRMACION" | "ESPERA";
