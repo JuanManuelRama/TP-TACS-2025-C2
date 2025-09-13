@@ -1,11 +1,19 @@
-import type { RouteObject } from "react-router";
+import {Navigate, RouteObject} from "react-router";
 
 export const route: RouteObject = {
-	path: "/auth",
-	children: [
-		{
-			path: "",
-			lazy: () => import("./+page"),
-		},
-	],
+    path: "/auth",
+    children: [
+        {
+            index: true,
+            element: <Navigate to="login" replace />,
+        },
+        {
+            path: "login",
+            lazy: () => import("./login/+page.tsx"),
+        },
+        {
+            path: "register",
+            lazy: () => import("./register/+page.tsx"),
+        },
+    ],
 };
