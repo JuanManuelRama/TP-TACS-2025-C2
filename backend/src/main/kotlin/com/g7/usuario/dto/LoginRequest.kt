@@ -7,3 +7,9 @@ data class LoginRequestDto (
     val username: String = "",
     val password: String = ""
 )
+
+@Serializable
+data class LoginResponseDto (
+    val token: String,
+    val user: UsuarioResponseDto
+)

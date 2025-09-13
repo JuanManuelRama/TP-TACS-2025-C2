@@ -5,6 +5,7 @@ import com.g7.server.middleware.login.JwtConfig
 import com.g7.server.requireUuidParam
 import com.g7.server.respondError
 import com.g7.usuario.dto.LoginRequestDto
+import com.g7.usuario.dto.LoginResponseDto
 import com.g7.usuario.dto.UsuarioDto
 import com.g7.usuario.dto.toResponseDto
 import io.ktor.http.HttpStatusCode
@@ -58,7 +59,10 @@ fun Route.usuarioRoutes() {
             return@post
         }
 
-        call.respond(mapOf("token" to JwtConfig.generateToken(usuario)))
+        call.respond(HttpStatusCode.OK, LoginResponseDto(
+            token = JwtConfig.generateToken(usuario),
+            user = usuario.toResponseDto()
+        ))
     }
 
 }

@@ -105,7 +105,12 @@ En caso de intentar acceder a un Endpoint que requiera autorización, y no tener
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "username": "pepito",
+    "type": "participante"
+  }
 }
 ```
 
