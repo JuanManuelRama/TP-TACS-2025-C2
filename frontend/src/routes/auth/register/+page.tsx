@@ -59,8 +59,13 @@ const Page = () => {
                     disabled={loading}
                 />
             </div>
-            <button type="submit" disabled={loading}>
-                {loading ? "Registering..." : "Register"}
+            <button
+                type="submit"
+                disabled={loading}
+                className={`transition-opacity duration-300 ${
+                    loading ? "opacity-50 cursor-not-allowed" : "opacity-100"
+                }`}>
+                Register
             </button>
             {error && <p style={{ color: "red" }}>{error}</p>}
         </form>
