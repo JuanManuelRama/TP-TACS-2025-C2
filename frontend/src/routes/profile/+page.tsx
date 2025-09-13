@@ -11,7 +11,7 @@ const Page = () => {
         }
     }, [navigate]);
 
-    return <div>Profile</div>;
+    return <div>Perfil de {localStorage.getItem("username")}</div>;
 };
 export { Page as Component };
 export default Page;

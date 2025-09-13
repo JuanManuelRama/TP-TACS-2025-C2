@@ -1,7 +1,7 @@
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "$/src/components/ui/card";
 import { Link } from "react-router";
-import {useEffect, useState} from "react";
-import {Event} from "$types/event"
+import { Event } from "$types/event"
+import useEvents from "$hooks/useEvents.tsx";
 
 const EventCard = ({event}: {event: Event}) => {
     return (
@@ -26,13 +26,10 @@ const EventCard = ({event}: {event: Event}) => {
 
 
 const Page = () => {
-    const [events, setEvents] = useState<Event[]>([]);
+    const {events, loading, error} = useEvents();
 
-    useEffect(() => {
-        fetch("http://localhost:8080/eventos")
-            .then(res => res.json())
-            .then(data => setEvents(data));
-    }, []);
+    if (loading) return <p>Loading events...</p>;
+    if (error) return <p>Error: {error}</p>;
 
     return (
         <div className="grid gap-4">
@@ -42,6 +39,7 @@ const Page = () => {
         </div>
     );
 };
+
 
 
 export { Page as Component }; //a
