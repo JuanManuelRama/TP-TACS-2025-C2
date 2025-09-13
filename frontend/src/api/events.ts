@@ -1,34 +1,34 @@
 import axiosInstance from "./axiosInstance"
+import {Event} from "@/types/event"
 
 
 export const eventList = () => {
-    return axiosInstance.get("/events").then(res => res.data)
+    return axiosInstance.get("/eventos").then(res => res.data)
 }
 
 export const event = (eventId: string) =>{
-    return axiosInstance.get(`/events/${eventId}`).then(res => res.data)
-}
-interface Event {
-    id: string
-    name: string
-    description: string
-    date: string
-    location: string
+    return axiosInstance.get(`/eventos/${eventId}`).then(res => res.data)
 }
 
 export const addEvent = (event: Event) => {
-    return axiosInstance.post("/events", event).then(res => res.data)
+    return axiosInstance.post("/eventos", event).then(res => res.data)
 }
 
 export const deleteEvent = (eventId:string ) => {
-    return axiosInstance.delete(`/events/${eventId}`).then(res => res.data)
+    return axiosInstance.delete(`/eventos/${eventId}`).then(res => res.data)
 }
 
 export const subscribeEvent = (eventId:string ) => {
-    return axiosInstance.post(`/events/${eventId}/subscribe`).then(res => res.data)
+    return axiosInstance.post(`/eventos/${eventId}/inscriptos`).then(res => res.data)
 }
 
 export const unsubscribeEvent = (eventId:string ) => {
-    return axiosInstance.post(`/events/${eventId}/unsubscribe`).then(res => res.data)
+    return axiosInstance.delete(`/eventos/${eventId}/inscriptos`).then(res => res.data)
 }
+
+export const kickEvent = (eventId: string, userId: string) => {
+    return axiosInstance.delete(`/eventos/${eventId}/inscriptos/${userId}`, {
+    });
+};
+
 
