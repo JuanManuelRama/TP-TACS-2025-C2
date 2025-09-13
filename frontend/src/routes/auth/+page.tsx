@@ -18,7 +18,7 @@ const Page = () => {
             const token = data.token;
             localStorage.setItem("jwt", token);
             localStorage.setItem("username", username);
-            navigate("/dashboard");
+            navigate("/events");
 
         } catch (err: unknown) {
             if (err instanceof Error) {
