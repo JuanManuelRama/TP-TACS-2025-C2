@@ -1,81 +1,13 @@
-import { Button } from "$/src/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import {useLocation, useParams} from "react-router";
-import {handleRemove, useRegistrations} from "./+aux.tsx";
 import useEvent from "@/hooks/useEvent.tsx";
-
-const Actions = ({isOwner}:{isOwner:boolean}) => {
-    return (
-        <div className="flex justify-end mr-10">
-            {isOwner ? (
-                <Button variant="destructive">Eliminar</Button>
-            ) : (
-                <Button>Subscribir</Button>
-            )}
-        </div>
-    );
-};
-
-const EventRegistrations = ({eventId, onRemove,}: {
-    eventId: string;
-    onRemove?: (userId: string) => void;
-}) => {
-    const { confirmed, setConfirmed, waitlisted, setWaitlisted, loading, error } = useRegistrations(eventId);
-
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error}</p>;
-
-    return (
-        <div className="grid grid-cols-2 gap-4">
-            <div>
-                <h2 className="font-semibold mb-2">Confirmed</h2>
-                <ul className="space-y-2">
-                    {confirmed.map((r) => (
-                        <li
-                            key={r.usuario.id}
-                            className="flex justify-between items-center"
-                        >
-                            <span>{r.usuario.username}</span>
-                            <button
-                                className="text-red-500 text-xs px-2 py-1 border border-red-300 rounded hover:bg-red-50"
-                                onClick={() => onRemove?.(eventId, r.usuario.id,
-                                    setConfirmed, setWaitlisted)}
-                            >
-                                Eliminar
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            <div>
-                <h2 className="font-semibold mb-2">Waitlisted</h2>
-                <ul className="space-y-2">
-                    {waitlisted.map((r) => (
-                        <li
-                            key={r.usuario.id}
-                            className="flex justify-between items-center"
-                        >
-                            <span>{r.usuario.username}</span>
-                            <button
-                                className="text-red-500 text-xs px-2 py-1 border border-red-300 rounded hover:bg-red-50"
-                                onClick={() => onRemove?.(eventId, r.usuario.id,
-                                    setConfirmed, setWaitlisted)}
-                            >
-                                Eliminar
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        </div>
-    );
-};
+import EventRegistrations from "./+registration.tsx";
+import Actions from "./+actions.tsx"
 
 const Page = () => {
-    const location = useLocation();
     const params = useParams();
-    const stateEvent = location.state?.event;
+    const stateEvent = useLocation().state?.event;
     const { event: fetchedEvent, loading, error } = useEvent(params.id ?? null);
     const event = stateEvent || fetchedEvent;
     const [ownerView, setOwnerView] = useState<boolean>(false) // temporarily for testing, in final product you'll be locked to the correct one
@@ -145,9 +77,9 @@ const Page = () => {
                 </div>
             </div>
 
-            <Actions isOwner={ownerView}></Actions>
+            <Actions isOwner={ownerView} eventId={params.id}></Actions>
             {/* Event registrations (only for owner) */}
-            {ownerView && <EventRegistrations eventId={params.id} onRemove={handleRemove}/>}
+            {ownerView && <EventRegistrations eventId={params.id}/>}
         </div>
     );
 }

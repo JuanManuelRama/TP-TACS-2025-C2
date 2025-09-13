@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
 import {Registration} from "$types/registration.ts";
 import axiosInstance from "@/api/axiosInstance.ts";
-import {kickEvent} from "@/api/events.ts";
 
 export const useRegistrations = (eventId: string) => {
     const [confirmed, setConfirmed] = useState<Registration[]>([]);
@@ -37,16 +36,4 @@ export const useRegistrations = (eventId: string) => {
     }, [eventId]);
 
     return { confirmed, setConfirmed, waitlisted, setWaitlisted, loading, error };
-};
-
-export const handleRemove = async (eventId: string, userId: string, setConfirmed, setWaitlisted) => {
-    try {
-        await kickEvent(eventId, userId); // API call
-        //update state
-        setConfirmed(prev => prev.filter(r => r.usuario.id !== userId));
-        setWaitlisted(prev => prev.filter(r => r.usuario.id !== userId));    }
-    catch (err) {
-        console.error("Failed to remove user:", err);
-        alert("Could not remove user");
-    }
 };
