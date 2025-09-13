@@ -1,42 +1,65 @@
-import type { ReactElement } from "react";
-import { Outlet, useNavigate } from "react-router";
-import { Button } from "../components/ui/button";
+import {Button} from "$components/ui/button.tsx";
+import {Outlet} from "react-router";
+import {useNavigate} from "react-router-dom";
 
-const Layout = ({ children }: { children?: ReactElement }) => {
+const Header = ({ isLoggedIn, username, handleLogout, navigate }: any) => {
+    const AuthButtons = () => (
+        <>
+            <Button
+                variant="outline"
+                onClick={() => navigate("/auth/register")}
+            >
+                Register
+            </Button>
+            <Button
+                variant="outline"
+                onClick={() => navigate("/auth/login")}
+            >
+                Log In
+            </Button>
+        </>
+    );
+
+    const UserInfo = () => (
+        <>
+            <span>{username}</span>
+            <Button
+                variant="outline"
+                onClick={handleLogout}
+            >
+                Logout
+            </Button>
+        </>
+    );
+
+    return (
+        <header className="h-14 border-b border-gray-200 flex items-center px-5">
+            <span>Event Manager</span>
+            <div className="ml-auto flex gap-2">
+                {isLoggedIn ? <UserInfo /> : <AuthButtons />}
+            </div>
+        </header>
+    );
+};
+
+const Layout = ({ children }: { children?: React.ReactNode }) => {
     const navigate = useNavigate();
-
-    const username = localStorage.getItem("username");
-    const isLoggedIn = !!username;
-
+    const isLoggedIn = !!localStorage.getItem("jwt"); // example
+    const username = localStorage.getItem("username") || "";
     const handleLogout = () => {
         localStorage.removeItem("jwt");
         localStorage.removeItem("username");
-        window.location.reload();
+        navigate("/auth/login");
     };
 
     return (
         <div className="h-screen">
-            <header className="h-14 border-b border-gray-200 flex flex-row items-center justify-start px-5">
-                <span>Event Manager</span>
-
-                {isLoggedIn ? (
-                    <div className="ml-auto flex gap-2">
-                        <span>{username}</span>
-                        <Button variant="outline" onClick={handleLogout}>
-                            Logout
-                        </Button>
-                    </div>
-                ) : (
-                    <Button
-                        className="ml-auto"
-                        variant="outline"
-                        onClick={() => navigate("/auth")}
-                    >
-                        Log In
-                    </Button>
-                )}
-            </header>
-
+            <Header
+                isLoggedIn={isLoggedIn}
+                username={username}
+                handleLogout={handleLogout}
+                navigate={navigate}
+            />
             <main className="mt-10 mx-40">{children || <Outlet />}</main>
         </div>
     );
