@@ -10,7 +10,7 @@ export interface Event {
     cupoMaximo: number;
     cupoMinimo: number | null;
     precio: number;
-    categoria: string;
+    categorias: string[];
 }
 
 export interface EventList {
