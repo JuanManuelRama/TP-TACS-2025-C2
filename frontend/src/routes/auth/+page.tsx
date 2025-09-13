@@ -1,6 +1,7 @@
 import {useState, FormEvent} from "react";
 import { useNavigate } from "react-router-dom";
 import "./+page.css";
+import {login} from "@/api/users.ts";
 
 const Page = () => {
     const [username, setUsername] = useState("");
@@ -13,28 +14,18 @@ const Page = () => {
         setError(null);
 
         try {
-            const res = await fetch("http://localhost:8080/usuarios/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }),
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                setError(err.message || "Invalid username or password");
-                return;
-            }
-
-            const data = await res.json();
+            const data = await login(username, password);
             const token = data.token;
-
             localStorage.setItem("jwt", token);
             localStorage.setItem("username", username);
             navigate("/dashboard");
 
-        } catch (err) {
-            console.error("Login failed:", err);
-            setError("Network error, please try again");
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("Login failed, please try again");
+            }
         }
     }
 
