@@ -44,6 +44,9 @@ fun Application.configureMiddleware() {
     install(CORS) {
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Delete)
+
+
         allowMethod(HttpMethod.Options) // important for preflight
 
         allowHeader(HttpHeaders.ContentType)
