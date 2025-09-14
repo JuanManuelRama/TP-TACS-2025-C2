@@ -35,19 +35,20 @@ docker run -p 8080:8080 ktor-app
 
 ### 🔹 Endpoints disponibles
 
-| Método | Endpoint                            | Descripción                               | Protegida | Parámetros                    |
-|:------:|-------------------------------------|-------------------------------------------|:---------:|-------------------------------|
-|  GET   | `/usuarios`                         | Lista todos los usuarios                  |     ❌     |                               |
-|  GET   | `/usuarios/{id}`                    | Obtiene un usuario                        |     ❌     | `id: UUID`                    |
-|  POST  | `/usuarios`                         | Crea un nuevo usuario,                    |     ❌     | JSON body                     |
-|  POST  | `/usuarios/login`                   | Devuelve un JWT si los datos son válidos  |     ❌     | JSON body                     |
-|  GET   | `/eventos`                          | Lista todos los eventos                   |     ❌     |                               |
-|  GET   | `/eventos/{id}`                     | Obtiene un evento                         |     ❌     | `id: UUID`                    |
-|  POST  | `/eventos`                          | Crea un nuevo evento                      |    ✔️     | JSON body                     |
-|  GET   | `/eventos/{id}/inscriptos`          | Muestra todos los inscriptos en un evento |    ✔️     | `id: UUID`                    |
-|  POST  | `/eventos/{id}/inscriptos`          | Inscribirse a un evento                   |    ✔️     | `id: UUID`                    |
-| DELETE | `/eventos/{id}/inscriptos`          | Cancela la inscripción                    |    ✔️     | `id: UUID`                    |
-| DELETE | `/eventos/{id}/inscriptos/{userId}` | Cancela la inscripción de un usuario      |    ✔️     | `id: UUID`, `usuarioId: UUID` |
+| Método | Endpoint                            | Descripción                                      | Protegida | Parámetros                    |
+|:------:|-------------------------------------|--------------------------------------------------|:---------:|-------------------------------|
+|  GET   | `/usuarios`                         | Lista todos los usuarios                         |     ❌     |                               |
+|  GET   | `/usuarios/{id}`                    | Obtiene un usuario                               |     ❌     | `id: UUID`                    |
+|  POST  | `/usuarios`                         | Crea un nuevo usuario,                           |     ❌     | JSON body                     |
+|  POST  | `/usuarios/login`                   | Devuelve un JWT si los datos son válidos         |     ❌     | JSON body                     |
+|  GET   | `/eventos`                          | Lista todos los eventos                          |     ❌     |                               |
+|  GET   | `/eventos/{id}`                     | Obtiene un evento                                |     ❌     | `id: UUID`                    |
+|  POST  | `/eventos`                          | Crea un nuevo evento                             |    ✔️     | JSON body                     |
+|  GET   | `/eventos/{id}/inscriptos`          | Muestra todos los inscriptos en un evento        |    ✔️     | `id: UUID`                    |
+|  POST  | `/eventos/{id}/inscriptos`          | Inscribirse a un evento                          |    ✔️     | `id: UUID`                    |
+| DELETE | `/eventos/{id}/inscriptos`          | Cancela la inscripción                           |    ✔️     | `id: UUID`                    |
+|  GET   | `/eventos/{id}/inscriptos/{userId}` | Muestra la inscripción de un usuario a un evento |    ✔️     | `id: UUID`, `usuarioId: UUID` |                               |
+| DELETE | `/eventos/{id}/inscriptos/{userId}` | Cancela la inscripción de un usuario             |    ✔️     | `id: UUID`, `usuarioId: UUID` |
 
 Las rutas protegidas requieren un header `Authorization Bearer` obtenido en `usuarios/login`. 
 

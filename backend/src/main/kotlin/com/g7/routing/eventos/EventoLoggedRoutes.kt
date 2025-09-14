@@ -73,6 +73,23 @@ fun Route.eventoLoggedRoutes() {
             .onFailure { call.respondError(HttpStatusCode.BadRequest, it.message) }
     }
 
+    get("/{id}/inscriptos/{userId}") {
+        val id = call.requireUuidParam("id") ?: return@get
+        val userId = call.requireUuidParam("userId") ?: return@get
+        val loggedUser = call.loggedUser() ?: return@get call.respond(HttpStatusCode.Unauthorized)
+
+        val evento = call.fetchEvento(id) ?: return@get
+
+        if (loggedUser.id != evento.organizador.id && loggedUser.id != userId)  {
+            return@get call.respondError(HttpStatusCode.Forbidden,
+                "solo el organizador o si mismo puede ver la inscripción")
+        }
+        val inscripcion = evento.inscriptos.find { it.usuario.id == userId }
+            ?: evento.enEspera.find { it.usuario.id == userId }
+            ?: return@get call.respondError(HttpStatusCode.NotFound, "inscripcion no encontrada")
+        return@get call.respond(inscripcion.toDto())
+    }
+
     delete("/{id}/inscriptos/{userId}") {
         val id = call.requireUuidParam("id") ?: return@delete
         val user = call.loggedUser() ?: return@delete call.respond(HttpStatusCode.Unauthorized)

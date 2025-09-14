@@ -45,8 +45,9 @@ En caso de intentar acceder a un Endpoint que requiera autorización, y no tener
 - [Crear un evento](#crear-un-evento)
 - [Obtener eventos](#obtener-eventos)
 - [Obtener evento](#obtener-evento)
-- [Ver Inscriptos](#ver-inscriptos)
 - [Inscribirse](#inscribirse)
+- [Ver Inscriptos](#ver-inscriptos)
+- [Ver Inscripcion](#ver-inscripción)
 - [Cancelar Inscripcion](#cancelar-inscripcion)
 - [Cancelar Inscripcion de un Usuario](#cancelar-inscripcion-de-un-usuario)
 
@@ -290,45 +291,6 @@ En caso de intentar acceder a un Endpoint que requiera autorización, y no tener
 
 ---
 
-### Ver Inscriptos
-
-- **URL:** `/eventos/{id}/inscriptos`
-- **Método:** `GET`
-- **Descripción** Obtiene todos los inscriptos de un evento
-- **Autorizacion**: Requiere [login](#login) y ser el organizador del evento
-
-### Response
-
-- **200 OK**
-
-```json
-[
-  {
-    "organizador": {
-      "id": "ac0c2ba5-4139-46d2-b095-e38383a5d9fb",
-      "username": "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a",
-      "type": "PARTICIPANTE"
-    },
-    "horaInscripcion": "2025-09-03T12:01:26.569835", 
-    "tipo": "CONFIRMACION"
-  }, 
-  {
-    "organizador": {
-      "id": "ac0c2ba5-4139-46d2-b095-e38383a5d9fb",
-      "username": "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a",
-      "type": "PARTICIPANTE"
-    },
-    "horaInscripcion": "2025-09-03T12:01:26.569835", 
-    "tipo": "ESPERA"
-  }
-]
-```
-
-- **403 Forbidden** Si alguien que no es el organizador intenta acceder
-- **404 Not Found** Si no se encuentra el evento, o el usuario de la JWT
-
----
-
 ### Inscribirse
 
 - **URL:** `/eventos/{id}/inscriptos`
@@ -360,6 +322,75 @@ o
 
 - **403 Forbidden**  Si el organizador se intenta inscribir a su propio evento
 - **404 Not Found** Si no encuentra el evento o el usuario de la JWT
+
+---
+
+### Ver Inscriptos
+
+- **URL:** `/eventos/{id}/inscriptos`
+- **Método:** `GET`
+- **Descripción** Obtiene todos los inscriptos de un evento
+- **Autorizacion**: Requiere [login](#login) y ser el organizador del evento
+
+### Response
+
+- **200 OK**
+
+```json
+[
+  {
+    "usuario": {
+      "id": "ac0c2ba5-4139-46d2-b095-e38383a5d9fb",
+      "username": "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a",
+      "type": "PARTICIPANTE"
+    },
+    "horaInscripcion": "2025-09-03T12:01:26.569835", 
+    "tipo": "CONFIRMACION"
+  }, 
+  {
+    "usuario": {
+      "id": "ac0c2ba5-4139-46d2-b095-e38383a5d9fb",
+      "username": "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a",
+      "type": "PARTICIPANTE"
+    },
+    "horaInscripcion": "2025-09-03T12:01:26.569835", 
+    "tipo": "ESPERA"
+  }
+]
+```
+
+- **403 Forbidden** Si alguien que no es el organizador intenta acceder
+- **404 Not Found** Si no se encuentra el evento, o el usuario de la JWT
+
+---
+
+### Ver Inscripción
+
+- **URL:** `/eventos/{id}/inscriptos/{userId}`
+- **Método:** `GET`
+- **Descripción** Obtiene una inscripci´pn de un evento
+- **Autorizacion**: Requiere [login](#login) y ser el organizador del evento o el usuario a ver
+
+### Response
+
+- **200 OK**
+
+```json
+{   
+  "usuario": {
+    "id": "ac0c2ba5-4139-46d2-b095-e38383a5d9fb",
+    "username": "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a",
+    "type": "PARTICIPANTE"
+  },
+  "horaInscripcion": "2025-09-03T12:01:26.569835", 
+  "tipo": "CONFIRMACION"
+  }
+```
+
+- **403 Forbidden** Si alguien que no es el organizador o el usuario mismo intenta acceder
+- **404 Not Found** Si no se encuentra el evento
+
+---
 
 ### Cancelar Inscripcion
 
