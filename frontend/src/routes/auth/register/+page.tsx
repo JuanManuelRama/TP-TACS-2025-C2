@@ -18,10 +18,11 @@ const Page = () => {
         try {
             await register(username.trim(), password.trim());
             const data = await login(username.trim(), password.trim());
-            const token = data.token;
 
-            localStorage.setItem("jwt", token);
-            localStorage.setItem("username", username.trim());
+            localStorage.setItem("jwt", data.token);
+            localStorage.setItem("username", data.user.username);
+            localStorage.setItem("id", data.user.id)
+
             navigate("/events");
         } catch (err: unknown) {
             if (err instanceof Error) {
