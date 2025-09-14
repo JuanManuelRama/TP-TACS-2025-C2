@@ -1,16 +1,23 @@
 /* --------------------------------------------------- ⫻ -- */
 
 import { useNavigate } from "react-router";
+import {useEffect} from "react";
 
-const isDev = process.env.NODE_ENV === "development";
+//const isDev = process.env.NODE_ENV === "development"; I didn't understand what it was supposed to do
 
 /* ------------------------------------------- component -- */
 
 export const Page = () => {
-    
     const navigate = useNavigate();
+    const isLoggedIn = !!localStorage.getItem("jwt");
 
-    navigate(isDev ? "/events" : "/events", { replace: true });
+    useEffect(() => {
+        if (isLoggedIn) {
+            navigate("/events", { replace: true }); // for now since dashboard is empty
+        } else {
+            navigate("/auth/login", { replace: true });
+        }
+    }, [navigate, isLoggedIn]);
 
     return null;
 };
