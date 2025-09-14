@@ -77,9 +77,9 @@ const Page = () => {
                 </div>
             </div>
 
-            <Actions isOwner={ownerView} eventId={params.id}></Actions>
+            <Actions isOwner={ownerView} event={event}></Actions>
             {/* Event registrations (only for owner) */}
-            {ownerView && <EventRegistrations eventId={params.id}/>}
+            {ownerView && <EventRegistrations eventId={event.id}/>}
         </div>
     );
 }

@@ -1,34 +1,46 @@
 import {Button} from "$components/ui/button.tsx";
-import {deleteEvent, subscribeEvent,} from "@/api/events.ts";
+import {Event} from "@/types/event.ts";
+import {deleteEvent, subscribeEvent, unsubscribeEvent,} from "@/api/events.ts";
 import {useNavigate} from "react-router-dom";
+import {useSubscription} from "$routes/events/[id]/+aux.tsx";
+import {useState} from "react";
 
-const Actions = ({isOwner, eventId}: {
+const Actions = ({isOwner, event}: {
     isOwner: boolean;
-    eventId: string;
+    event: Event;
 }) => {
     const navigate = useNavigate();
+    const {isSubscribed, setSubscribed} = useSubscription(event)
+    const [message, setMessage] = useState<string | null>(null);
 
-    //TODO Change state of button, and make it unsubscribe
     const onSubscribe = async () => {
         try {
-            await subscribeEvent(eventId);
+            if (!localStorage.getItem("id")) {
+                navigate("/auth/login");
+                return;
+            }
+            const result = await subscribeEvent(event.id);
+            setSubscribed(true);
+            if(result.tipo == "CONFIRMACION") setMessage("You have been confirmed for this event")
+            else setMessage("Unfortunately, there were no more spots left, you have been waitlisted")
         } catch {
             alert("Subscribe event failed");
         }
     }
-/*
+
     const onUnsubscribe = async () => {
         try {
-            await unsubscribeEvent(eventId);
-            setRegistered(false);
+            await unsubscribeEvent(event.id);
+            setMessage("You have been unsubscribed for this event")
+            setSubscribed(false);
         } catch {
             alert("Unsubscribe event failed");
         }
-    }*/
+    }
 
     const onDelete = async () => {
         try {
-            await deleteEvent(eventId);
+            await deleteEvent(event.id);
             navigate("/events");
         }
         catch {
@@ -37,13 +49,24 @@ const Actions = ({isOwner, eventId}: {
     }
 
     return (
-        <div className="flex justify-end mr-10">
-            {isOwner ? (
-                <Button
-                    variant="destructive"
-                    onClick={onDelete}>Eliminar</Button>
-            ) : <Button onClick={onSubscribe}>Subscribe</Button>
-            }
+        <div className="flex flex-col items-end mr-10">
+            <div className="flex gap-2">
+                {isOwner ? (
+                    <Button variant="destructive" onClick={onDelete}>Eliminar</Button>
+                ) : isSubscribed ? (
+                    <Button onClick={onUnsubscribe}>Unsubscribe</Button>
+                ) : (
+                    <Button onClick={onSubscribe}>Subscribe</Button>
+                )}
+            </div>
+
+            {message && (
+                <div
+                    className="mt-2 px-3 py-1 rounded-md text-sm font-medium shadow-sm
+                    bg-gray-100 text-gray-800">
+                    {message}
+                </div>
+            )}
         </div>
     );
 };

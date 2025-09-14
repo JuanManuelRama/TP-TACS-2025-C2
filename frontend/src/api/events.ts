@@ -26,6 +26,10 @@ export const unsubscribeEvent = (eventId:string ) => {
     return axiosInstance.delete(`/eventos/${eventId}/inscriptos`).then(res => res.data)
 }
 
+export const suscriptionEvent = (eventId:string, userId: string ) => {
+    return axiosInstance.get(`/eventos/${eventId}/inscriptos/${userId}`).then(res => res.data)
+}
+
 export const kickEvent = (eventId: string, userId: string) => {
     return axiosInstance.delete(`/eventos/${eventId}/inscriptos/${userId}`, {
     });
