@@ -2,7 +2,8 @@ import {Button} from "$components/ui/button.tsx";
 import {Outlet} from "react-router";
 import {useNavigate} from "react-router-dom";
 
-const Header = ({ isLoggedIn, username, handleLogout, navigate }: any) => {
+const Header = ({ isLoggedIn, username, handleLogout }: any) => {
+    const navigate = useNavigate();
     const AuthButtons = () => (
         <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => navigate("/auth/register")}>Register</Button>
@@ -45,7 +46,6 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
                 isLoggedIn={isLoggedIn}
                 username={username}
                 handleLogout={handleLogout}
-                navigate={navigate}
             />
             <main className="mt-10 mx-40">{children || <Outlet />}</main>
         </div>
