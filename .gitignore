@@ -34,3 +34,5 @@ out/
 
 ### VS Code ###
 .vscode/
+frontend/tsconfig.app.tsbuildinfo
+frontend/tsconfig.node.tsbuildinfo
