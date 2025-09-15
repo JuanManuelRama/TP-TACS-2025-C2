@@ -22,7 +22,7 @@ Generar un jar ejecutable:
 java -jar build/libs/TP-TACS-2025-C2-all.jar
 ```
 
-### Docker 
+### Docker
 
 Generando el contenedor
 
@@ -43,6 +43,7 @@ docker run -p 8080:8080 ktor-app
 |  POST  | `/usuarios/login`                   | Devuelve un JWT si los datos son válidos         |     ❌     | JSON body                     |
 |  GET   | `/eventos`                          | Lista todos los eventos                          |     ❌     |                               |
 |  GET   | `/eventos/{id}`                     | Obtiene un evento                                |     ❌     | `id: UUID`                    |
+| DELETE | `/eventos/{id}`                     | Borra un evento                                  |    ✔️     | `id: UUID`                    |
 |  POST  | `/eventos`                          | Crea un nuevo evento                             |    ✔️     | JSON body                     |
 |  GET   | `/eventos/{id}/inscriptos`          | Muestra todos los inscriptos en un evento        |    ✔️     | `id: UUID`                    |
 |  POST  | `/eventos/{id}/inscriptos`          | Inscribirse a un evento                          |    ✔️     | `id: UUID`                    |

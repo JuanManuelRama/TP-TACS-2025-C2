@@ -291,6 +291,22 @@ En caso de intentar acceder a un Endpoint que requiera autorización, y no tener
 
 ---
 
+### Borrar un Evento
+
+- **URL:** `/eventos/{id}`
+- **Método:** `DELETE`
+- **Descripción** Borra un evento
+- **Autorizacion**: Requiere [login](#login) y ser el organizador del evento
+
+#### Response
+
+- **200 OK**
+- **403 Forbidden**  Si alguien que no es el organizador intenta inscribirse
+- **404 Not Found** Si no se encuentra el evento
+
+
+---
+
 ### Inscribirse
 
 - **URL:** `/eventos/{id}/inscriptos`

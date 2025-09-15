@@ -30,6 +30,21 @@ fun Route.eventoLoggedRoutes() {
             .onFailure { call.respondError(HttpStatusCode.BadRequest, it.message) }
     }
 
+    delete("/{id}") {
+        val id = call.requireUuidParam("id")?: return@delete
+        val user = call.loggedUser() ?: return@delete call.respondError(HttpStatusCode.Unauthorized)
+        val evento = call.fetchEvento(id) ?: return@delete
+
+        if (user.id != evento.organizador.id) {
+            return@delete call.respondError(HttpStatusCode.Unauthorized, "Solo el organizador puede borrar el evento")
+        }
+        evento.inscriptos.forEach { evento.cancelar(it.usuario) }
+        evento.enEspera.forEach { evento.cancelar(it.usuario) }
+        evento.organizador.eventosOrganizados.remove(evento)
+        EventoRepository.deleteEvento(evento)
+        call.respond(HttpStatusCode.OK)
+    }
+
     get("/{id}/inscriptos") {
         val id = call.requireUuidParam("id")?: return@get
         val user = call.loggedUser() ?: return@get call.respond(HttpStatusCode.Unauthorized)

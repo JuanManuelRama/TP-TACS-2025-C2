@@ -14,6 +14,8 @@ interface EventoRepo {
     fun findById(id: UUID): Result<Evento>
 
     fun getEventosFiltrado(filtro: FiltroEvento): Set<Evento>
+
+    fun deleteEvento(evento: Evento)
 }
 
 object EventoRepository : EventoRepo {
@@ -23,6 +25,10 @@ object EventoRepository : EventoRepo {
 
     override fun saveEvento(evento: Evento) {
         eventos.add(evento)
+    }
+
+    override fun deleteEvento(evento: Evento) {
+        eventos.remove(evento)
     }
 
     /**
