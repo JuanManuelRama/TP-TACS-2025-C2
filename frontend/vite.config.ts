@@ -7,6 +7,7 @@ import tsConfigPath from "vite-tsconfig-paths"; //d
 
 // https://vite.dev/config/
 export default defineConfig({
+	base: "/",
 	plugins: [
 		{
 			...strip({
