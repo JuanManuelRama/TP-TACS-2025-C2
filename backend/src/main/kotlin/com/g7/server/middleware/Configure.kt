@@ -56,6 +56,8 @@ fun Application.configureMiddleware() {
 
         // For dev
         allowHost("localhost:5173", schemes = listOf("http"))
+        //For prod
+        allowHost("localhost:8081", schemes = listOf("http"))
 
         // In prod, you can add your real frontend domain:
         // allowHost("app.mydomain.com", schemes = listOf("https"))
