@@ -7,11 +7,17 @@ COPY gradlew .
 COPY gradle ./gradle
 COPY build.gradle.kts settings.gradle.kts gradle.properties ./
 
+# Dar permisos de ejecución a gradlew
+RUN chmod +x ./gradlew
+
 # Descargar dependencias (aparte para cache)
 RUN ./gradlew dependencies --no-daemon || return 0
 
 # Copy the rest of the backend source
 COPY . .
+
+# Normalizar finales de línea por si vienen como CRLF y asegurar permisos de ejecución
+RUN sed -i 's/\r$//' ./gradlew && chmod +x ./gradlew
 
 # Construir el fat JAR
 RUN ./gradlew shadowJar --no-daemon

@@ -1,6 +1,5 @@
-import {Button} from "$components/ui/button.tsx";
-import {Outlet} from "react-router";
-import {useNavigate} from "react-router-dom";
+import { Button } from "$components/ui/button.tsx";
+import { Outlet, useNavigate } from "react-router";
 
 const Header = ({ isLoggedIn, username, handleLogout }: any) => {
     const navigate = useNavigate();
