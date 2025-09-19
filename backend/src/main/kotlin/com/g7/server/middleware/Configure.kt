@@ -11,9 +11,12 @@ import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import kotlinx.serialization.json.Json
 import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.request.path
+import org.slf4j.event.Level
 
 
 fun Application.configureMiddleware() {
@@ -62,5 +65,11 @@ fun Application.configureMiddleware() {
         // In prod, you can add your real frontend domain:
         // allowHost("app.mydomain.com", schemes = listOf("https"))
     }
+
+    install(CallLogging) {
+        level = Level.INFO
+        filter { it.request.path().startsWith("/") }
+    }
+
 
 }

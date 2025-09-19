@@ -15,13 +15,13 @@ import java.util.UUID
 * */
 suspend fun ApplicationCall.requireUuidParam(name: String): UUID? {
     val raw = parameters[name] ?: run {
-        respond(HttpStatusCode.BadRequest, "Missing $name")
+        respondError(HttpStatusCode.BadRequest, "Missing $name")
         return null
     }
     return try {
         UUID.fromString(raw)
     } catch (_: IllegalArgumentException) {
-        respond(HttpStatusCode.BadRequest, "Invalid $name format")
+        respondError(HttpStatusCode.BadRequest, "Invalid $name format")
         null
     }
 }
@@ -57,5 +57,9 @@ suspend fun ApplicationCall.fetchUsuario(id: UUID): Usuario? {
  * mensaje. En un futuro también se podría utilizar para los logs
  * */
 suspend fun ApplicationCall.respondError(status: HttpStatusCode, message: String? = null) {
+    when(status) {
+        HttpStatusCode.BadRequest -> respond(status, mapOf("error" to ""))
+    }
     respond(status, mapOf("error" to (message ?: "Unknown error")))
+
 }

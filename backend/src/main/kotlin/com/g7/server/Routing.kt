@@ -14,7 +14,6 @@ fun Application.configureRouting() {
     routing {
         get("/") {
             call.respondText("Hello World!")
-            log.info("Root endpoint accessed")
         }
         route("/eventos") {
                 eventoRoutes()

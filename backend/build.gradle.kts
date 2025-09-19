@@ -38,6 +38,7 @@ dependencies {
 
     // Logging
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("io.ktor:ktor-server-call-logging-jvm:${ktor_version}")
 
     // Testing
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktor_version")
