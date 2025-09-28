@@ -1,6 +1,7 @@
 val kotlin_version: String by project
 val ktor_version: String by project
 val logback_version: String by project
+val mongo_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -56,8 +57,19 @@ dependencies {
     // CORS
     implementation("io.ktor:ktor-server-cors:${ktor_version}")
 
+    // Status Pages
+    implementation("io.ktor:ktor-server-status-pages:${ktor_version}")
+
+
     // Auth
     implementation("com.auth0:java-jwt:4.4.0")
     implementation("io.ktor:ktor-server-auth:${ktor_version}")
     implementation("io.ktor:ktor-server-auth-jwt:${ktor_version}")
+
+    // Mongo
+    implementation("org.mongodb:mongodb-driver-core:${mongo_version}")
+    implementation("org.mongodb:mongodb-driver-sync:${mongo_version}")
+    implementation("org.mongodb:bson:${mongo_version}")
+    implementation("org.mongodb:bson-kotlin:${mongo_version}")
+
 }

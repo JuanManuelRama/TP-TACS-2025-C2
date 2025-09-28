@@ -1,65 +1,22 @@
 package com.g7.server
 
-import com.g7.evento.Evento
-import com.g7.repo.EventoRepository
-import com.g7.repo.UsuarioRepository
-import com.g7.usuario.Usuario
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.response.respond
-import java.util.UUID
+import com.g7.exception.InvalidIdException
+import com.g7.exception.MissingParameterException
+import io.ktor.server.application.*
+import org.bson.types.ObjectId
 
 /**
-* Busca el parámetro especificado de una UUID, si no lo encuentra envía la respuesta correspondiente
-* y retorna null
+ * Busca el parámetro especificado de una ObjectId en la llamada.
+ * @throws MissingParameterException si no se encuentra el parámetro
+ * @throws InvalidIdException si el parámetro no es un ObjectId válido
 * */
-suspend fun ApplicationCall.requireUuidParam(name: String): UUID? {
+fun ApplicationCall.requireIdParam(name: String): ObjectId {
     val raw = parameters[name] ?: run {
-        respondError(HttpStatusCode.BadRequest, "Missing $name")
-        return null
-    }
+        throw MissingParameterException(name)
+}
     return try {
-        UUID.fromString(raw)
+        ObjectId(raw)
     } catch (_: IllegalArgumentException) {
-        respondError(HttpStatusCode.BadRequest, "Invalid $name format")
-        null
+        throw InvalidIdException(raw)
     }
-}
-
-/**
- * Busca el evento correspondiente al ID, retorna null si no lo encontró, y en ese caso responde por http
- * esta función existe para manejar de forma centralizada todos los casos distintos de error
- * aunque por ahora solo haya uno (no encontrado)
- * */
-suspend fun ApplicationCall.fetchEvento(id: UUID): Evento? {
-    val result = EventoRepository.findById(id)
-    return result.getOrElse {
-        respondError(HttpStatusCode.NotFound, it.message)
-        null
-    }
-}
-
-/**
- * Busca el evento correspondiente al ID, retorna null si no lo encontró, y en ese caso responde por http
- * esta función existe para manejar de forma centralizada todos los casos distintos de error
- * aunque por ahora solo haya uno (no encontrado)
- * */
-suspend fun ApplicationCall.fetchUsuario(id: UUID): Usuario? {
-    val result = UsuarioRepository.getUsuarioFromId(id)
-    return result.getOrElse {
-        respondError(HttpStatusCode.NotFound, it.message)
-        null
-    }
-}
-
-/**
- * Garantiza el formato de todos los errores, además de manejar centralizado el caso de que no haya
- * mensaje. En un futuro también se podría utilizar para los logs
- * */
-suspend fun ApplicationCall.respondError(status: HttpStatusCode, message: String? = null) {
-    when(status) {
-        HttpStatusCode.BadRequest -> respond(status, mapOf("error" to ""))
-    }
-    respond(status, mapOf("error" to (message ?: "Unknown error")))
-
 }

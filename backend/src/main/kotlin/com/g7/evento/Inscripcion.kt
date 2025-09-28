@@ -1,34 +1,56 @@
 package com.g7.evento
 
+import com.g7.repo.UsuarioRepo
 import com.g7.serializable.LocalDateTimeSerializer
-import com.g7.serializable.UUIDSerializer
 import com.g7.usuario.Usuario
-import com.g7.usuario.dto.UsuarioDto
 import com.g7.usuario.dto.UsuarioResponseDto
 import com.g7.usuario.dto.toResponseDto
 import kotlinx.serialization.Serializable
+import org.bson.types.ObjectId
 import java.time.LocalDateTime
-import java.util.UUID
-import kotlin.time.Duration
-import kotlin.time.toKotlinDuration
+
+/*
+data class Inscripcion (
+    val usuario: ObjectId,
+    val horaInscripcion: LocalDateTime,
+    val horaConfirmacion: LocalDateTime? = null,
+) {
+    constructor(usuario: ObjectId, horaInscripcion: LocalDateTime, smth:Any?): this(
+        usuario,
+        horaInscripcion,
+        null
+    )
+    fun confirmado() = horaConfirmacion != null
+    fun confirmar() = this.copy(horaConfirmacion = LocalDateTime.now())
+}*/
 
 sealed class Inscripcion {
-    data class Confirmacion(
-        val usuario: Usuario,
-        val horaInscripcion: LocalDateTime,
-        val espera: Duration?,
-    ): Inscripcion()
+    abstract val usuario: ObjectId
+    abstract val horaInscripcion: LocalDateTime
+    abstract val confirmado: Boolean
+    abstract val tipo: String
+
+    data class Confirmada(
+        override val usuario: ObjectId,
+        override val horaInscripcion: LocalDateTime,
+        val horaConfirmacion: LocalDateTime
+    ) : Inscripcion() {
+        override val confirmado: Boolean = true
+        override val tipo: String = "CONFIRMACION"
+    }
 
     data class Espera(
-        val usuario: Usuario,
-        val horaInscripcion: LocalDateTime
-    ): Inscripcion() {
-        fun tiempoEsperando(): Duration =
-            java.time.Duration.between(this.horaInscripcion, LocalDateTime.now()).toKotlinDuration()
-        fun toConfirmacion(): Confirmacion = Confirmacion(
+        override val usuario: ObjectId,
+        override val horaInscripcion: LocalDateTime
+    ) : Inscripcion() {
+        override val confirmado: Boolean = false
+        override val tipo: String = "ESPERA"
+
+        fun confirmar() = Confirmada(
             usuario = this.usuario,
             horaInscripcion = this.horaInscripcion,
-            espera = this.tiempoEsperando())
+            horaConfirmacion = LocalDateTime.now()
+        )
     }
 }
 
@@ -37,21 +59,23 @@ data class InscripcionDto(
     val usuario: UsuarioResponseDto,
     @Serializable(with = LocalDateTimeSerializer::class)
     val horaInscripcion: LocalDateTime,
-    val espera: Duration? = null,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val horaConfirmacion: LocalDateTime? = null,
     val tipo: String
 )
 
-fun Inscripcion.toDto(): InscripcionDto = when (this) {
-    is Inscripcion.Confirmacion -> InscripcionDto(
-        usuario = usuario.toResponseDto(),
-        horaInscripcion = horaInscripcion,
-        espera = espera,
-        tipo = "CONFIRMACION"
-    )
-    is Inscripcion.Espera -> InscripcionDto(
-        usuario = usuario.toResponseDto(),
-        horaInscripcion = horaInscripcion,
-        espera = null,
-        tipo = "ESPERA"
+fun Inscripcion.toDto(repo: UsuarioRepo) = toDto(repo.getFromId(this.usuario).toResponseDto())
+
+fun Inscripcion.toDto(usuario: UsuarioResponseDto): InscripcionDto {
+    val horaConfirmacion = when (this) {
+        is Inscripcion.Espera -> null
+        is Inscripcion.Confirmada -> this.horaConfirmacion
+    }
+    return InscripcionDto(
+        usuario =usuario,
+        horaInscripcion = this.horaInscripcion,
+        horaConfirmacion = horaConfirmacion,
+        tipo = this.tipo
     )
 }
+

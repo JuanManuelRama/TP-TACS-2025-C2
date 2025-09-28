@@ -1,127 +1,111 @@
 package com.g7.routing.eventos
 
-import com.g7.evento.EventoDto
-import com.g7.evento.register
+import com.g7.evento.EventoInputDto
 import com.g7.evento.toDto
-import com.g7.repo.EventoRepository
-import com.g7.server.fetchEvento
-import com.g7.server.fetchUsuario
+import com.g7.server.*
 import com.g7.server.middleware.login.loggedUser
-import com.g7.server.requireUuidParam
-import com.g7.server.respondError
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.delete
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
+import com.g7.usuario.dto.toResponseDto
+import io.ktor.http.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 
 fun Route.eventoLoggedRoutes() {
     post {
-        val userId = call.loggedUser()?.id ?: return@post call
-            .respondError(HttpStatusCode.Unauthorized, "No se pudo obtener el usuario logueado")
-        val eventoDto = call.receive<EventoDto>()
-        eventoDto.register(userId)
-            .onSuccess { evento ->
-                EventoRepository.saveEvento(evento)
-                call.respond(HttpStatusCode.Created, evento.toDto())
-            }
-            .onFailure { call.respondError(HttpStatusCode.BadRequest, it.message) }
+        val user = call.loggedUser()
+        val eventoDto = call.receive<EventoInputDto>()
+        val evento = application.eventoRepo.save(user.id, eventoDto)
+        application.usuarioRepo.crearEvento(user.id, evento.id)
+        call.respond(HttpStatusCode.Created, evento.toDto(user.toResponseDto()))
     }
 
     delete("/{id}") {
-        val id = call.requireUuidParam("id")?: return@delete
-        val user = call.loggedUser() ?: return@delete call.respondError(HttpStatusCode.Unauthorized)
-        val evento = call.fetchEvento(id) ?: return@delete
+        val id = call.requireIdParam("id")
+        val user = call.loggedUser()
+        val organizador = application.eventoRepo.getOwnerFromId(id)
 
-        if (user.id != evento.organizador.id) {
-            return@delete call.respondError(HttpStatusCode.Unauthorized, "Solo el organizador puede borrar el evento")
+        if (user.id != organizador) {
+            throw IllegalAccessException("Solo el organizador puede eliminar el evento")
         }
-        evento.inscriptos.forEach { evento.cancelar(it.usuario) }
-        evento.enEspera.forEach { evento.cancelar(it.usuario) }
-        evento.organizador.eventosOrganizados.remove(evento)
-        EventoRepository.deleteEvento(evento)
-        call.respond(HttpStatusCode.OK)
+        application.usuarioRepo.borrarEventoCreado(user.id, id)
+        val inscriptos = application.eventoRepo.batchGetInscripcion(id).toSet()
+        val ids = inscriptos.map { it.usuario }.toSet()
+        application.usuarioRepo.batchDescinscribirEvento(ids, id)
+        application.eventoRepo.deleteEvento(id)
+        call.respond(HttpStatusCode.NoContent)
     }
 
     get("/{id}/inscriptos") {
-        val id = call.requireUuidParam("id")?: return@get
-        val user = call.loggedUser() ?: return@get call.respond(HttpStatusCode.Unauthorized)
-        val evento = call.fetchEvento(id) ?: return@get
+        val id = call.requireIdParam("id")
+        val user = call.loggedUser()
+        val owner = application.eventoRepo.getOwnerFromId(id)
 
-        if (user.id != evento.organizador.id) {
-            return@get call.respondError(HttpStatusCode.Unauthorized, "Solo el organizador puede verlo")
+        if (user.id != owner) {
+            throw IllegalAccessException("Solo el organizador puede ver los inscriptos")
         }
 
-        val inscriptos = evento.inscriptos.map { it.toDto() } + evento.enEspera.map { it.toDto() }
-        call.respond(HttpStatusCode.OK, inscriptos)
+        val inscriptos = application.eventoRepo.batchGetInscripcion(id)
+        val usuariosMap = application.usuarioRepo.batchGetFromId(inscriptos.map { it.usuario }
+            .toSet()).mapValues {it.value.toResponseDto()}
+        call.respond(HttpStatusCode.OK, inscriptos.map { it.toDto(usuariosMap[it.usuario]!!) })
 
     }
 
     post("/{id}/inscriptos") {
-        val id = call.requireUuidParam("id") ?: return@post
-        val userLog = call.loggedUser() ?: return@post call.respond(HttpStatusCode.Unauthorized)
+        val eventoId = call.requireIdParam("id")
+        val userId = call.loggedUser().id
+        val owner = application.eventoRepo.getOwnerFromId(eventoId)
 
-        val evento = call.fetchEvento(id) ?: return@post
-        val usuario = call.fetchUsuario(userLog.id) ?: return@post
-
-        if (usuario.id == evento.organizador.id) {
-            return@post call.respondError(HttpStatusCode.Forbidden,
-                "El organizador no puede inscribirse en su propio evento")
+        if (userId == owner) {
+            throw IllegalStateException("El organizador no puede inscribirse a su propio evento")
         }
 
-        evento.inscribir(usuario)
-            .onSuccess { call.respond(HttpStatusCode.OK, it.toDto()) }
-            .onFailure { call.respondError(HttpStatusCode.BadRequest, it.message) }
+
+        val inscripcion = application.eventoRepo.inscribirUsuario(eventoId, userId)
+        application.usuarioRepo.inscribirEvento(userId, eventoId, inscripcion.confirmado)
+        call.respond(HttpStatusCode.Created, inscripcion.toDto(application.usuarioRepo))
     }
 
     delete("/{id}/inscriptos") {
-        val id = call.requireUuidParam("id") ?: return@delete
-        val user = call.loggedUser() ?: return@delete call.respond(HttpStatusCode.Unauthorized)
+        val eventoId = call.requireIdParam("id")
+        val userId = call.loggedUser().id
 
-        val evento = call.fetchEvento(id) ?: return@delete
-        val usuario = call.fetchUsuario(user.id) ?: return@delete
-
-        evento.cancelar(usuario)
-            .onSuccess { call.respond(HttpStatusCode.OK) }
-            .onFailure { call.respondError(HttpStatusCode.BadRequest, it.message) }
+        application.eventoRepo.cancelarInscripcion(eventoId, userId)
+        call.respond(HttpStatusCode.NoContent)
     }
 
     get("/{id}/inscriptos/{userId}") {
-        val id = call.requireUuidParam("id") ?: return@get
-        val userId = call.requireUuidParam("userId") ?: return@get
-        val loggedUser = call.loggedUser() ?: return@get call.respond(HttpStatusCode.Unauthorized)
+        val eventoId = call.requireIdParam("id")
+        val userId = call.requireIdParam("userId")
+        val loggedUser = call.loggedUser()
 
-        val evento = call.fetchEvento(id) ?: return@get
-
-        if (loggedUser.id != evento.organizador.id && loggedUser.id != userId)  {
-            return@get call.respondError(HttpStatusCode.Forbidden,
-                "solo el organizador o si mismo puede ver la inscripción")
+        if(loggedUser.id == userId) {
+            val inscripcion = application.eventoRepo.getInscripcion(eventoId, userId)
+            call.respond(HttpStatusCode.OK, inscripcion.toDto(loggedUser.toResponseDto()))
         }
-        val inscripcion = evento.inscriptos.find { it.usuario.id == userId }
-            ?: evento.enEspera.find { it.usuario.id == userId }
-            ?: return@get call.respondError(HttpStatusCode.NotFound, "inscripcion no encontrada")
-        return@get call.respond(inscripcion.toDto())
+
+        val owner = application.eventoRepo.getOwnerFromId(eventoId)
+
+        if (loggedUser.id != owner)  {
+           throw IllegalAccessException("No podes ver la inscripcion de otro usuario")
+        }
+        val inscripcion = application.eventoRepo.getInscripcion(eventoId, userId)
+        val inscripto = application.usuarioRepo.getFromId(userId).toResponseDto()
+        call.respond(HttpStatusCode.OK, inscripcion.toDto(inscripto))
     }
 
     delete("/{id}/inscriptos/{userId}") {
-        val id = call.requireUuidParam("id") ?: return@delete
-        val user = call.loggedUser() ?: return@delete call.respond(HttpStatusCode.Unauthorized)
+        val id = call.requireIdParam("id")
+        val loggedUser = call.loggedUser()
 
-        val evento = call.fetchEvento(id) ?: return@delete
-        var usuario = call.fetchUsuario(user.id) ?: return@delete
+        val owner = application.eventoRepo.getOwnerFromId(id)
 
-        if (usuario.id != evento.organizador.id) {
-            return@delete call.respondError(HttpStatusCode.Forbidden,
-                "solo el organizador puede echar a alguien")
+        if (loggedUser.id != owner) {
+            throw IllegalAccessException("Solo el organizador puede dar de baja a un inscripto")
         }
 
-        val userId = call.requireUuidParam("userId") ?: return@delete
-        usuario = call.fetchUsuario(userId) ?: return@delete
-
-        evento.cancelar(usuario)
-            .onSuccess { call.respond(HttpStatusCode.OK) }
-            .onFailure { call.respondError(HttpStatusCode.BadRequest, it.message) }
+        val userId = call.requireIdParam("userId")
+        application.eventoRepo.cancelarInscripcion(id, userId)
+        call.respond(HttpStatusCode.NoContent)
     }
 }

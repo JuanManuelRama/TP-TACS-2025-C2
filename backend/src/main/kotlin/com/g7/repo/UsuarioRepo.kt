@@ -1,38 +1,86 @@
 package com.g7.repo
 
+import com.g7.exception.InvalidCredentialsException
 import com.g7.usuario.Usuario
-import io.ktor.util.collections.ConcurrentSet
-import java.util.UUID
+import com.g7.usuario.dto.UsuarioInputDto
+import com.mongodb.MongoWriteException
+import com.mongodb.client.model.Filters
+import com.mongodb.client.model.Projections
+import com.mongodb.client.model.Updates
+import org.bson.types.ObjectId
 
-interface UsuarioRepo {
+class UsuarioRepo(provider: MongoProvider) {
+    private val collection = provider.usuarioCollection
+    private val projection = Projections.exclude("eventosCreados", "eventosConfirmados", "EventosEnEspera")
 
-    fun getUsuarios(): Set<Usuario>
-
-    fun save(usuario: Usuario)
-
-    fun getUsuarioFromId(id: UUID): Result<Usuario>
-
-    fun getOptionalUsuarioFromUsername(username: String): Usuario?
-
-}
-
-object UsuarioRepository : UsuarioRepo {
-    private val usuarios = ConcurrentSet<Usuario>()
-
-    override fun getUsuarios(): Set<Usuario> = HashSet(usuarios)
-    override fun save(usuario: Usuario) {
-        usuarios.add(usuario)
+    fun getUsuarios(): List<Usuario> {
+        return collection.find()
+            .projection(projection)
+            .into(ArrayList())
     }
 
-    /**
-     * Retorna result en vez de null porque en un futuro el error puede ser de la db, no del pedido
-     * */
-    override fun getUsuarioFromId(id: UUID): Result<Usuario>  =
-        usuarios.find { it.id == id }
-            ?.let { Result.success(it) }
-            ?: Result.failure(NoSuchElementException("Usuario with id $id not found"))
+    fun save(usuario: UsuarioInputDto): Usuario {
+        val newUsuario = Usuario(
+            username = usuario.username,
+            password = usuario.hashPassword(),
+            type = usuario.type
+        )
+        try {
+            collection.insertOne(newUsuario)
+        } catch (e: MongoWriteException) {
+            if(e.code == 11000){
+                throw IllegalStateException("Username ${usuario.username} already exists")
+            }
+            throw e
+        }
+        return newUsuario
+    }
 
-    override fun getOptionalUsuarioFromUsername(username: String): Usuario? =
-        usuarios.find { it.username == username }
+    fun getFromId(id: ObjectId): Usuario =
+        collection.find(Filters.eq("_id", id)).projection(projection).first()
+            ?: throw NoSuchElementException("Usuario with id $id not found")
 
+    fun batchGetFromId(ids: Set<ObjectId>): Map<ObjectId, Usuario> =
+        collection.find(Filters.`in`("_id", ids)).projection(projection).into(HashSet()).associateBy { it.id }
+
+    fun getFromUsername(username: String): Usuario =
+        collection.find(Filters.eq("username", username)).projection(projection).first()
+            ?: throw InvalidCredentialsException()
+
+    fun crearEvento(usuarioId: ObjectId, eventoId: ObjectId) {
+        collection.findOneAndUpdate(Filters.eq("_id", usuarioId),
+            Updates.push("eventosCreados", eventoId))
+    }
+
+    fun borrarEventoCreado(usuarioId: ObjectId, eventoId: ObjectId) {
+        collection.updateOne(Filters.eq("_id", usuarioId),
+            Updates.pull("eventosCreados", eventoId))
+    }
+
+    fun inscribirEvento(userId: ObjectId, id: ObjectId, confirmado: Boolean) {
+        if (confirmado){
+            collection.findOneAndUpdate(Filters.eq("_id", userId),
+                Updates.push("eventosConfirmados", id))
+        }
+        else {
+            collection.findOneAndUpdate(Filters.eq("_id", userId),
+                Updates.push("EventosEnEspera", id))
+        }
+    }
+
+    fun descinscribirEvento(userId: ObjectId, eventoId: ObjectId) {
+        collection.updateOne(Filters.eq("_id", userId),
+            Updates.combine(
+                Updates.pull("eventosConfirmados", eventoId),
+                Updates.pull("EventosEnEspera", eventoId)
+            ))
+    }
+
+    fun batchDescinscribirEvento(userIds: Set<ObjectId>, eventoId: ObjectId) {
+        collection.updateMany(Filters.`in`("_id", userIds),
+            Updates.combine(
+                Updates.pull("eventosConfirmados", eventoId),
+                Updates.pull("EventosEnEspera", eventoId)
+            ))
+    }
 }

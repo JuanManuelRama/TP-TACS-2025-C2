@@ -1,0 +1,710 @@
+openapi: 3.0.3
+info:
+  title: TP-TACS-2025-C2 API
+  description: API para gestión de eventos y usuarios con inscripciones
+  version: 1.0.0
+  contact:
+    name: API Support
+servers:
+  - url: http://localhost:8080
+    description: Development server
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtenido del endpoint de login
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Mensaje de error
+      required:
+        - error
+      example:
+        error: "Some error message"
+
+    UserType:
+      type: string
+      enum:
+        - PARTICIPANTE
+        - ORGANIZADOR
+      description: Tipo de usuario
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: objectId
+          description: ID único del usuario
+        username:
+          type: string
+          description: Nombre de usuario único
+        type:
+          $ref: '#/components/schemas/UserType'
+      required:
+        - id
+        - username
+        - type
+      example:
+        id: "550e8400-e29b-41d4-a716-446655440000"
+        username: "pepito"
+        type: "PARTICIPANTE"
+
+    UserRegistration:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Nombre de usuario único
+        password:
+          type: string
+          description: Contraseña del usuario
+        type:
+          $ref: '#/components/schemas/UserType'
+      required:
+        - username
+        - password
+        - type
+      example:
+        username: "pepito"
+        password: "superSecreto123"
+        type: "PARTICIPANTE"
+
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Nombre de usuario
+        password:
+          type: string
+          description: Contraseña del usuario
+      required:
+        - username
+        - password
+      example:
+        username: "pepito"
+        password: "superSecreto123"
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token para autenticación
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - token
+        - user
+      example:
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          id: "550e8400-e29b-41d4-a716-446655440000"
+          username: "pepito"
+          type: "PARTICIPANTE"
+
+    EventCategory:
+      type: string
+      enum:
+        - FIESTA
+        - CONCIERTO
+      description: Categoría del evento
+
+    EventRequest:
+      type: object
+      properties:
+        titulo:
+          type: string
+          description: Título del evento
+        descripcion:
+          type: string
+          description: Descripción del evento
+        inicio:
+          type: string
+          format: date-time
+          description: Fecha y hora de inicio del evento
+        duracion:
+          type: integer
+          description: Duración del evento en segundos
+        cupoMaximo:
+          type: integer
+          description: Cupo máximo de participantes
+        cupoMinimio:
+          type: integer
+          description: Cupo mínimo de participantes
+        precio:
+          type: number
+          format: float
+          description: Precio del evento
+        categorias:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventCategory'
+          description: Lista de categorías del evento
+      required:
+        - titulo
+        - descripcion
+        - inicio
+        - duracion
+        - cupoMaximo
+        - cupoMinimio
+        - precio
+        - categorias
+      example:
+        titulo: "Fiesta de prueba"
+        descripcion: "Evento de prueba para testear la API"
+        inicio: "2025-09-15T20:00:00"
+        duracion: 10800
+        cupoMaximo: 100
+        cupoMinimio: 10
+        precio: 1500.5
+        categorias: ["FIESTA", "CONCIERTO"]
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: objectId
+          description: ID único del evento
+        organizador:
+          $ref: '#/components/schemas/User'
+        titulo:
+          type: string
+          description: Título del evento
+        descripcion:
+          type: string
+          description: Descripción del evento
+        inicio:
+          type: string
+          format: date-time
+          description: Fecha y hora de inicio del evento
+        duracion:
+          type: integer
+          description: Duración del evento en segundos
+        cupoMaximo:
+          type: integer
+          description: Cupo máximo de participantes
+        cupoMinimio:
+          type: integer
+          description: Cupo mínimo de participantes
+        precio:
+          type: number
+          format: float
+          description: Precio del evento
+        categorias:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventCategory'
+          description: Lista de categorías del evento
+      required:
+        - id
+        - organizador
+        - titulo
+        - descripcion
+        - inicio
+        - duracion
+        - cupoMaximo
+        - cupoMinimio
+        - precio
+        - categorias
+      example:
+        id: "570g8400-e29b-41h4-a716-446655440040"
+        organizador:
+          id: "ac0c2ba5-4139-46d2-b095-e38383a5d9fb"
+          username: "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a"
+          type: "ORGANIZADOR"
+        titulo: "Fiesta de prueba"
+        descripcion: "Evento de prueba para testear la API"
+        inicio: "2025-09-15T20:00:00"
+        duracion: 10800
+        cupoMaximo: 100
+        cupoMinimio: 10
+        precio: 1500.5
+        categorias: ["FIESTA", "CONCIERTO"]
+
+    InscriptionType:
+      type: string
+      enum:
+        - CONFIRMACION
+        - ESPERA
+      description: Tipo de inscripción
+
+    InscriptionResponse:
+      type: object
+      properties:
+        usuario:
+          type: string
+          format: objectId
+          description: ID del usuario inscrito
+        horaInscripcion:
+          type: string
+          format: date-time
+          description: Fecha y hora de la inscripción
+        tipo:
+          $ref: '#/components/schemas/InscriptionType'
+      required:
+        - usuario
+        - horaInscripcion
+        - tipo
+      example:
+        usuario: "5ed2f21f-8943-44ce-94a1-27d9edac098c"
+        horaInscripcion: "2025-09-03T12:01:26.569835"
+        tipo: "CONFIRMACION"
+
+    InscriptionDetail:
+      type: object
+      properties:
+        usuario:
+          $ref: '#/components/schemas/User'
+        horaInscripcion:
+          type: string
+          format: date-time
+          description: Fecha y hora de la inscripción
+        tipo:
+          $ref: '#/components/schemas/InscriptionType'
+      required:
+        - usuario
+        - horaInscripcion
+        - tipo
+      example:
+        usuario:
+          id: "ac0c2ba5-4139-46d2-b095-e38383a5d9fb"
+          username: "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a"
+          type: "PARTICIPANTE"
+        horaInscripcion: "2025-09-03T12:01:26.569835"
+        tipo: "CONFIRMACION"
+
+paths:
+  /usuarios:
+    post:
+      tags:
+        - Users
+      summary: Registro de usuario
+      description: Crea un nuevo usuario en el sistema
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '409':
+          description: El username ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Users
+      summary: Obtener usuarios
+      description: Devuelve los datos de todos los usuarios
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Token inválido o expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /usuarios/login:
+    post:
+      tags:
+        - Users
+      summary: Login
+      description: Devuelve un JWT si el usuario y la contraseña son correctos
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Usuario o contraseña incorrectos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /usuarios/{id}:
+    get:
+      tags:
+        - Users
+      summary: Obtener usuario por ID
+      description: Devuelve los datos de un usuario por su ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: string
+            format: objectId
+      responses:
+        '200':
+          description: Datos del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Token inválido o expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /eventos:
+    post:
+      tags:
+        - Events
+      summary: Crear un evento
+      description: Le permite a un organizador crear un evento
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+      responses:
+        '201':
+          description: Evento creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '401':
+          description: Token inválido o expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Usuario de la JWT no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Events
+      summary: Obtener eventos
+      description: Obtiene todos los eventos
+      security: []
+      responses:
+        '200':
+          description: Lista de eventos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+
+  /eventos/{id}:
+    get:
+      tags:
+        - Events
+      summary: Obtener evento
+      description: Obtiene un evento específico
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del evento
+          schema:
+            type: string
+            format: objectId
+      responses:
+        '200':
+          description: Datos del evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: Evento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Events
+      summary: Borrar un evento
+      description: Borra un evento (solo el organizador puede hacerlo)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del evento
+          schema:
+            type: string
+            format: objectId
+      responses:
+        '204':
+          description: Evento borrado exitosamente
+        '403':
+          description: No es el organizador del evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Evento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /eventos/{id}/inscriptos:
+    post:
+      tags:
+        - Inscriptions
+      summary: Inscribirse
+      description: Se inscribe a un evento, puede quedar confirmado o en espera
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del evento
+          schema:
+            type: string
+            format: objectId
+      responses:
+        '200':
+          description: Inscripción exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InscriptionResponse'
+        '403':
+          description: El organizador no puede inscribirse a su propio evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Evento o usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Inscriptions
+      summary: Ver inscriptos
+      description: Obtiene todos los inscriptos de un evento (solo el organizador)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del evento
+          schema:
+            type: string
+            format: objectId
+      responses:
+        '200':
+          description: Lista de inscriptos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InscriptionDetail'
+        '403':
+          description: No es el organizador del evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Evento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Inscriptions
+      summary: Cancelar inscripción
+      description: Cancela la inscripción del usuario autenticado a un evento
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del evento
+          schema:
+            type: string
+            format: objectId
+      responses:
+        '204':
+          description: Inscripción cancelada exitosamente
+        '400':
+          description: No estaba inscripto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Evento o usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /eventos/{id}/inscriptos/{userId}:
+    get:
+      tags:
+        - Inscriptions
+      summary: Ver inscripción
+      description: Obtiene una inscripción específica (organizador o el mismo usuario)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del evento
+          schema:
+            type: string
+            format: objectId
+        - name: userId
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: string
+            format: objectId
+      responses:
+        '200':
+          description: Datos de la inscripción
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InscriptionDetail'
+        '403':
+          description: No es el organizador ni el usuario de la inscripción
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Evento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Inscriptions
+      summary: Cancelar inscripción de un usuario
+      description: Cancela la inscripción de un usuario específico (solo el organizador)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del evento
+          schema:
+            type: string
+            format: objectId
+        - name: userId
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: string
+            format: objectId
+      responses:
+        '204':
+          description: Inscripción cancelada exitosamente
+        '400':
+          description: El usuario no estaba inscripto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: No es el organizador del evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Evento o usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Users
+    description: Operaciones relacionadas con usuarios
+  - name: Events
+    description: Operaciones relacionadas con eventos
+  - name: Inscriptions
+    description: Operaciones relacionadas con inscripciones a eventos

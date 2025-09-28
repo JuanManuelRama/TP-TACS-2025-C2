@@ -3,7 +3,7 @@ ktor:
     modules:
       - com.g7.server.ApplicationKt.module
   deployment:
-    port: ${PORT:8080}
+    port: 8080
 
 jwt:
   secret: ${JWT_SECRET:Ry9wggNqKu9XdNE/mR1A47HcOIh0mjCSUw+jKCEtS9/SQKX+J80La5HFBSBKvVW1DFZLGqIv4tbReGVrdeIu0g==}
@@ -14,3 +14,7 @@ jwt:
     username: ${JWT_CLAIM_USERNAME:username}
     type: ${JWT_CLAIM_TYPE:type}
     userId: ${JWT_CLAIM_USERID:userId}
+
+mongo:
+    uri: ${MONGO_URI:mongodb://localhost:27017}
+    db: ${MONGO_DATABASE:eventos_db}

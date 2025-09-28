@@ -1,0 +1,27 @@
+# IDE & editor config
+.idea
+.vscode
+*.iml
+
+# Build outputs
+build
+out
+bin
+
+# Gradle caches
+.gradle
+.kotlinc
+
+# Docker itself
+Dockerfile
+.dockerignore
+
+# Local stuff
+*.log
+*.tmp
+*.swp
+
+# Docs
+docs
+README.md
+api-docs.yaml

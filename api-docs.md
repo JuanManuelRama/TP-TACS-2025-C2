@@ -300,10 +300,9 @@ En caso de intentar acceder a un Endpoint que requiera autorización, y no tener
 
 #### Response
 
-- **200 OK**
+- **204 No Content**
 - **403 Forbidden**  Si alguien que no es el organizador intenta inscribirse
 - **404 Not Found** Si no se encuentra el evento
-
 
 ---
 
@@ -417,7 +416,7 @@ o
 
 #### Response
 
-- **200 OK**
+- **204 No Content**
 - **400 Bad Request** Si no estaba inscripto
 - **404 Not Found** Si no se encuentra el evento o el usuario de la JWT
 
@@ -432,7 +431,7 @@ o
 
 #### Response
 
-- **200 OK**
+- **204 OK**
 - **400 Bad Request** Si no estaba inscripto
 - **403 Forbidden** Si el usuario de la JWT no es el organizador
 - **404 Not Found** Si no se encuentra el evento o el usuario de la JWT

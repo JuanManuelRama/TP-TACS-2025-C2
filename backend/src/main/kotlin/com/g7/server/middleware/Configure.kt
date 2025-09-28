@@ -1,21 +1,17 @@
 package com.g7.server.middleware
 
+import com.g7.exception.InvalidCredentialsException
 import com.g7.server.middleware.login.JwtConfig
-import com.g7.server.respondError
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
-import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.jwt.jwt
-import io.ktor.server.plugins.calllogging.CallLogging
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.plugins.calllogging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.request.*
 import kotlinx.serialization.json.Json
-import io.ktor.server.plugins.cors.routing.CORS
-import io.ktor.server.request.path
 import org.slf4j.event.Level
 
 
@@ -30,10 +26,12 @@ fun Application.configureMiddleware() {
                 if (userId != null) JWTPrincipal(credential.payload) else null
             }
             challenge { _, _ ->
-                call.respondError(HttpStatusCode.Unauthorized, "Token inválido o expirado")
+                throw InvalidCredentialsException("Token inválido o expirado")
             }
         }
     }
+
+    configureExceptions()
 
     install(ContentNegotiation) {
         json(

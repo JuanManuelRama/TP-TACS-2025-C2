@@ -1,13 +1,32 @@
-services:
-  backend:
-    build:
-      context:  ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-  frontend:
-   build: 
-     context: ./frontend
-     dockerfile: Dockerfile
-   ports:
-     - "8081:80"
+services: 
+  mongo: 
+    image: mongo:8.0.14 
+    environment: 
+      MONGO_INITDB_DATABASE: eventos_db 
+    networks: 
+      - backend-network 
+  backend: 
+    build: 
+      context: ./backend 
+      dockerfile: Dockerfile 
+    environment: 
+      MONGO_URI: "mongodb://mongo:27017" 
+      MONGO_DATABASE: "eventos_db" 
+    ports: 
+      - "8080:8080" 
+    networks: 
+      - backend-network 
+    depends_on: 
+      - mongo 
+  frontend: 
+    build: 
+      context: ./frontend 
+      dockerfile: Dockerfile 
+    ports: 
+      - "8081:80" 
+    depends_on: 
+      - backend
+
+networks:
+  backend-network:
+    driver: bridge

@@ -1,62 +1,39 @@
 package com.g7.routing.usuarios;
 
-import com.g7.repo.UsuarioRepository
+import com.g7.exception.InvalidCredentialsException
 import com.g7.server.middleware.login.JwtConfig
-import com.g7.server.requireUuidParam
-import com.g7.server.respondError
+import com.g7.server.requireIdParam
+import com.g7.server.usuarioRepo
 import com.g7.usuario.dto.LoginRequestDto
 import com.g7.usuario.dto.LoginResponseDto
-import com.g7.usuario.dto.UsuarioDto
+import com.g7.usuario.dto.UsuarioInputDto
 import com.g7.usuario.dto.toResponseDto
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
+import io.ktor.http.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 
 fun Route.usuarioRoutes() {
 
     post {
-        val usuarioDto = call.receive<UsuarioDto>()
+        val usuarioDto = call.receive<UsuarioInputDto>()
 
-        val usuario = UsuarioRepository.getOptionalUsuarioFromUsername(usuarioDto.username)
-
-        if (usuario != null) {
-            call.respondError(HttpStatusCode.Conflict, "El nombre de usuario ya existe")
-            return@post
-        }
-
-        usuarioDto.register()
-            .onSuccess {
-                usuario ->
-                    UsuarioRepository.save(usuario)
-                    call.respond(HttpStatusCode.Created, usuarioDto.toResponseDto())
-            }
-            .onFailure {
-                call.respondError(HttpStatusCode.BadRequest, "Error al inscribir usuario: ${it.message}")
-            }
+        val newUsuario = application.usuarioRepo.save(usuarioDto)
+        call.respond(HttpStatusCode.Created, newUsuario.toResponseDto())
     }
 
     get("/{id}"){
-        val id = call.requireUuidParam("id") ?: return@get
+        val id = call.requireIdParam("id")
 
-        UsuarioRepository.getUsuarioFromId(id)
-            .onSuccess { usuario ->
-                call.respond(HttpStatusCode.OK, usuario.toResponseDto())
-            }
-            .onFailure {
-                call.respondError(HttpStatusCode.NotFound, "${it.message}")
-            }
+        call.respond(HttpStatusCode.OK, application.usuarioRepo.getFromId(id).toResponseDto())
     }
 
     post("/login") {
         val loginRequest = call.receive<LoginRequestDto>()
-        val usuario = UsuarioRepository.getOptionalUsuarioFromUsername(loginRequest.username)
+        val usuario = application.usuarioRepo.getFromUsername(loginRequest.username)
 
-        if (usuario == null || !usuario.passwordMatches(loginRequest.password)) {
-            call.respondError(HttpStatusCode.Unauthorized, "Usuario o contraseña incorrectos")
-            return@post
+        if (!usuario.passwordMatches(loginRequest.password)) {
+            throw InvalidCredentialsException()
         }
 
         call.respond(HttpStatusCode.OK, LoginResponseDto(
