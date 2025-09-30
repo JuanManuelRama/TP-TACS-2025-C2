@@ -28,9 +28,13 @@ data class Inscripciones (
     val esperas: List<Inscripcion.Espera>? = emptyList()
 )
 
-class EventoRepo(val provider: MongoProvider) {
-    private val collection: MongoCollection<Evento> = provider.eventoCollection
+object EventoRepo {
+    private lateinit var collection: MongoCollection<Evento>
     private val projection = Projections.exclude("inscriptos", "esperas")
+
+    fun init() {
+        collection = MongoProvider.eventoCollection
+    }
 
     fun getEventos(): List<Evento> {
         return collection.find().projection(projection).toList()
@@ -107,7 +111,7 @@ class EventoRepo(val provider: MongoProvider) {
     }
 
     fun cancelarInscripcion(eventoId: ObjectId, usuarioId: ObjectId) {
-        val ses = provider.client.startSession()
+        val ses = MongoProvider.client.startSession()
         ses.startTransaction()
         val event = collection.withDocumentClass(Algo::class.java)
             .find(Filters.eq("_id", eventoId))

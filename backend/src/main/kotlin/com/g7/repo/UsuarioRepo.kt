@@ -4,14 +4,19 @@ import com.g7.exception.InvalidCredentialsException
 import com.g7.usuario.Usuario
 import com.g7.usuario.dto.UsuarioInputDto
 import com.mongodb.MongoWriteException
+import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Projections
 import com.mongodb.client.model.Updates
 import org.bson.types.ObjectId
 
-class UsuarioRepo(provider: MongoProvider) {
-    private val collection = provider.usuarioCollection
+object UsuarioRepo {
+    private lateinit var collection: MongoCollection<Usuario>
     private val projection = Projections.exclude("eventosCreados", "eventosConfirmados", "EventosEnEspera")
+
+    fun init() {
+        collection = MongoProvider.usuarioCollection
+    }
 
     fun getUsuarios(): List<Usuario> {
         return collection.find()

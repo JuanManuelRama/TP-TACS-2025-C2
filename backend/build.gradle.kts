@@ -2,7 +2,7 @@ val kotlin_version: String by project
 val ktor_version: String by project
 val logback_version: String by project
 val mongo_version: String by project
-
+val testcontainers_version: String by project
 plugins {
     kotlin("jvm") version "2.1.10"
     kotlin("plugin.serialization") version "2.1.10"
@@ -10,7 +10,7 @@ plugins {
     id("com.gradleup.shadow") version "9.0.2"
 }
 
-group = "TACS_G6"  // use underscore instead of dash
+group = "TACS_G6"
 version = "0.0.1"
 
 application {
@@ -31,6 +31,11 @@ repositories {
     mavenCentral()
 }
 
+tasks.test {
+    useJUnitPlatform()
+    systemProperty("junit.jupiter.execution.parallel.enabled", "false")
+}
+
 dependencies {
     // Ktor server dependencies
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
@@ -42,9 +47,12 @@ dependencies {
     implementation("io.ktor:ktor-server-call-logging-jvm:${ktor_version}")
 
     // Testing
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktor_version")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    testImplementation("io.mockk:mockk:1.14.5")
+    testImplementation("org.testcontainers:testcontainers:$testcontainers_version")
+    testImplementation("org.testcontainers:mongodb:$testcontainers_version")
+    testImplementation("org.testcontainers:junit-jupiter:$testcontainers_version")
 
     // Json
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")

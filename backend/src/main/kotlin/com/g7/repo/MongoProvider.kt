@@ -14,25 +14,33 @@ import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.codecs.pojo.PojoCodecProvider
 
-class MongoProvider (
-    connectionString: String,
-    dbName: String
-){
+object MongoProvider {
+    lateinit var connectionString: String
+    lateinit var dbName: String
+    lateinit var client: MongoClient
+    lateinit var db: MongoDatabase
+    lateinit var usuarioCollection: MongoCollection<Usuario>
+    lateinit var eventoCollection: MongoCollection<Evento>
+
     private val pojoCodecRegistry: CodecRegistry = CodecRegistries.fromRegistries(
         MongoClientSettings.getDefaultCodecRegistry(),
         CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())
     )
 
-    val client: MongoClient = MongoClients.create(connectionString)
-    val db: MongoDatabase = client.getDatabase(dbName).withCodecRegistry(pojoCodecRegistry)
+    fun init(connectionString: String, dbName: String) {
+        this.connectionString = connectionString
+        this.dbName = dbName
+        client = MongoClients.create(connectionString)
+        db = client.getDatabase(dbName).withCodecRegistry(pojoCodecRegistry)
 
-    val usuarioCollection: MongoCollection<Usuario> = db.getCollection("usuarios", Usuario::class.java)
-    val eventoCollection: MongoCollection<Evento> = db.getCollection("eventos", Evento::class.java)
-
-    fun init() {
+        usuarioCollection =db.getCollection("usuarios", Usuario::class.java)
+        eventoCollection = db.getCollection("eventos", Evento::class.java)
         usuarioCollection.createIndex(
             Indexes.ascending("username"),
             IndexOptions().unique(true)
         )
+        val client: MongoClient = MongoClients.create(connectionString)
+        val db: MongoDatabase = client.getDatabase(dbName).withCodecRegistry(pojoCodecRegistry)
     }
+
 }

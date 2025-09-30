@@ -2,6 +2,8 @@ package com.g7.routing.eventos
 
 import com.g7.evento.EventoInputDto
 import com.g7.evento.toDto
+import com.g7.repo.EventoRepo
+import com.g7.repo.UsuarioRepo
 import com.g7.server.*
 import com.g7.server.middleware.login.loggedUser
 import com.g7.usuario.dto.toResponseDto
@@ -14,38 +16,38 @@ fun Route.eventoLoggedRoutes() {
     post {
         val user = call.loggedUser()
         val eventoDto = call.receive<EventoInputDto>()
-        val evento = application.eventoRepo.save(user.id, eventoDto)
-        application.usuarioRepo.crearEvento(user.id, evento.id)
+        val evento = EventoRepo.save(user.id, eventoDto)
+        UsuarioRepo.crearEvento(user.id, evento.id)
         call.respond(HttpStatusCode.Created, evento.toDto(user.toResponseDto()))
     }
 
     delete("/{id}") {
         val id = call.requireIdParam("id")
         val user = call.loggedUser()
-        val organizador = application.eventoRepo.getOwnerFromId(id)
+        val organizador = EventoRepo.getOwnerFromId(id)
 
         if (user.id != organizador) {
             throw IllegalAccessException("Solo el organizador puede eliminar el evento")
         }
-        application.usuarioRepo.borrarEventoCreado(user.id, id)
-        val inscriptos = application.eventoRepo.batchGetInscripcion(id).toSet()
+        UsuarioRepo.borrarEventoCreado(user.id, id)
+        val inscriptos = EventoRepo.batchGetInscripcion(id).toSet()
         val ids = inscriptos.map { it.usuario }.toSet()
-        application.usuarioRepo.batchDescinscribirEvento(ids, id)
-        application.eventoRepo.deleteEvento(id)
+        UsuarioRepo.batchDescinscribirEvento(ids, id)
+        EventoRepo.deleteEvento(id)
         call.respond(HttpStatusCode.NoContent)
     }
 
     get("/{id}/inscriptos") {
         val id = call.requireIdParam("id")
         val user = call.loggedUser()
-        val owner = application.eventoRepo.getOwnerFromId(id)
+        val owner = EventoRepo.getOwnerFromId(id)
 
         if (user.id != owner) {
             throw IllegalAccessException("Solo el organizador puede ver los inscriptos")
         }
 
-        val inscriptos = application.eventoRepo.batchGetInscripcion(id)
-        val usuariosMap = application.usuarioRepo.batchGetFromId(inscriptos.map { it.usuario }
+        val inscriptos = EventoRepo.batchGetInscripcion(id)
+        val usuariosMap = UsuarioRepo.batchGetFromId(inscriptos.map { it.usuario }
             .toSet()).mapValues {it.value.toResponseDto()}
         call.respond(HttpStatusCode.OK, inscriptos.map { it.toDto(usuariosMap[it.usuario]!!) })
 
@@ -54,23 +56,23 @@ fun Route.eventoLoggedRoutes() {
     post("/{id}/inscriptos") {
         val eventoId = call.requireIdParam("id")
         val userId = call.loggedUser().id
-        val owner = application.eventoRepo.getOwnerFromId(eventoId)
+        val owner = EventoRepo.getOwnerFromId(eventoId)
 
         if (userId == owner) {
             throw IllegalStateException("El organizador no puede inscribirse a su propio evento")
         }
 
 
-        val inscripcion = application.eventoRepo.inscribirUsuario(eventoId, userId)
-        application.usuarioRepo.inscribirEvento(userId, eventoId, inscripcion.confirmado)
-        call.respond(HttpStatusCode.Created, inscripcion.toDto(application.usuarioRepo))
+        val inscripcion = EventoRepo.inscribirUsuario(eventoId, userId)
+        UsuarioRepo.inscribirEvento(userId, eventoId, inscripcion.confirmado)
+        call.respond(HttpStatusCode.Created, inscripcion.toDto(UsuarioRepo))
     }
 
     delete("/{id}/inscriptos") {
         val eventoId = call.requireIdParam("id")
         val userId = call.loggedUser().id
 
-        application.eventoRepo.cancelarInscripcion(eventoId, userId)
+        EventoRepo.cancelarInscripcion(eventoId, userId)
         call.respond(HttpStatusCode.NoContent)
     }
 
@@ -80,17 +82,17 @@ fun Route.eventoLoggedRoutes() {
         val loggedUser = call.loggedUser()
 
         if(loggedUser.id == userId) {
-            val inscripcion = application.eventoRepo.getInscripcion(eventoId, userId)
+            val inscripcion = EventoRepo.getInscripcion(eventoId, userId)
             call.respond(HttpStatusCode.OK, inscripcion.toDto(loggedUser.toResponseDto()))
         }
 
-        val owner = application.eventoRepo.getOwnerFromId(eventoId)
+        val owner = EventoRepo.getOwnerFromId(eventoId)
 
         if (loggedUser.id != owner)  {
            throw IllegalAccessException("No podes ver la inscripcion de otro usuario")
         }
-        val inscripcion = application.eventoRepo.getInscripcion(eventoId, userId)
-        val inscripto = application.usuarioRepo.getFromId(userId).toResponseDto()
+        val inscripcion = EventoRepo.getInscripcion(eventoId, userId)
+        val inscripto = UsuarioRepo.getFromId(userId).toResponseDto()
         call.respond(HttpStatusCode.OK, inscripcion.toDto(inscripto))
     }
 
@@ -98,14 +100,14 @@ fun Route.eventoLoggedRoutes() {
         val id = call.requireIdParam("id")
         val loggedUser = call.loggedUser()
 
-        val owner = application.eventoRepo.getOwnerFromId(id)
+        val owner = EventoRepo.getOwnerFromId(id)
 
         if (loggedUser.id != owner) {
             throw IllegalAccessException("Solo el organizador puede dar de baja a un inscripto")
         }
 
         val userId = call.requireIdParam("userId")
-        application.eventoRepo.cancelarInscripcion(id, userId)
+        EventoRepo.cancelarInscripcion(id, userId)
         call.respond(HttpStatusCode.NoContent)
     }
 }

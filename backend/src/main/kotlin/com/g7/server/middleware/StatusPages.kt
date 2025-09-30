@@ -8,7 +8,7 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 
-fun Application.configureExceptions() {
+fun Application.installStatusPages() {
     install(StatusPages) {
         exception <IllegalStateException> { call, cause ->
             call.respond(HttpStatusCode.Conflict, mapOf("error" to (cause.message ?: "Conflict error")))

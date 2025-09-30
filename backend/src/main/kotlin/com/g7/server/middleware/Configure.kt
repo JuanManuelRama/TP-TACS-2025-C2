@@ -7,6 +7,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
@@ -16,32 +17,15 @@ import org.slf4j.event.Level
 
 
 fun Application.configureMiddleware() {
-    JwtConfig.init(environment.config)
+    installAuth(environment.config)
+    installStatusPages()
+    installContentNegotiation()
+    installLogging()
+    installCors()
 
-    install(Authentication) {
-        jwt("auth-jwt") {
-            verifier(JwtConfig.verifier)
-            validate { credential ->
-                val userId = credential.payload.getClaim("userId").asString()
-                if (userId != null) JWTPrincipal(credential.payload) else null
-            }
-            challenge { _, _ ->
-                throw InvalidCredentialsException("Token inválido o expirado")
-            }
-        }
-    }
+}
 
-    configureExceptions()
-
-    install(ContentNegotiation) {
-        json(
-            Json {
-                prettyPrint = true
-                ignoreUnknownKeys = true
-            }
-        )
-    }
-
+fun Application.installCors() {
     install(CORS) {
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
@@ -63,11 +47,39 @@ fun Application.configureMiddleware() {
         // In prod, you can add your real frontend domain:
         // allowHost("app.mydomain.com", schemes = listOf("https"))
     }
+}
 
+fun Application.installAuth(config: ApplicationConfig) {
+    JwtConfig.init(config)
+
+    install(Authentication) {
+        jwt("auth-jwt") {
+            verifier(JwtConfig.verifier)
+            validate { credential ->
+                val userId = credential.payload.getClaim("userId").asString()
+                if (userId != null) JWTPrincipal(credential.payload) else null
+            }
+            challenge { _, _ ->
+                throw InvalidCredentialsException("Token inválido o expirado")
+            }
+        }
+    }
+}
+
+fun Application.installContentNegotiation() {
+    install(ContentNegotiation) {
+        json(
+            Json {
+                prettyPrint = true
+                ignoreUnknownKeys = true
+            }
+        )
+    }
+}
+
+fun Application.installLogging() {
     install(CallLogging) {
         level = Level.INFO
         filter { it.request.path().startsWith("/") }
     }
-
-
 }

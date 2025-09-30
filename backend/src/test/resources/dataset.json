@@ -1,0 +1,25 @@
+{
+  "usuarios": [
+    {
+      "username": "juan",
+      "password": "secret",
+      "type": "PARTICIPANTE"
+    }
+  ],
+    "eventos": [
+      {
+        "titulo": "Concierto de Rock",
+        "descripcion": "Un show en vivo",
+        "inicio": "2025-09-10T20:00:00",
+        "duracion": 7200,
+        "cupoMaximo": 2,
+        "cupoMinimio": 1,
+        "precio": 1500.5,
+        "categorias": [
+          "FIESTA",
+          "CONCIERTO"
+        ]
+      }
+    ]
+}
+
