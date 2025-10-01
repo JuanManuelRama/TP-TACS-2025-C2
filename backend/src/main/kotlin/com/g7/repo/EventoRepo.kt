@@ -4,28 +4,15 @@ import com.g7.evento.Evento
 import com.g7.evento.EventoInputDto
 import com.g7.evento.FiltroEvento
 import com.g7.evento.Inscripcion
-import com.g7.evento.InscripcionDto
 import com.mongodb.client.MongoCollection
-import com.mongodb.client.model.Filters
-import com.mongodb.client.model.Projections
-import com.mongodb.client.model.Updates
+import com.mongodb.client.model.*
 import org.bson.Document
 import org.bson.types.ObjectId
-import java.lang.IllegalStateException
 import java.time.LocalDateTime
 
-data class Algo(
-    val inscriptos: MutableList<Inscripcion.Confirmada>,
-    val esperas: MutableList<Inscripcion.Espera>,
-    var cantInscripciones: Long,
-    var cantEspera: Int,
-    var cantEsperaExitosas: Int,
-    var cantEsperaCancelada: Int
-)
-
 data class Inscripciones (
-    val inscriptos: List<Inscripcion.Confirmada>? = emptyList(),
-    val esperas: List<Inscripcion.Espera>? = emptyList()
+    val inscriptos: List<Inscripcion.Confirmada> = emptyList(),
+    val esperas: List<Inscripcion.Espera> = emptyList()
 )
 
 object EventoRepo {
@@ -81,75 +68,99 @@ object EventoRepo {
     fun inscribirUsuario(eventoId: ObjectId, usuarioId: ObjectId): Inscripcion {
         val now = LocalDateTime.now()
 
-        val updateResult = collection.updateOne(
-            Filters.eq("_id", eventoId),
-            inscribirUsuarioPipeline(usuarioId, now)
+        val confirmed = collection.updateOne(
+            Filters.and(
+                Filters.eq("_id", eventoId),
+                Filters.not(Filters.elemMatch("inscriptos", Filters.eq("usuario", usuarioId))),
+                Filters.not(Filters.elemMatch("esperas", Filters.eq("usuario", usuarioId))),
+                Filters.expr(Document("\$lt", listOf("\$cantInscripciones", "\$cupoMaximo")))
+            ),
+            Updates.combine(
+                Updates.inc("cantInscripciones", 1),
+                Updates.push("inscriptos", Inscripcion.Confirmada(usuarioId, now, now))
+            )
         )
 
-        if (updateResult.modifiedCount == 0L) {
-            throw IllegalStateException("Usuario $usuarioId ya está registrado en evento $eventoId")
-        }
-
-        val inscripcionDoc = collection.withDocumentClass(Document::class.java)
-            .find(Filters.eq("_id", eventoId))
-            .projection(
-                Projections.fields(
-                    Projections.elemMatch("inscriptos", Filters.eq("usuario", usuarioId)),
-                    Projections.elemMatch("esperas", Filters.eq("usuario", usuarioId))
+        if (confirmed.modifiedCount > 0L) {
+            return Inscripcion.Confirmada(usuarioId, now, now)
+        } else {
+            val result = collection.updateOne(
+                Filters.and(
+                    Filters.eq("_id", eventoId),
+                    Filters.not(Filters.elemMatch("inscriptos", Filters.eq("usuario", usuarioId))),
+                    Filters.not(Filters.elemMatch("esperas", Filters.eq("usuario", usuarioId))),
+                ),
+                Updates.combine(
+                    Updates.inc("cantEspera", 1),
+                    Updates.push("esperas", Inscripcion.Espera(usuarioId, now))
                 )
             )
-            .first()
-
-        val confirmado = (inscripcionDoc?.get("inscriptos") as? List<*>)?.firstOrNull()
-        val enEspera = (inscripcionDoc?.get("esperas") as? List<*>)?.firstOrNull()
-
-        return when {
-            confirmado != null -> Inscripcion.Confirmada(usuarioId, now, now)
-            enEspera != null -> Inscripcion.Espera(usuarioId, now)
-            else -> throw RuntimeException("No se pudo inscribir al usuario $usuarioId en el evento $eventoId")
+            if (result.matchedCount == 0L) {
+                throw IllegalStateException("Usuario $usuarioId ya está inscripto en el evento $eventoId")
+            }
+            return Inscripcion.Espera(usuarioId, now)
         }
     }
 
+    data class ListEsperas(
+        val esperas: List<Inscripcion.Espera>
+    )
+
     fun cancelarInscripcion(eventoId: ObjectId, usuarioId: ObjectId) {
-        val ses = MongoProvider.client.startSession()
-        ses.startTransaction()
-        val event = collection.withDocumentClass(Algo::class.java)
-            .find(Filters.eq("_id", eventoId))
-            .projection(
-                Projections.include ("inscriptos", "esperas", "cantInscripciones",
-                    "cantEspera", "cantEsperaExitosas", "cantEsperaCancelada"
-                )
-            ).first() ?: throw NoSuchElementException("Evento with id: $eventoId not found")
-
-        val removedFromInscriptos = event.inscriptos.removeIf { it.usuario == usuarioId }
-        val removedFromEsperas = event.esperas.removeIf { it.usuario == usuarioId }
-
-        if (!removedFromInscriptos && !removedFromEsperas) {
-            throw IllegalStateException("Usuario $usuarioId no está inscripto en el evento $eventoId")
-        }
-
-        if (removedFromInscriptos && event.esperas.isNotEmpty()) {
-            val promoted = event.esperas.removeAt(0).confirmar()
-            event.inscriptos.add(promoted)
-            event.cantEsperaExitosas++
-        }
-        event.cantInscripciones = event.inscriptos.size.toLong()
-        if (removedFromEsperas) {
-            event.cantEsperaCancelada++
-        }
-
-        collection.updateOne(
-            Filters.eq("_id", eventoId),
+        //Asume user is waitlisted
+        val result = collection.updateOne(
+            Filters.and(
+                Filters.eq("_id", eventoId),
+                Filters.elemMatch("esperas", Filters.eq("usuario", usuarioId))
+            ),
             Updates.combine(
-                Updates.set("inscriptos", event.inscriptos),
-                Updates.set("esperas", event.esperas),
-                Updates.set("cantEspera", event.cantEspera),
-                Updates.set("cantInscripciones", event.cantInscripciones),
-                Updates.set("cantEsperaExitosas", event.cantEsperaExitosas),
-                Updates.set("cantEsperaCancelada", event.cantEsperaCancelada)
+                Updates.pull("esperas", Document("usuario", usuarioId)),
+                Updates.inc("cantEsperaCancelada", 1)
             )
         )
-        ses.commitTransaction()
+
+        if (result != null && result.modifiedCount > 0L) {
+            return
+        }
+
+        // User wasn't waitlised, try and find him in inscriptos and promote first in waitlist if found
+        val promoted = collection.withDocumentClass(ListEsperas::class.java).findOneAndUpdate(
+            Filters.and(
+                Filters.eq("_id", eventoId),
+                Filters.elemMatch("inscriptos", Filters.eq("usuario", usuarioId))
+            ),
+            Updates.combine(
+                Updates.pull("inscriptos", Document("usuario", usuarioId)),
+                Updates.popFirst("esperas")
+            ),
+            FindOneAndUpdateOptions()
+                .returnDocument(ReturnDocument.BEFORE)
+                .projection(Projections.slice("esperas", 1))
+        )
+
+        // User wasn't found in inscriptos or esperas
+        if (promoted == null) {
+            throw NoSuchElementException("Usuario $usuarioId no está inscripto en el evento $eventoId")
+        }
+
+        // If there was no one in the waitlist, just decrease the count of inscriptos
+        if (promoted.esperas.isEmpty()) {
+            collection.updateOne(
+                Filters.eq("_id", eventoId),
+                Updates.inc("cantInscripciones", -1)
+            )
+
+        }
+        // If there was someone in the waitlist, promote them
+        else {
+            collection.updateOne(
+                Filters.eq("_id", eventoId),
+                Updates.combine(
+                    Updates.inc("cantEsperaExitosas", 1),
+                    Updates.push("inscriptos", promoted.esperas[0].confirmar())
+                )
+            )
+        }
     }
 
     fun getEventosFiltrado(filtro: FiltroEvento): List<Evento> {
@@ -166,10 +177,6 @@ object EventoRepo {
             .projection(Projections.include("inscriptos", "esperas"))
             .first() ?: throw NoSuchElementException("Evento con id $eventoId no encontrado")
 
-        if (inscriptos.esperas == null || inscriptos.inscriptos == null) {
-            throw RuntimeException("No deberían ser null las listas de inscriptos o esperas")
-        }
-
         return inscriptos.inscriptos + inscriptos.esperas
     }
 
@@ -184,10 +191,8 @@ object EventoRepo {
             )
             .first() ?: throw NoSuchElementException("Evento con id $eventoId no encontrado")
 
-        return when {
-            !inscripciones.inscriptos.isNullOrEmpty() -> inscripciones.inscriptos[0]
-            !inscripciones.esperas.isNullOrEmpty() -> inscripciones.esperas[0]
-            else -> throw NoSuchElementException("Usuario $usuarioId no está inscripto en el evento $eventoId")
-        }
+        return inscripciones.inscriptos.firstOrNull()
+            ?: inscripciones.esperas.firstOrNull()
+            ?: throw NoSuchElementException("Usuario $usuarioId no está inscripto en el evento $eventoId")
     }
 }
