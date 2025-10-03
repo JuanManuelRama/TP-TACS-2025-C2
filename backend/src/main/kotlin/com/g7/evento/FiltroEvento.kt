@@ -3,7 +3,7 @@ package com.g7.evento
 import java.time.LocalDate
 
 interface FiltroEvento { fun cumple(evento: Evento): Boolean }
-
+/*
 class FiltroPalabrasClave(val palabra: String) : FiltroEvento {
     override fun cumple(evento: Evento): Boolean = evento.titulo.contains(palabra)
 }
@@ -26,4 +26,4 @@ class FiltroPrecioMayor(val precio: Double) : FiltroEvento {
 
 class FiltroPrecioMenor(val precio: Double) : FiltroEvento {
     override fun cumple(evento: Evento): Boolean = evento.precio <= precio
-}
+}*/

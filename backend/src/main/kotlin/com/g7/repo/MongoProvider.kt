@@ -1,7 +1,6 @@
 package com.g7.repo
 
 import com.g7.evento.Evento
-import com.g7.serializable.DurationCodec
 import com.g7.usuario.Usuario
 import com.mongodb.MongoClientSettings
 import com.mongodb.client.MongoClient
@@ -40,7 +39,7 @@ object MongoProvider {
             IndexOptions().unique(true)
         )
         val client: MongoClient = MongoClients.create(connectionString)
-        val db: MongoDatabase = client.getDatabase(dbName).withCodecRegistry(pojoCodecRegistry)
+        client.getDatabase(dbName).withCodecRegistry(pojoCodecRegistry)
     }
 
 }

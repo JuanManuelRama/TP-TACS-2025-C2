@@ -4,6 +4,21 @@
       "username": "juan",
       "password": "secret",
       "type": "PARTICIPANTE"
+    },
+    {
+      "username": "santi",
+      "password": "secreto",
+      "type": "PARTICIPANTE"
+    },
+    {
+      "username": "mati",
+      "password": "secreto",
+      "type": "PARTICIPANTE"
+    },
+    {
+      "username": "jose",
+      "password": "secrecy",
+      "type": "PARTICIPANTE"
     }
   ],
     "eventos": [
@@ -12,7 +27,7 @@
         "descripcion": "Un show en vivo",
         "inicio": "2025-09-10T20:00:00",
         "duracion": 7200,
-        "cupoMaximo": 2,
+        "cupoMaximo": 1,
         "cupoMinimio": 1,
         "precio": 1500.5,
         "categorias": [

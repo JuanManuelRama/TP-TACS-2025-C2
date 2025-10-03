@@ -4,22 +4,27 @@ import com.g7.BaseMongoTest
 import com.g7.repo.UsuarioRepo
 import com.g7.setupTestApplication
 import com.g7.usuario.dto.LoginResponseDto
+import com.g7.usuario.dto.UsuarioInputDto
 import com.g7.usuario.dto.UsuarioResponseDto
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.MethodOrderer
+import org.junit.jupiter.api.Order
+import org.junit.jupiter.api.TestMethodOrder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class UsuarioRoutesKtTest: BaseMongoTest() {
+    val inputUser = dataset.usuarios[0]
 
-    @Test
+    @Test  @Order(1)
     fun usuarioIsCreated() = withTestApp {
-        val inputUser = dataset.usuarios[0]
         client.post("/usuarios") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(inputUser))
@@ -37,10 +42,8 @@ class UsuarioRoutesKtTest: BaseMongoTest() {
         }
     }
 
-    @Test
+    @Test @Order(2)
     fun usuarioWithSameNameIsRejected() = withTestApp {
-        val inputUser = dataset.usuarios[0]
-        UsuarioRepo.save(inputUser)
         client.post("/usuarios") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(inputUser.copy(password = "wrong"))) // Change password to ensure username is the conflict
@@ -51,10 +54,8 @@ class UsuarioRoutesKtTest: BaseMongoTest() {
 
     }
 
-    @Test
+    @Test @Order(3)
     fun loginWorks() = withTestApp {
-        val inputUser = dataset.usuarios[0]
-        UsuarioRepo.save(inputUser)
         client.post("/usuarios/login") {
             contentType(ContentType.Application.Json)
             setBody("""{"username": "${inputUser.username}", "password": "${inputUser.password}"}""")
@@ -66,10 +67,9 @@ class UsuarioRoutesKtTest: BaseMongoTest() {
 
     }
 
+    @Order(4)
     @Test
     fun wrongLoginIsRejected() = withTestApp {
-        val inputUser = dataset.usuarios[0]
-        UsuarioRepo.save(inputUser)
         client.post("/usuarios/login") {
             contentType(ContentType.Application.Json)
             setBody("""{"username": "${inputUser.username}", "password": "WRONG"}""")
@@ -78,10 +78,9 @@ class UsuarioRoutesKtTest: BaseMongoTest() {
         }
     }
 
+    @Order(5)
     @Test
     fun loginDoesntSayWhetherUsernameOrPasswordIsWrong() = withTestApp {
-        val inputUser = dataset.usuarios[0]
-        UsuarioRepo.save(inputUser)
         val response1 = client.post("/usuarios/login") {
             contentType(ContentType.Application.Json)
             setBody("""{"username": "WRONG", "password": "${inputUser.password}"}""")

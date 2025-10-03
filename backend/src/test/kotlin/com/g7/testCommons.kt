@@ -60,13 +60,9 @@ abstract class BaseMongoTest {
                 .contextClassLoader.getResource("dataset.json")!!.readText())
     }
 
-    @AfterEach
-    fun clearDb() {
-        MongoProvider.client.getDatabase("test").drop()
-    }
-
     @AfterAll
     fun tearDown() {
+        MongoProvider.client.getDatabase("test").drop()
         MongoProvider.client.close()
     }
 

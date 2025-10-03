@@ -8,6 +8,8 @@ plugins {
     kotlin("plugin.serialization") version "2.1.10"
     id("io.ktor.plugin") version "3.2.3"
     id("com.gradleup.shadow") version "9.0.2"
+    id("jacoco")
+
 }
 
 group = "TACS_G6"
@@ -31,10 +33,38 @@ repositories {
     mavenCentral()
 }
 
+jacoco {
+    toolVersion = "0.8.10"
+}
+
 tasks.test {
     useJUnitPlatform()
     systemProperty("junit.jupiter.execution.parallel.enabled", "false")
+    finalizedBy(tasks.jacocoTestReport)
 }
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+
 
 dependencies {
     // Ktor server dependencies

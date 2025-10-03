@@ -1,16 +1,13 @@
 package com.g7.evento
 
 import com.g7.repo.UsuarioRepo
-import com.g7.serializable.KotlinDurationSerializer
 import com.g7.serializable.LocalDateTimeSerializer
 import com.g7.serializable.ObjectIdSerializer
-import com.g7.usuario.Usuario
 import com.g7.usuario.dto.UsuarioResponseDto
 import com.g7.usuario.dto.toResponseDto
 import kotlinx.serialization.Serializable
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
-import kotlin.time.Duration
 
 @Serializable
 data class EventoResponseDto (
@@ -55,7 +52,7 @@ fun Evento.toDto(usuario: UsuarioResponseDto): EventoResponseDto = EventoRespons
 )
 
 @Serializable
-class EventoInputDto(
+data class EventoInputDto(
     val titulo: String,
     val descripcion: String,
     @Serializable(with = LocalDateTimeSerializer::class)

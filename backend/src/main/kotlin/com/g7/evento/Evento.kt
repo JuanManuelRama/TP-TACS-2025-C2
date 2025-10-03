@@ -22,11 +22,12 @@ data class Evento (
     val cupoMinimio: Int?,
     val precio: Float,
     val categorias: List<Categoria>,
-    val cantInscripciones: Long = 0,
+    val cantInscripciones: Int = 0,
     var cantEspera: Int = 0,
     var cantEsperaExitosas: Int = 0,
     var cantEsperaCancelada: Int = 0
 ) {
+    fun porcentajeInscripcion(): Float? = ratio(cantInscripciones, cupoMaximo)
 
     fun porcentajeExito(): Float? = ratio(cantEsperaExitosas, cantEspera)
 
@@ -34,4 +35,17 @@ data class Evento (
 
     private fun ratio(part: Int, total: Int): Float? =
         if (total == 0) null else (part.toFloat() / total.toFloat()) * 100
+}
+
+@Serializable
+data class EstadisticasEvento(
+    val procentajeLleno: Float?,
+    val porcentajeExito: Float?,
+    val porcentajeCancelacion: Float?
+) {
+    constructor(evento: Evento): this(
+        procentajeLleno = evento.porcentajeInscripcion(),
+        porcentajeExito = evento.porcentajeExito(),
+        porcentajeCancelacion = evento.porcentajeCancelacion()
+    )
 }

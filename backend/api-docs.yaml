@@ -285,6 +285,25 @@ components:
           type: "PARTICIPANTE"
         horaInscripcion: "2025-09-03T12:01:26.569835"
         tipo: "CONFIRMACION"
+    EvenStasts:
+      type: object
+      properties:
+        procentajeLleno:
+          type: number
+          format: float
+          description: Procentaje de llenado del evento
+        porcentajeExito:
+            type: number
+            format: float
+            description: Porcentaje esperas transofrmadas en inscripciones confirmadas
+            required: false
+        porcentajeCancelacion:
+          type: number
+          format: float
+          description: Porcentaje esperas que han sido canceladas
+          required: false
+
+
 
 paths:
   /usuarios:
@@ -503,6 +522,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '404':
+          description: Evento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /eventos/{id}/estadisticas:
+    get:
+      tags:
+        - Events
+      summary: Obtener estadísticas del evento
+      description: Obtiene estadísticas del evento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del evento
+          schema:
+            type: string
+            format: objectId
+      responses:
+        '200':
+          description: Estadísticas del evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvenStasts'
         '404':
           description: Evento no encontrado
           content:

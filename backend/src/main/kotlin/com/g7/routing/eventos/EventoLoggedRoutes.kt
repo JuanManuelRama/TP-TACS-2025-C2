@@ -62,7 +62,6 @@ fun Route.eventoLoggedRoutes() {
             throw IllegalStateException("El organizador no puede inscribirse a su propio evento")
         }
 
-
         val inscripcion = EventoRepo.inscribirUsuario(eventoId, userId)
         UsuarioRepo.inscribirEvento(userId, eventoId, inscripcion.confirmado)
         call.respond(HttpStatusCode.Created, inscripcion.toDto(UsuarioRepo))
@@ -73,6 +72,7 @@ fun Route.eventoLoggedRoutes() {
         val userId = call.loggedUser().id
 
         EventoRepo.cancelarInscripcion(eventoId, userId)
+        UsuarioRepo.descinscribirEvento(userId, eventoId)
         call.respond(HttpStatusCode.NoContent)
     }
 
@@ -97,17 +97,18 @@ fun Route.eventoLoggedRoutes() {
     }
 
     delete("/{id}/inscriptos/{userId}") {
-        val id = call.requireIdParam("id")
+        val eventoId = call.requireIdParam("id")
         val loggedUser = call.loggedUser()
 
-        val owner = EventoRepo.getOwnerFromId(id)
+        val owner = EventoRepo.getOwnerFromId(eventoId)
 
         if (loggedUser.id != owner) {
             throw IllegalAccessException("Solo el organizador puede dar de baja a un inscripto")
         }
 
         val userId = call.requireIdParam("userId")
-        EventoRepo.cancelarInscripcion(id, userId)
+        EventoRepo.cancelarInscripcion(eventoId, userId)
+        UsuarioRepo.descinscribirEvento(userId, eventoId)
         call.respond(HttpStatusCode.NoContent)
     }
 }

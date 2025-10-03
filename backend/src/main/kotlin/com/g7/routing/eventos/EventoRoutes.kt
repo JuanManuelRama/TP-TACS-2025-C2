@@ -1,5 +1,6 @@
 package com.g7.routing.eventos
 
+import com.g7.evento.EstadisticasEvento
 import com.g7.evento.toDto
 import com.g7.repo.EventoRepo
 import com.g7.repo.UsuarioRepo
@@ -22,6 +23,12 @@ fun Route.eventoRoutes() {
         val id = call.requireIdParam("id")
         val evento = EventoRepo.getFromId(id)
         call.respond(HttpStatusCode.OK, evento.toDto(UsuarioRepo))
+    }
+
+    get("/{id}/estadisticas") {
+        val id = call.requireIdParam("id")
+        val evento = EventoRepo.getFromId(id)
+        call.respond(HttpStatusCode.OK, EstadisticasEvento(evento))
     }
     authenticate("auth-jwt") {
         eventoLoggedRoutes()
