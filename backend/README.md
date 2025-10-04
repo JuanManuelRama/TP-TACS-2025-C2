@@ -2,7 +2,7 @@
 
 ## Build & Run
 
-Existen 3 formas distintas de ejecutar el proyecto
+El backend puede ser ejecutado localmente de 2 formas distintas:
 
 ### Gradlew
 
@@ -22,15 +22,6 @@ Generar un jar ejecutable:
 java -jar build/libs/TP-TACS-2025-C2-all.jar
 ```
 
-### Docker
-
-Generando el contenedor
-
-```bash
-docker build -t ktor-app .
-docker run -p 8080:8080 ktor-app
-```
-
 ## 📖 Documentación de la API
 
 ### 🔹 Endpoints disponibles
@@ -44,6 +35,7 @@ docker run -p 8080:8080 ktor-app
 |  GET   | `/eventos`                          | Lista todos los eventos                          |     ❌     |                               |
 |  GET   | `/eventos/{id}`                     | Obtiene un evento                                |     ❌     | `id: UUID`                    |
 | DELETE | `/eventos/{id}`                     | Borra un evento                                  |    ✔️     | `id: UUID`                    |
+|  GET   | `/eventos/{id}/estadisticas`        | Obtiene las estadísticas de un evento            |     ❌     | `id: UUID`                    |
 |  POST  | `/eventos`                          | Crea un nuevo evento                             |    ✔️     | JSON body                     |
 |  GET   | `/eventos/{id}/inscriptos`          | Muestra todos los inscriptos en un evento        |    ✔️     | `id: UUID`                    |
 |  POST  | `/eventos/{id}/inscriptos`          | Inscribirse a un evento                          |    ✔️     | `id: UUID`                    |
@@ -60,45 +52,17 @@ Las rutas protegidas requieren un header `Authorization Bearer` obtenido en `usu
 | DELETE | `/usuarios/{id}`               | Borra un usuario                                           | `id: UUID` |
 | GET    | `/usuarios/{id}/inscripciones` | Lista todos las inscripciones de un usuario                | `id: UUID` |
 | GET    | `/usuarios/{id}/eventos`       | Lista todos los eventos organizados por un usuario         | `id: UUID` |
-| GET    | `/eventos/{id}/estadisticas`   | Obtiene las estadísticas de un evento (tasa de conversión) | `id: UUID` |
-
 
 ## Testing
 
-### Kotlin
-
-Tenemos test de Kotlin, para corroborar lógica de dominio, los mismos se corren con
-
-```bash
-./gradlew test
-```
-
-### Postman
-
-Para verificar que la API sea funcional, hay un script de Postman. No verifica los casos no felices, ni tampoco es exhaustivo. Pero sirve para ver la API en funcionamiento
+Los test son integradores, la lógica individual de cada función no es lo suficientemente compleja como
+para ameritar un test unitario. Además, los test dentro de cada archivo son progresivos, cada uno
+parte del estado del anterior.
 
 ## Decisiones de Diseño
 
-### Manejo de errores
+La capa de persistencia está parcialmente acoplada al resto de la aplicación, toda su lógica está
+encapsulada en los objetos globales de Repo, y su configuración en una función aparte.
 
-Los errores se tratan mediante `Result<T>`, lo que consideramos superior al manejo de errores por excepciones tradicionales, ya que:
-
-+ Obliga a tener en cuenta siempre el caso de error.
-+ Simplifica el testing, al poder validar explícitamente los estados fallidos.
-+ Hace más predecible la propagación de fallos.
-
-Buscamos, además, que si un objeto retorna `Result.failure` no tenga ningún efecto de lado.
-
-### Data Transfer Objects
-
-Las clases de dominio (`evento`, `usuario`, etc.) no son serializadas directamente \
-En su lugar, se transforman a objetos DTO, con el objetivo de:
-
-+ Separar el modelo interno del formato expuesto públicamente.
-+ Mantener la flexibilidad de cambiar la estructura interna sin romper la API.
-
-### Arquitectura lógica
-
-No seguimos el modelo de capas rígido de `router->controller->service->domain`. 
-En su lugar favorecemos objetos de dominio ricos en comportamiento \
-Esto, junto con el uso de `Result<T>`, permite que la lógica de los endpoints sea sencilla: consiste principalmente en navegar los distintos estados de cada operación y ejecutar los métodos correspondientes del dominio.
+No hay capa de servicio, ya que la lógica de negocio es muy simple, las operaciones son mayormente CRUD
+así que ocurren directamente dentro de la base de datos

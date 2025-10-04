@@ -17,14 +17,13 @@ docker compose up --build
 
 - Backend: Kotlin + Ktor
 - Frontend: TypeScrypt + React + Vite
+- Base de Datos: MongoDB
 
 ## Documentación Adicional
 
 - [Consigna](https://docs.google.com/document/d/e/2PACX-1vRKgz7eEA1fIByKMtXKxA6-Vs1rSst8cwUeTkMnZyYrDPkzkUECyK7WXqXWFSh5jwnxJMdanffdyWzB/pub)
 - [Backend](/backend/README.md)
 - [Frontend](/frontend/README.md)
+- [Persistencia](persistencia.md)
 - [API](api-docs.md)
 - [APP](app-docs.md)
-
-
-
