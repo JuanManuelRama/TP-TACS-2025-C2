@@ -1,4 +1,4 @@
-package com.g7.server.middleware.login
+package com.g7.application.middleware.login
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier

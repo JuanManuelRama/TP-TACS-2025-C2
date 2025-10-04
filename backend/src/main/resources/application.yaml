@@ -1,7 +1,7 @@
 ktor:
   application:
     modules:
-      - com.g7.server.ApplicationKt.module
+      - com.g7.application.ApplicationKt.module
   deployment:
     port: 8080
 

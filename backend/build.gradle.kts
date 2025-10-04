@@ -16,7 +16,7 @@ group = "TACS_G6"
 version = "0.0.1"
 
 application {
-    mainClass.set("com.g7.server.ApplicationKt")
+    mainClass.set("com.g7.application.ApplicationKt")
 }
 
 java {

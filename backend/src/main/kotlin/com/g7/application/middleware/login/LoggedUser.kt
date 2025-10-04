@@ -1,11 +1,10 @@
-package com.g7.server.middleware.login
+package com.g7.application.middleware.login
 
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.plugins.BadRequestException
 import org.bson.types.ObjectId
-import java.util.UUID
 import javax.naming.AuthenticationException
 
 data class LoggedUser(

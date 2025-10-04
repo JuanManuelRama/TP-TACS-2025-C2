@@ -34,6 +34,18 @@
           "FIESTA",
           "CONCIERTO"
         ]
+      },
+      {
+        "titulo": "Feria de Tecnología",
+        "descripcion": "Exposición de innovaciones tecnológicas",
+        "inicio": "2025-10-05T10:00:00",
+        "duracion": 14400,
+        "cupoMaximo": 100,
+        "cupoMinimio": 10,
+        "precio": 500.0,
+        "categorias": [
+          "FIESTA"
+        ]
       }
     ]
 }

@@ -1,7 +1,7 @@
 package com.g7.usuario.dto
 
 import com.g7.serializable.ObjectIdSerializer
-import com.g7.server.middleware.login.LoggedUser
+import com.g7.application.middleware.login.LoggedUser
 import com.g7.usuario.UserType
 import com.g7.usuario.Usuario
 import kotlinx.serialization.Serializable

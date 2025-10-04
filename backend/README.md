@@ -55,9 +55,10 @@ Las rutas protegidas requieren un header `Authorization Bearer` obtenido en `usu
 
 ## Testing
 
-Los test son integradores, la lógica individual de cada función no es lo suficientemente compleja como
-para ameritar un test unitario. Además, los test dentro de cada archivo son progresivos, cada uno
-parte del estado del anterior.
+No hay test unitarios, ya que el core de la lógica de negocio es muy simple (básicamente CRUD).
+
+Los test están realizados sobre los endpoints, cada test asume que anda todo, salvo el endpoint que
+está probando. Para preparar el entorno, llama directo a los repositorios.
 
 ## Decisiones de Diseño
 
@@ -65,4 +66,5 @@ La capa de persistencia está parcialmente acoplada al resto de la aplicación, 
 encapsulada en los objetos globales de Repo, y su configuración en una función aparte.
 
 No hay capa de servicio, ya que la lógica de negocio es muy simple, las operaciones son mayormente CRUD
-así que ocurren directamente dentro de la base de datos
+así que ocurren directamente dentro de la base de datos.
+

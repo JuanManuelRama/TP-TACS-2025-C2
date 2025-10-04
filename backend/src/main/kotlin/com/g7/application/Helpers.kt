@@ -1,4 +1,4 @@
-package com.g7.server
+package com.g7.application
 
 import com.g7.exception.InvalidIdException
 import com.g7.exception.MissingParameterException

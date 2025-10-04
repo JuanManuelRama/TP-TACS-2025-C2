@@ -2,12 +2,13 @@ package com.g7
 
 import com.g7.evento.EventoInputDto
 import com.g7.repo.MongoProvider
-import com.g7.server.configureDb
-import com.g7.server.configureRouting
-import com.g7.server.middleware.installAuth
-import com.g7.server.middleware.installContentNegotiation
-import com.g7.server.middleware.installStatusPages
-import com.g7.server.middleware.login.JwtConfig
+import com.g7.application.infra.configureDb
+import com.g7.application.configureRouting
+import com.g7.application.middleware.installAuth
+import com.g7.application.middleware.installContentNegotiation
+import com.g7.application.middleware.installStatusPages
+import com.g7.application.middleware.login.JwtConfig
+import com.g7.usuario.Usuario
 import com.g7.usuario.dto.UsuarioInputDto
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.server.application.*
@@ -18,6 +19,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.junit.jupiter.Container
@@ -49,7 +51,6 @@ data class Dataset(
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class BaseMongoTest {
-
     companion object {
         @Container
         @JvmStatic
@@ -60,6 +61,14 @@ abstract class BaseMongoTest {
                 .contextClassLoader.getResource("dataset.json")!!.readText())
     }
 
+    open fun populateTestData(){
+    }
+
+    @AfterEach
+    fun cleanDb() {
+        MongoProvider.client.getDatabase("test").drop()
+    }
+
     @AfterAll
     fun tearDown() {
         MongoProvider.client.getDatabase("test").drop()
@@ -68,16 +77,19 @@ abstract class BaseMongoTest {
 
     protected fun withTestApp(block: suspend ApplicationTestBuilder.() -> Unit) = testApplication {
         externalServices {
-            configureDb(mongoContainer.connectionString, "test")
+            configureDb(MapApplicationConfig(
+                "mongo.uri" to mongoContainer.connectionString,
+                "mongo.db" to "test"))
             JwtConfig.init(testConfig)
         }
         application {
             setupTestApplication()
         }
+        populateTestData()
         block()
     }
 }
 
-fun HttpRequestBuilder.addAuth(token: String) {
-    this.headers.append("Authorization", "Bearer $token")
-    }
+fun HttpRequestBuilder.addAuth(user: Usuario) {
+    this.headers.append("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+}
