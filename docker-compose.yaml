@@ -4,7 +4,7 @@ services:
     environment: 
       MONGO_INITDB_DATABASE: eventos_db 
     networks: 
-      - backend-network 
+      - db-netwrok 
   backend: 
     build: 
       context: ./backend 
@@ -15,7 +15,8 @@ services:
     ports: 
       - "8080:8080" 
     networks: 
-      - backend-network 
+      - db-netwrok 
+      - backend-network
     depends_on: 
       - mongo 
   frontend: 
@@ -24,9 +25,13 @@ services:
       dockerfile: Dockerfile 
     ports: 
       - "8081:80" 
+    networks:
+      - backend-network
     depends_on: 
       - backend
 
 networks:
-  backend-network:
+  db-netwrok:
     driver: bridge
+  backend-network:
+    driver: bridge  

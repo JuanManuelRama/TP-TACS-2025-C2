@@ -1,4 +1,4 @@
-# Stage 1: Build React App
+# Stage 1: Build React app
 FROM node:20-alpine AS builder
 WORKDIR /app
 
@@ -11,17 +11,21 @@ RUN pnpm install
 COPY . .
 RUN pnpm run build
 
-# Stage 2: Serve with "serve" from node_modules
-FROM node:20-alpine
-WORKDIR /app
+# Stage 2: Serve using Nginx
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
 
-# Copy only the build output and node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY package.json ./package.json
+# Remove default nginx website
+RUN rm -rf ./*
+
+# Copy build output from previous stage
+COPY --from=builder /app/dist ./
+
+# Copy custom Nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port
 EXPOSE 80
 
-# Run "serve" from local node_modules
-CMD ["npx", "serve", "-s", "dist", "-l", "80"]
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

@@ -4,7 +4,7 @@ import HttpError from "./HttpError.ts";
 
 
 const axiosInstance = axios.create({
-    baseURL: "http://localhost:8080/",
+    baseURL: "/api",
 })
 
 axiosInstance.interceptors.response.use(
