@@ -48,20 +48,21 @@ data class Dataset(
     val eventos: List<EventoInputDto>
 )
 
+@Container
+val mongoContainer: MongoDBContainer = MongoDBContainer("mongo:8.0.14")
+
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class BaseMongoTest {
-    companion object {
-        @Container
-        @JvmStatic
-        val mongoContainer: MongoDBContainer = MongoDBContainer("mongo:8.0.14")
-
-        val dataset = Json
-            .decodeFromString<Dataset>(Thread.currentThread()
-                .contextClassLoader.getResource("dataset.json")!!.readText())
-    }
+    val dataset = Json.decodeFromString<Dataset>(
+        Thread.currentThread().contextClassLoader.getResource("dataset.json")!!.readText())
 
     open fun populateTestData(){
+    }
+
+    @BeforeAll
+    fun setup() {
+        mongoContainer.start()
     }
 
     @AfterEach
