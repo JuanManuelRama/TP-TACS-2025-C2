@@ -19,7 +19,7 @@ fun Application.module() {
     installStatusPages()
     installContentNegotiation()
     installLogging()
-    installCors()
+    //installCors()
 
     //Routing
     configureRouting()
