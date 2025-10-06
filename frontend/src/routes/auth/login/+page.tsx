@@ -1,73 +1,88 @@
-import { login } from "@/api/users.ts";
-import { type FormEvent, useState } from "react";
-import { useNavigate } from "react-router";
-import "./+page.css";
+import AppleButton from "$/src/components/custom/appleButton";
+import GoogleButton from "$/src/components/custom/googleButton";
+import MetaButton from "$/src/components/custom/metaButton";
+import { Card, CardContent } from "$/src/components/ui/card";
+import useAuth from "$/src/hooks/useAuth";
+import EventImage from "@/assets/pexels-bertellifotografia-2608517.jpg";
+import { Link } from "react-router";
+import { LoginForm } from "./form/LoginForm";
+import type { LoginFormValues } from "./form/schema";
 
 const Page = () => {
-	const [username, setUsername] = useState("");
-	const [password, setPassword] = useState("");
-	const [error, setError] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false);
-	const navigate = useNavigate();
+	const { login } = useAuth();
 
-	async function handleLogin(e: FormEvent) {
-		e.preventDefault();
-		setError(null);
-		setLoading(true);
-
-		try {
-			const data = await login(username.trim(), password.trim());
-			localStorage.setItem("jwt", data.token);
-			localStorage.setItem("username", data.user.username);
-			localStorage.setItem("id", data.user.id);
-			navigate("/events");
-		} catch (err: unknown) {
-			if (err instanceof Error) {
-				setError(err.message);
-			} else {
-				setError("Login failed, please try again");
-			}
-		} finally {
-			setLoading(false);
-		}
-	}
+	// error => if we get an error.
+	const onSubmit = (payload: LoginFormValues) => {
+		login(payload.username, payload.password);
+	};
 
 	return (
-		<form className="login-container" onSubmit={handleLogin}>
-			<h2>Log In</h2>
-			<div>
-				<label htmlFor="username">Username:</label>
-				<input
-					id="username"
-					type="text"
-					value={username}
-					onChange={(e) => setUsername(e.target.value)}
-					placeholder="Enter your username"
-					disabled={loading}
-				/>
+		<div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+			<div className="w-full max-w-sm md:max-w-3xl">
+				<div className="flex flex-col gap-6">
+					<Card className="overflow-hidden p-0">
+						<CardContent className="grid p-0 md:grid-cols-2">
+							<div className="p-6 md:p-8">
+								<div className="flex flex-col gap-6">
+									<div className="flex flex-col items-center text-center">
+										<h1 className="text-2xl font-bold">Welcome back</h1>
+										<p className="text-muted-foreground text-balance">
+											Login to your Event Manager account
+										</p>
+									</div>
+									<LoginForm onSubmission={onSubmit} />
+									{import.meta.env.VITE_EXTERNAL_PROVIDERS === "true" && (
+										<>
+											<div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+												<span className="bg-card text-muted-foreground relative z-10 px-2">
+													Or continue with
+												</span>
+											</div>
+											<div className="grid grid-cols-3 gap-4">
+												<AppleButton />
+												<GoogleButton />
+												<MetaButton />
+											</div>
+										</>
+									)}
+
+									<div className="text-center text-sm">
+										Don&apos;t have an account?{" "}
+										<Link to="/signup">
+											<span className="underline underline-offset-4">
+												Sign up
+											</span>
+										</Link>
+									</div>
+								</div>
+							</div>
+							<div className="bg-muted relative hidden md:block">
+								<img
+									src={EventImage}
+									alt="Event Logo"
+									className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+								/>
+							</div>
+						</CardContent>
+					</Card>
+					<div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+						By clicking continue, you agree to our{" "}
+						<Link to="/terms">
+							<span className="underline underline-offset-4">
+								Terms of Service
+							</span>
+						</Link>{" "}
+						and{" "}
+						<Link to="/policy">
+							<span className="underline underline-offset-4">
+								Privacy Policy
+							</span>
+						</Link>
+						.
+					</div>
+				</div>
 			</div>
-			<div>
-				<label htmlFor="password">Password:</label>
-				<input
-					id="password"
-					type="password"
-					value={password}
-					onChange={(e) => setPassword(e.target.value)}
-					placeholder="Enter your password"
-					disabled={loading}
-				/>
-			</div>
-			<button
-				type="submit"
-				disabled={loading}
-				className={`transition-opacity duration-300 ${
-					loading ? "opacity-50 cursor-not-allowed" : "opacity-100"
-				}`}
-			>
-				Log in
-			</button>
-			{error && <p style={{ color: "red" }}>{error}</p>}
-		</form>
+		</div>
 	);
 };
 
