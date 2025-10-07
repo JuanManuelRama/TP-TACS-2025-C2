@@ -12,8 +12,8 @@ export const route: RouteObject = {
 			lazy: () => import("./login/+page.tsx"),
 		},
 		{
-			path: "register",
-			lazy: () => import("./register/+page.tsx"),
+			path: "signup",
+			lazy: () => import("./signup/+page.tsx"),
 		},
 	],
 };

@@ -20,7 +20,12 @@ export const signOut = () => {
 };
 
 export const register = (payload: { username: string; password: string }) => {
+	const { username, password } = payload;
 	return axiosInstance
-		.post("/usuarios/register", payload)
+		.post("/usuarios", {
+			username,
+			password,
+			type: "PARTICIPANTE",
+		})
 		.then((response) => response.data);
 };

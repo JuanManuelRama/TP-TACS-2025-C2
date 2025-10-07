@@ -1,25 +1,26 @@
 /* --------------------------------------------------- ⫻ -- */
 
+import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import {useEffect} from "react";
+import useBoundStore from "../store";
 
 //const isDev = process.env.NODE_ENV === "development"; I didn't understand what it was supposed to do
 
 /* ------------------------------------------- component -- */
 
 export const Page = () => {
-    const navigate = useNavigate();
-    const isLoggedIn = !!localStorage.getItem("jwt");
+	const navigate = useNavigate();
+	const { isAuthenticated } = useBoundStore();
 
-    useEffect(() => {
-        if (isLoggedIn) {
-            navigate("/events", { replace: true }); // for now since dashboard is empty
-        } else {
-            navigate("/auth/login", { replace: true });
-        }
-    }, [navigate, isLoggedIn]);
+	useEffect(() => {
+		if (isAuthenticated) {
+			navigate("/events", { replace: true }); // for now since dashboard is empty
+		} else {
+			navigate("/auth/login", { replace: true });
+		}
+	}, [navigate, isAuthenticated]);
 
-    return null;
+	return null;
 };
 
 export { Page as Component }; //a

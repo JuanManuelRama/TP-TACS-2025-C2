@@ -4,6 +4,7 @@ import { signIn, signOut } from "@/api/authService";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import useBoundStore from "../store";
 // import { toast } from "sonner";
 
 export interface TokenResponse {
@@ -16,6 +17,8 @@ export interface TokenResponse {
 const useAuth = () => {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
+	const { setIsAuthenticated, setAccessToken, setUserInformation, reset } =
+		useBoundStore();
 	// const { setAuthentication, clearAuthentication } = useBoundStore();
 
 	const navigate = useNavigate();
@@ -25,10 +28,13 @@ const useAuth = () => {
 			setLoading(true);
 			const response = await signIn(username, password);
 			setLoading(false);
-			console.log(response.data.token);
-			localStorage.setItem("jwt", response.data.token);
-			localStorage.setItem("username", response.data.user.username);
-			localStorage.setItem("id", response.data.user.id);
+			setIsAuthenticated(true);
+			setAccessToken(response.data.token);
+			setUserInformation({
+				username: response.data.user.username,
+				email: response.data.user.username,
+				role: "USER",
+			});
 			// if (response?.accessToken) {
 			// 	const { token } = response.accessToken;
 			// 	sessionStorage.setItem("token", token);
@@ -49,15 +55,8 @@ const useAuth = () => {
 		} catch (error) {
 			console.log(error);
 		}
-		// queryClient.clear();
-		// queryClient.invalidateQueries();
-		localStorage.removeItem("jwt");
-		localStorage.removeItem("username");
-		localStorage.removeItem("id");
-		// clearAuthentication();
 
-		/* sessionStorage.removeItem("domainId"); */
-		// toast.success("loggedOut");
+		reset();
 	};
 
 	return {
