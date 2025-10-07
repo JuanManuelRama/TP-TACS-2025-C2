@@ -8,7 +8,7 @@
 	},
 	"item": [
 		{
-			"name": "usuario",
+			"name": "registrar-organizador",
 			"event": [
 				{
 					"listen": "test",
@@ -21,13 +21,14 @@
 							"const responseJson = pm.response.json();\r",
 							"\r",
 							"pm.test(\"Resoponde Id\", function () {\r",
-							"    pm.expect(responseJson.id).to.not.be.empty;\r",
+							"    pm.expect(responseJson.user.id).to.not.be.empty;\r",
 							"});\r",
 							"\r",
-							"pm.environment.set(\"userId\", responseJson.id);"
+							"pm.environment.set(\"userId\", responseJson.user.id);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -40,7 +41,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -69,7 +71,24 @@
 			"response": []
 		},
 		{
-			"name": "usuario",
+			"name": "eventos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{tacs-url}}/eventos",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"eventos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "organizador",
 			"event": [
 				{
 					"listen": "test",
@@ -114,7 +133,7 @@
 			"response": []
 		},
 		{
-			"name": "login",
+			"name": "login-organizador",
 			"event": [
 				{
 					"listen": "test",
@@ -133,7 +152,8 @@
 							"pm.environment.set(\"jwt\", responseJson.token);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -182,7 +202,8 @@
 							"pm.environment.set(\"eventoId\", responseJson.id);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -192,7 +213,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -210,7 +232,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"organizador\": \"{{userId}}\",\r\n    \"titulo\": \"Concierto de Rock\",\r\n    \"descripcion\": \"Un show en vivo\",\r\n    \"inicio\": \"2025-09-10T20:00:00\",\r\n    \"duracion\": 7200,\r\n    \"cupoMaximo\": 100,\r\n    \"cupoMinimio\": null,\r\n    \"precio\": 1500.5,\r\n    \"categorias\": [\r\n        \"FIESTA\"\r\n    ]\r\n}",
+					"raw": "    {\r\n        \"titulo\": \"Concierto de Rock\",\r\n        \"descripcion\": \"Un show en vivo\",\r\n        \"inicio\": \"2025-09-10T20:00:00\",\r\n        \"duracion\": 7200,\r\n        \"cupoMaximo\": 2,\r\n        \"cupoMinimio\": null,\r\n        \"precio\": 1500.5,\r\n        \"categorias\": [\r\n            \"FIESTA\",\r\n            \"CONCIERTO\"\r\n        ]\r\n    }",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -243,7 +265,7 @@
 							"    const responseJson = pm.response.json();\r",
 							"    const userId = pm.environment.get(\"userId\");\r",
 							"    \r",
-							"    pm.expect(responseJson.organizador).to.equal(userId);\r",
+							"    pm.expect(responseJson.organizador.id).to.equal(userId);\r",
 							"});\r",
 							""
 						],
@@ -281,13 +303,78 @@
 			"response": []
 		},
 		{
+			"name": "registrar-inscripto",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(201);\r",
+							"});\r",
+							"\r",
+							"const responseJson = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Resoponde token\", function () {\r",
+							"    pm.expect(responseJson.token).to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"pm.environment.set(\"userId\", responseJson.user.id);\r",
+							"\r",
+							"pm.environment.set(\"jwtInscripto\", responseJson.token);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomized = crypto.randomUUID()\r",
+							"pm.environment.set(\"username\", \"newUser-\" + randomized)\r",
+							"pm.environment.set(\"password\", \"newPasword-\" + randomized)\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"type\": \"PARTICIPANTE\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{tacs-url}}/usuarios",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "inscribir",
 			"request": {
 				"method": "POST",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer {{jwt}}",
+						"value": "Bearer {{jwtInscripto}}",
 						"type": "text"
 					}
 				],
@@ -334,7 +421,7 @@
 							"pm.test(\"Response contains single usuario with matching id\", function() {\r",
 							"    const responseJson = pm.response.json();\r",
 							"    pm.expect(responseJson).to.be.an('array').that.has.lengthOf(1);\r",
-							"    pm.expect(responseJson[0]).to.have.property('usuarioId', pm.environment.get(\"userId\"));\r",
+							"    pm.expect(responseJson[0].usuario.id).to.equal(pm.environment.get(\"userId\"));\r",
 							"});\r",
 							""
 						],
@@ -380,12 +467,13 @@
 					"script": {
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"    pm.expect(pm.response.code).to.equal(204);\r",
 							"});\r",
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -394,29 +482,24 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer {{jwt}}",
+						"value": "Bearer {{jwtInscripto}}",
 						"type": "text"
 					}
 				],
 				"url": {
-					"raw": "{{tacs-url}}/eventos/:id/inscriptos/:usuarioId",
+					"raw": "{{tacs-url}}/eventos/:id/inscriptos",
 					"host": [
 						"{{tacs-url}}"
 					],
 					"path": [
 						"eventos",
 						":id",
-						"inscriptos",
-						":usuarioId"
+						"inscriptos"
 					],
 					"variable": [
 						{
 							"key": "id",
 							"value": "{{eventoId}}"
-						},
-						{
-							"key": "usuarioId",
-							"value": "{{userId}}"
 						}
 					]
 				}
@@ -463,6 +546,55 @@
 						"eventos",
 						":id",
 						"inscriptos"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{eventoId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "evento",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"titulo\": \"Concierto de Rock\",\r\n    \"descripcion\": \"Un show en vivo\",\r\n    \"inicio\": \"2025-09-10T20:00:00\",\r\n    \"duracion\": 7200,\r\n    \"cupoMaximo\": 100,\r\n    \"cupoMinimio\": null,\r\n    \"precio\": 1500.5,\r\n    \"categorias\": [\r\n        \"FIESTA\",\r\n        \"CONCIERTO\"\r\n    ]\r\n}"
+				},
+				"url": {
+					"raw": "{{tacs-url}}/eventos/:id",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"eventos",
+						":id"
 					],
 					"variable": [
 						{

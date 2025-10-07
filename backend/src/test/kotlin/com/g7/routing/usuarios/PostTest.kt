@@ -2,6 +2,7 @@ package com.g7.routing.usuarios
 
 import com.g7.BaseMongoTest
 import com.g7.repo.UsuarioRepo
+import com.g7.usuario.dto.LoginResponseDto
 import com.g7.usuario.dto.UsuarioResponseDto
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -24,7 +25,7 @@ class PostTest: BaseMongoTest() {
             setBody(Json.encodeToString(user))
         }.apply {
             assertEquals(HttpStatusCode.Created, status)
-            val createdUser = Json.decodeFromString<UsuarioResponseDto>(bodyAsText())
+            val createdUser = Json.decodeFromString<LoginResponseDto>(bodyAsText()).user
             assertEquals(createdUser.username, user.username, "Returned username should match input")
 
             val fetchedFromDb = UsuarioRepo.getFromId(createdUser.id)
