@@ -19,7 +19,7 @@ data class Evento (
     val inicio: LocalDateTime,
     val duracion: Long,
     val cupoMaximo: Int,
-    val cupoMinimio: Int?,
+    val cupoMinimo: Int?,
     val precio: Float,
     val categorias: List<Categoria>,
     val cantInscripciones: Int = 0,

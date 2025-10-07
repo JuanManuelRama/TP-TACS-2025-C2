@@ -232,7 +232,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "    {\r\n        \"titulo\": \"Concierto de Rock\",\r\n        \"descripcion\": \"Un show en vivo\",\r\n        \"inicio\": \"2025-09-10T20:00:00\",\r\n        \"duracion\": 7200,\r\n        \"cupoMaximo\": 2,\r\n        \"cupoMinimio\": null,\r\n        \"precio\": 1500.5,\r\n        \"categorias\": [\r\n            \"FIESTA\",\r\n            \"CONCIERTO\"\r\n        ]\r\n    }",
+					"raw": "    {\r\n        \"titulo\": \"Concierto de Rock\",\r\n        \"descripcion\": \"Un show en vivo\",\r\n        \"inicio\": \"2025-09-10T20:00:00\",\r\n        \"duracion\": 7200,\r\n        \"cupoMaximo\": 2,\r\n        \"cupoMinimo\": null,\r\n        \"precio\": 1500.5,\r\n        \"categorias\": [\r\n            \"FIESTA\",\r\n            \"CONCIERTO\"\r\n        ]\r\n    }",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -585,7 +585,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"titulo\": \"Concierto de Rock\",\r\n    \"descripcion\": \"Un show en vivo\",\r\n    \"inicio\": \"2025-09-10T20:00:00\",\r\n    \"duracion\": 7200,\r\n    \"cupoMaximo\": 100,\r\n    \"cupoMinimio\": null,\r\n    \"precio\": 1500.5,\r\n    \"categorias\": [\r\n        \"FIESTA\",\r\n        \"CONCIERTO\"\r\n    ]\r\n}"
+					"raw": "{\r\n    \"titulo\": \"Concierto de Rock\",\r\n    \"descripcion\": \"Un show en vivo\",\r\n    \"inicio\": \"2025-09-10T20:00:00\",\r\n    \"duracion\": 7200,\r\n    \"cupoMaximo\": 100,\r\n    \"cupoMinimo\": null,\r\n    \"precio\": 1500.5,\r\n    \"categorias\": [\r\n        \"FIESTA\",\r\n        \"CONCIERTO\"\r\n    ]\r\n}"
 				},
 				"url": {
 					"raw": "{{tacs-url}}/eventos/:id",

@@ -9,7 +9,7 @@ export const route: RouteObject = {
 		},
 		{
 			path: "login",
-			lazy: () => import("./login/+page.tmp.tsx"),
+			lazy: () => import("./login/+page.tsx"),
 		},
 		{
 			path: "register",
