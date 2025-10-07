@@ -9,10 +9,14 @@ import type { EventFormValues } from "./form/schema";
 
 const Page = () => {
 	const { mutate } = useAddEventMutation();
+    const navigate = useNavigate();
 	const onSubmit = (data: EventFormValues) => {
-		mutate(data as unknown as NewEvent);
+		mutate(data as NewEvent,{
+            onSuccess: (response) => {
+                navigate(`/events/${response.id}`);
+            }
+        });
 	};
-	const navigate = useNavigate();
 	return (
 		<div className="mx-auto max-w-2xl p-4">
 			<div className="mb-5">

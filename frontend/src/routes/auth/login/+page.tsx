@@ -1,15 +1,28 @@
 import AppleButton from "$/src/components/custom/appleButton";
 import GoogleButton from "$/src/components/custom/googleButton";
 import MetaButton from "$/src/components/custom/metaButton";
+import { Alert, AlertDescription, AlertTitle } from "$/src/components/ui/alert";
 import { Card, CardContent } from "$/src/components/ui/card";
 import useAuth from "$/src/hooks/useAuth";
+import useBoundStore from "$/src/store";
 import EventImage from "@/assets/pexels-bertellifotografia-2608517.jpg";
-import { Link } from "react-router";
+import { AlertCircleIcon } from "lucide-react";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router";
 import { LoginForm } from "./form/LoginForm";
 import type { LoginFormValues } from "./form/schema";
 
 const Page = () => {
-	const { login } = useAuth();
+	const { login, loading, error } = useAuth();
+	const {isAuthenticated } = useBoundStore()
+	const navigate = useNavigate()
+
+	useEffect(() => {
+		if (isAuthenticated) {
+			navigate("/events")
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	},[isAuthenticated])
 
 	// error => if we get an error.
 	const onSubmit = (payload: LoginFormValues) => {
@@ -23,6 +36,8 @@ const Page = () => {
 					<Card className="overflow-hidden p-0">
 						<CardContent className="grid p-0 md:grid-cols-2">
 							<div className="p-6 md:p-8">
+								
+							
 								<div className="flex flex-col gap-6">
 									<div className="flex flex-col items-center text-center">
 										<h1 className="text-2xl font-bold">Welcome back</h1>
@@ -30,7 +45,17 @@ const Page = () => {
 											Login to your Event Manager account
 										</p>
 									</div>
-									<LoginForm onSubmission={onSubmit} />
+									{
+									!!error && 
+									<Alert variant="destructive">
+										<AlertCircleIcon />
+										<AlertTitle>API Error.</AlertTitle>
+										<AlertDescription>
+										<p>An error occurred while logging in, please verify your data and try again.</p>
+										</AlertDescription>
+									</Alert>
+								}
+									<LoginForm onSubmission={onSubmit} loading={loading} />
 									{import.meta.env.VITE_EXTERNAL_PROVIDERS === "true" && (
 										<>
 											<div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">

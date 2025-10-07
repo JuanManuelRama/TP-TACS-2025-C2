@@ -24,6 +24,7 @@ const UserInfo = () => {
 
 	const {userInformation} = useBoundStore()
 	const {logout} = useAuth();
+	const navigate = useNavigate();
 
 	return  <DropdownMenu>
 	<DropdownMenuTrigger asChild>
@@ -67,7 +68,7 @@ const UserInfo = () => {
 	  </DropdownMenuLabel>
 	  <DropdownMenuSeparator />
 	  <DropdownMenuGroup>
-		<DropdownMenuItem>
+		<DropdownMenuItem onClick={() => navigate("/profile")}>
 		  <UserCircle />
 		  Account
 		</DropdownMenuItem>

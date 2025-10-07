@@ -4,6 +4,7 @@ interface UserInformation {
 	username: string;
 	email: string;
 	role?: "ADMIN" | "USER";
+	id: string;
 }
 
 export interface AuthState {

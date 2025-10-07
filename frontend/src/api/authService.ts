@@ -1,14 +1,17 @@
 import axiosInstance from "./axiosInstance";
 
+interface LoggedUser {
+	token: string;
+	user: {
+		id: string;
+		username: string;
+		type: string;
+	};
+}
+
 export const signIn = (username: string, password: string) => {
 	return axiosInstance
-		.post<{
-			token: string;
-			user: {
-				id: string;
-				username: string;
-			};
-		}>("/usuarios/login", {
+		.post<LoggedUser>("/usuarios/login", {
 			username,
 			password,
 		})
@@ -22,7 +25,7 @@ export const signOut = () => {
 export const register = (payload: { username: string; password: string }) => {
 	const { username, password } = payload;
 	return axiosInstance
-		.post("/usuarios", {
+		.post<LoggedUser>("/usuarios", {
 			username,
 			password,
 			type: "PARTICIPANTE",

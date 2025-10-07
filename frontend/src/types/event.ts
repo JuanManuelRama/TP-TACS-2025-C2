@@ -15,7 +15,7 @@ export interface Event {
 export interface NewEvent {
 	titulo: string;
 	descripcion: string;
-	inicio: string;
+	inicio: Date;
 	duracion: number;
 	cupoMaximo: number;
 	cupoMinimo: number | null;

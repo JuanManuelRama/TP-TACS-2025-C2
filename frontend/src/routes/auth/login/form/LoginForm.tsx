@@ -1,3 +1,4 @@
+import { Spinner } from "$/src/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,8 +8,10 @@ import { formSchema, type LoginFormValues } from "./schema";
 
 export function LoginForm({
 	onSubmission,
+	loading
 }: {
 	onSubmission: (data: LoginFormValues) => void;
+	loading: boolean
 }) {
 	const form = useForm<LoginFormValues>({
 		resolver: zodResolver(formSchema),
@@ -19,7 +22,6 @@ export function LoginForm({
 	});
 
 	const submit = (data: LoginFormValues) => {
-		console.log(data);
 		onSubmission(data);
 		// Handle form submission here
 	};
@@ -56,7 +58,8 @@ export function LoginForm({
 					</p>
 				)}
 			</div>
-			<Button type="submit" className="w-full">
+			<Button type="submit" className="w-full" disabled={loading}>
+				{loading && <Spinner />}
 				Login
 			</Button>
 		</form>

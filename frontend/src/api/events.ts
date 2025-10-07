@@ -1,4 +1,4 @@
-import type { NewEvent } from "../types/event";
+import type { Event, NewEvent } from "../types/event";
 import axiosInstance from "./axiosInstance";
 
 export const eventList = () => {
@@ -10,7 +10,14 @@ export const event = (eventId: string) => {
 };
 
 export const addEvent = (event: NewEvent) => {
-	return axiosInstance.post("/eventos", event).then((res) => res.data);
+    const {inicio, ...rest} = event;
+
+
+    // Removing the last Z for utc
+	return axiosInstance.post<Event>("/eventos", {
+        ...rest,
+        inicio: inicio.toISOString().substring(0, 19),
+    }).then((res) => res.data);
 };
 
 export const deleteEvent = (eventId: string) => {
@@ -18,6 +25,7 @@ export const deleteEvent = (eventId: string) => {
 };
 
 export const subscribeEvent = (eventId: string) => {
+    
 	return axiosInstance
 		.post(`/eventos/${eventId}/inscriptos`)
 		.then((res) => res.data);

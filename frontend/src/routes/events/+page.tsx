@@ -9,8 +9,8 @@ import {
 } from "$/src/components/ui/card";
 import { Input } from "$/src/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "$/src/components/ui/popover";
+import { useEventList } from "$/src/hooks/api/events/useEvents";
 import { cn } from "$/src/lib/utils";
-import useEvents from "$hooks/useEvents.tsx";
 import type { Event } from "$types/event";
 import {
 	Empty,
@@ -122,22 +122,23 @@ export function EmptyEvent() {
 				className="text-muted-foreground"
 				size="sm"
 			></Button>
+			
 		</Empty>
 	);
 }
 
 const Page = () => {
-	const { events, loading, error } = useEvents();
+	const { data: events, isLoading, error } = useEventList();
 
-	if (loading) return <p>Loading events...</p>;
-	if (error) return <p>Error: {error}</p>;
+	if (isLoading) return <p>Loading events...</p>;
+	if (error) return <p>Error: {error.message}</p>;
 	if (events.length === 0) return <EmptyEvent />;
 
 	return (
 		<>
 			<ToolBar />
 			<div className="grid gap-4">
-				{events.map((event) => (
+				{events.map((event: Event) => (
 					<EventCard key={event.id} event={event} />
 				))}
 			</div>

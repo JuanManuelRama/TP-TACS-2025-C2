@@ -1,3 +1,4 @@
+import useBoundStore from "$/src/store";
 import { Button } from "$components/ui/button.tsx";
 import { useSubscription } from "$routes/events/[id]/+aux.tsx";
 import { deleteEvent, subscribeEvent, unsubscribeEvent } from "@/api/events.ts";
@@ -9,10 +10,11 @@ const Actions = ({ isOwner, event }: { isOwner: boolean; event: Event }) => {
 	const navigate = useNavigate();
 	const { isSubscribed, setSubscribed } = useSubscription(event);
 	const [message, setMessage] = useState<string | null>(null);
+	const {userInformation} = useBoundStore()
 
 	const onSubscribe = async () => {
 		try {
-			if (!localStorage.getItem("id")) {
+			if (!userInformation) {
 				navigate("/auth/login");
 				return;
 			}
