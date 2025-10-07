@@ -35,7 +35,7 @@ object EventoRepo {
             inicio = evento.inicio,
             duracion = evento.duracion,
             cupoMaximo = evento.cupoMaximo,
-            cupoMinimio = evento.cupoMinimio,
+            cupoMinimo = evento.cupoMinimo,
             precio = evento.precio,
             categorias = evento.categorias
         )

@@ -1,46 +1,46 @@
-import {useEffect, useState} from "react";
-import {Registration} from "@/types/registration.ts";
-import {Event} from "@/types/event.ts";
+import useBoundStore from "$/src/store";
 import axiosInstance from "@/api/axiosInstance.ts";
-import {suscriptionEvent} from "@/api/events.ts";
+import { suscriptionEvent } from "@/api/events.ts";
 import HttpError from "@/api/HttpError.ts";
+import type { Event } from "@/types/event.ts";
+import type { Registration } from "@/types/registration.ts";
+import { useEffect, useState } from "react";
 
 export const useRegistrations = (eventId: string) => {
-    const [confirmed, setConfirmed] = useState<Registration[]>([]);
-    const [waitlisted, setWaitlisted] = useState<Registration[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+	const [confirmed, setConfirmed] = useState<Registration[]>([]);
+	const [waitlisted, setWaitlisted] = useState<Registration[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!eventId) return;
+	useEffect(() => {
+		if (!eventId) return;
 
-        const fetchRegistrations = async () => {
-            setLoading(true);
-            setError(null);
+		const fetchRegistrations = async () => {
+			setLoading(true);
+			setError(null);
 
-            try {
-                const res = await axiosInstance.get<Registration[]>(
-                    `/eventos/${eventId}/inscriptos`
-                );
+			try {
+				const res = await axiosInstance.get<Registration[]>(
+					`/eventos/${eventId}/inscriptos`,
+				);
 
-                const data = res.data;
+				const data = res.data;
 
-                setConfirmed(data.filter(r => r.tipo === "CONFIRMACION"));
-                setWaitlisted(data.filter(r => r.tipo === "ESPERA"));
-            } catch (err: unknown) {
-                if (err instanceof Error) setError(err.message);
-                else setError("Unknown error");
-            } finally {
-                setLoading(false);
-            }
-        };
+				setConfirmed(data.filter((r) => r.tipo === "CONFIRMACION"));
+				setWaitlisted(data.filter((r) => r.tipo === "ESPERA"));
+			} catch (err: unknown) {
+				if (err instanceof Error) setError(err.message);
+				else setError("Unknown error");
+			} finally {
+				setLoading(false);
+			}
+		};
 
-        fetchRegistrations();
-    }, [eventId]);
+		fetchRegistrations();
+	}, [eventId]);
 
-    return { confirmed, setConfirmed, waitlisted, setWaitlisted, loading, error };
+	return { confirmed, setConfirmed, waitlisted, setWaitlisted, loading, error };
 };
-
 
 /**
  * no es la solución más limpia, 404 significa que el endpoint no encontro la inscripción, por ende
@@ -52,31 +52,35 @@ export const useRegistrations = (eventId: string) => {
  * puede redirigir desde el botón en sí
  * */
 export function useSubscription(event: Event | null) {
-    const [isSubscribed, setSubscribed] = useState<boolean | null>(null);
+	const [isSubscribed, setSubscribed] = useState<boolean | null>(null);
+	const { userInformation } = useBoundStore();
 
-    useEffect(() => {
-        if (!event) return; // wait until event is loaded
-        const userId = localStorage.getItem("id");
-        if (!userId || userId === event.organizador.id) {
-            setSubscribed(false);
-            return;
-        }
+	useEffect(() => {
+		if (!event) return; // wait until event is loaded
+		const userId = userInformation?.id;
+		if (!userId || userId === event.organizador.id) {
+			setSubscribed(false);
+			return;
+		}
 
-        const checkSubscription = async () => {
-            try {
-                await suscriptionEvent(event.id, userId);
-                setSubscribed(true);
-            } catch (err: unknown) {
-                if (err instanceof HttpError && (err.status === 404 || err.status === 401)) {
-                    setSubscribed(false);
-                } else {
-                    setSubscribed(false);
-                }
-            }
-        };
+		const checkSubscription = async () => {
+			try {
+				await suscriptionEvent(event.id, userId);
+				setSubscribed(true);
+			} catch (err: unknown) {
+				if (
+					err instanceof HttpError &&
+					(err.status === 404 || err.status === 401)
+				) {
+					setSubscribed(false);
+				} else {
+					setSubscribed(false);
+				}
+			}
+		};
 
-        checkSubscription();
-    }, [event]);
+		checkSubscription();
+	}, [event, userInformation?.id]);
 
-    return { isSubscribed, setSubscribed };
+	return { isSubscribed, setSubscribed };
 }

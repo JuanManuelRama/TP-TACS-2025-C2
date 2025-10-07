@@ -1,8 +1,10 @@
 package com.g7.routing.usuarios
 
+import com.g7.application.middleware.login.JwtConfig
 import com.g7.repo.UsuarioRepo
 import com.g7.routing.usuarios.id.usuariosId
 import com.g7.routing.usuarios.login.usuariosLogin
+import com.g7.usuario.dto.LoginResponseDto
 import com.g7.usuario.dto.UsuarioInputDto
 import com.g7.usuario.dto.toResponseDto
 import io.ktor.http.*
@@ -15,7 +17,11 @@ fun Route.usuarios() {
         val usuarioDto = call.receive<UsuarioInputDto>()
 
         val newUsuario = UsuarioRepo.save(usuarioDto)
-        call.respond(HttpStatusCode.Created, newUsuario.toResponseDto())
+        val response = LoginResponseDto(
+            token = JwtConfig.generateToken(newUsuario),
+            user = newUsuario.toResponseDto()
+        )
+        call.respond(HttpStatusCode.Created, response)
     }
 
     route("/{id}") {

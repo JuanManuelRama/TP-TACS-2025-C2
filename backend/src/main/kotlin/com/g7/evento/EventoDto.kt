@@ -20,7 +20,7 @@ data class EventoResponseDto (
     val inicio: LocalDateTime,
     val duracion: Long,
     val cupoMaximo: Int,
-    val cupoMinimio: Int? = null,
+    val cupoMinimo: Int? = null,
     val precio: Float,
     val categorias: List<Categoria> = ArrayList(),
     )
@@ -33,7 +33,7 @@ fun Evento.toDto(repo: UsuarioRepo): EventoResponseDto = EventoResponseDto(
     inicio = this.inicio,
     duracion = this.duracion,
     cupoMaximo = this.cupoMaximo,
-    cupoMinimio = this.cupoMinimio,
+    cupoMinimo = this.cupoMinimo,
     precio = this.precio,
     categorias = this.categorias
 )
@@ -46,7 +46,7 @@ fun Evento.toDto(usuario: UsuarioResponseDto): EventoResponseDto = EventoRespons
     inicio = this.inicio,
     duracion = this.duracion,
     cupoMaximo = this.cupoMaximo,
-    cupoMinimio = this.cupoMinimio,
+    cupoMinimo = this.cupoMinimo,
     precio = this.precio,
     categorias = this.categorias
 )
@@ -59,7 +59,7 @@ data class EventoInputDto(
     val inicio: LocalDateTime,
     val duracion: Long,
     val cupoMaximo: Int,
-    val cupoMinimio: Int? = null,
+    val cupoMinimo: Int? = null,
     val precio: Float,
     val categorias: List<Categoria> = ArrayList(),
 )
