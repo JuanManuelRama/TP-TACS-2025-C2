@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getAuthState } from "../store/index.ts";
 import HttpError from "./HttpError.ts";
 
 const axiosInstance = axios.create({
@@ -21,9 +22,9 @@ axiosInstance.interceptors.response.use(
 );
 
 axiosInstance.interceptors.request.use((config) => {
-	const token = localStorage.getItem("jwt");
-	if (token) {
-		config.headers.Authorization = `Bearer ${token}`;
+	const { accessToken } = getAuthState();
+	if (accessToken) {
+		config.headers.Authorization = `Bearer ${accessToken}`;
 	}
 	return config;
 });

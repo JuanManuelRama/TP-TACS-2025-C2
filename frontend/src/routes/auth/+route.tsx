@@ -9,11 +9,11 @@ export const route: RouteObject = {
 		},
 		{
 			path: "login",
-			lazy: () => import("./login/+page.tmp.tsx"),
+			lazy: () => import("./login/+page.tsx"),
 		},
 		{
-			path: "register",
-			lazy: () => import("./register/+page.tsx"),
+			path: "signup",
+			lazy: () => import("./signup/+page.tsx"),
 		},
 	],
 };
