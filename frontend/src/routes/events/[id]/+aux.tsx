@@ -7,8 +7,10 @@ import type { Registration } from "@/types/registration.ts";
 import { useEffect, useState } from "react";
 
 export const useRegistrations = (eventId: string) => {
-	const [confirmed, setConfirmed] = useState<Registration[]>([]);
-	const [waitlisted, setWaitlisted] = useState<Registration[]>([]);
+    const [registrations, setRegistrations] = useState<Registration>({
+        inscriptos: [],
+        esperas: []
+    });
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -20,14 +22,11 @@ export const useRegistrations = (eventId: string) => {
 			setError(null);
 
 			try {
-				const res = await axiosInstance.get<Registration[]>(
+				const res = await axiosInstance.get<Registration>(
 					`/eventos/${eventId}/inscriptos`,
 				);
 
-				const data = res.data;
-
-				setConfirmed(data.filter((r) => r.tipo === "CONFIRMACION"));
-				setWaitlisted(data.filter((r) => r.tipo === "ESPERA"));
+				setRegistrations(res.data);
 			} catch (err: unknown) {
 				if (err instanceof Error) setError(err.message);
 				else setError("Unknown error");
@@ -39,7 +38,7 @@ export const useRegistrations = (eventId: string) => {
 		fetchRegistrations();
 	}, [eventId]);
 
-	return { confirmed, setConfirmed, waitlisted, setWaitlisted, loading, error };
+	return {registrations, setRegistrations, loading, error };
 };
 
 /**

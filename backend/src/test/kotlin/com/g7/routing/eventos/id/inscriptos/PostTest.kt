@@ -2,7 +2,6 @@ package com.g7.routing.eventos.id.inscriptos
 
 import com.g7.BaseMongoTest
 import com.g7.addAuth
-import com.g7.application.middleware.login.JwtConfig
 import com.g7.evento.Evento
 import com.g7.repo.EventoRepo
 import com.g7.repo.UsuarioRepo
@@ -30,11 +29,10 @@ class PostTest: BaseMongoTest() {
             addAuth(subscriber)
         }.apply {
             assertEquals(HttpStatusCode.Created, status, "Should return 201 Created")
-            val inscriptos = EventoRepo.batchGetInscripcion(evento.id)
+            val inscriptos = EventoRepo.batchGetInscripto(evento.id)
 
             assertEquals(1, inscriptos.size, "Event should have one subscriber")
-            assertEquals(subscriber.id, inscriptos[0].usuario, "Subscriber should match")
-            assertEquals("CONFIRMACION", inscriptos[0].tipo, "Subscriber should match")
+            assertEquals(subscriber.id, inscriptos.inscriptos[0], "Subscriber should match")
             assertEquals(1, EventoRepo.getFromId(evento.id).cantInscripciones, "Event should have one subscription" )
         }
     }
@@ -49,11 +47,10 @@ class PostTest: BaseMongoTest() {
             addAuth(subscriber)
         }.apply {
             assertEquals(HttpStatusCode.Created, status, "Should return 201 Created")
-            val inscriptos = EventoRepo.batchGetInscripcion(evento.id)
+            val inscriptos = EventoRepo.batchGetInscripto(evento.id)
 
             assertEquals(2, inscriptos.size, "Event should have one subscriber")
-            assertEquals(subscriber.id, inscriptos[1].usuario, "Subscriber should match")
-            assertEquals("ESPERA", inscriptos[1].tipo, "Subscriber should match")
+            assertEquals(subscriber.id, inscriptos.esperas[0], "Subscriber should match")
             assertEquals(1, EventoRepo.getFromId(evento.id).cantInscripciones, "Event should have one subscriptions" )
         }
     }

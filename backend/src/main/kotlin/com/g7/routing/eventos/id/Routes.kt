@@ -30,8 +30,8 @@ fun Route.eventosId() {
                 throw IllegalAccessException("Solo el organizador puede eliminar el evento")
             }
             UsuarioRepo.borrarEventoCreado(user.id, id)
-            val inscriptos = EventoRepo.batchGetInscripcion(id).toSet()
-            val ids = inscriptos.map { it.usuario }.toSet()
+            val inscriptos = EventoRepo.batchGetInscripto(id)
+            val ids = (inscriptos.inscriptos + inscriptos.esperas).toSet()
             UsuarioRepo.batchDescinscribirEvento(ids, id)
             EventoRepo.deleteEvento(id)
             call.respond(HttpStatusCode.NoContent)

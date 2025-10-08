@@ -3,26 +3,11 @@ package com.g7.evento
 import com.g7.repo.UsuarioRepo
 import com.g7.serializable.LocalDateTimeSerializer
 import com.g7.usuario.Usuario
-import com.g7.usuario.dto.UsuarioResponseDto
-import com.g7.usuario.dto.toResponseDto
+import com.g7.usuario.UsuarioResponseDto
+import com.g7.usuario.toResponseDto
 import kotlinx.serialization.Serializable
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
-
-/*
-data class Inscripcion (
-    val usuario: ObjectId,
-    val horaInscripcion: LocalDateTime,
-    val horaConfirmacion: LocalDateTime? = null,
-) {
-    constructor(usuario: ObjectId, horaInscripcion: LocalDateTime, smth:Any?): this(
-        usuario,
-        horaInscripcion,
-        null
-    )
-    fun confirmado() = horaConfirmacion != null
-    fun confirmar() = this.copy(horaConfirmacion = LocalDateTime.now())
-}*/
 
 sealed class Inscripcion {
     abstract val usuario: ObjectId
@@ -78,4 +63,27 @@ fun Inscripcion.toDto(usuario: UsuarioResponseDto): InscripcionDto {
         tipo = this.tipo
     )
 }
+
+data class Inscriptos (
+    val inscriptos: List<ObjectId> = emptyList(),
+    val esperas: List<ObjectId> = emptyList()
+) {
+    val size get() = inscriptos.size + esperas.size
+    fun isEmpty() = inscriptos.isEmpty() && esperas.isEmpty()
+    fun none(predicate: (ObjectId) -> Boolean) = inscriptos.none(predicate) && esperas.none(predicate)
+}
+
+@Serializable
+data class InscriptosDto (
+    val inscriptos: List<UsuarioResponseDto>,
+    val esperas: List<UsuarioResponseDto>
+)
+
+fun Inscriptos.toDto (map: Map<ObjectId, Usuario>): InscriptosDto {
+    return InscriptosDto(
+        inscriptos = this.inscriptos.map { map[it]!!.toResponseDto() },
+        esperas = this.esperas.map { map[it]!!.toResponseDto() }
+    )
+}
+
 

@@ -1,9 +1,6 @@
 import {User} from "$types/user.ts";
 
 export interface Registration {
-    usuario: User;
-    horaInscripcion: string;
-    tipo: RegistrationType;
+    inscriptos: User[];
+    esperas: User[];
 }
-
-type RegistrationType = "CONFIRMACION" | "ESPERA";

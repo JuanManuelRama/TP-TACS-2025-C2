@@ -4,12 +4,14 @@ import com.g7.BaseMongoTest
 import com.g7.addAuth
 import com.g7.evento.Evento
 import com.g7.evento.InscripcionDto
+import com.g7.evento.InscriptosDto
 import com.g7.repo.EventoRepo
 import com.g7.repo.UsuarioRepo
 import com.g7.usuario.Usuario
-import com.g7.usuario.dto.toResponseDto
+import com.g7.usuario.toResponseDto
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -37,16 +39,14 @@ class GetTest: BaseMongoTest() {
         client.get("/eventos/${evento.id}/inscriptos") {
             addAuth(creator)
         }.apply {
-            assertEquals(io.ktor.http.HttpStatusCode.OK, status, "Should return 200 OK")
-            val inscriptos = Json.decodeFromString<List<InscripcionDto>>(bodyAsText())
+            assertEquals(HttpStatusCode.OK, status, "Should return 200 OK")
+            val inscriptos = Json.decodeFromString<InscriptosDto>(bodyAsText())
+            val cantIncsriptos = inscriptos.inscriptos.size + inscriptos.esperas.size
 
-            assertEquals(3, inscriptos.size, "Event should have three subscribers")
-            assertEquals(inscripto.toResponseDto(), inscriptos[0].usuario, "First subscriber should match")
-            assertEquals("CONFIRMACION", inscriptos[0].tipo, "First subscriber type should match")
-            assertEquals(espera1.toResponseDto(), inscriptos[1].usuario, "Second subscriber should match")
-            assertEquals("ESPERA", inscriptos[1].tipo, "Second subscriber type should match")
-            assertEquals(espera2.toResponseDto(), inscriptos[2].usuario, "Third subscriber should match")
-            assertEquals("ESPERA", inscriptos[2].tipo, "Third subscriber type should match")
+            assertEquals(3, cantIncsriptos, "Event should have three subscribers")
+            assertEquals(inscripto.toResponseDto(), inscriptos.inscriptos[0], "First subscriber should match")
+            assertEquals(espera1.toResponseDto(), inscriptos.esperas[0], "Second subscriber should match")
+            assertEquals(espera2.toResponseDto(), inscriptos.esperas[1], "Third subscriber should match")
         }
     }
 
@@ -55,14 +55,14 @@ class GetTest: BaseMongoTest() {
         client.get("/eventos/${evento.id}/inscriptos") {
             addAuth(inscripto)
         }.apply {
-            assertEquals(io.ktor.http.HttpStatusCode.Forbidden, status, "Should return 403 Forbidden")
+            assertEquals(HttpStatusCode.Forbidden, status, "Should return 403 Forbidden")
         }
     }
 
     @Test
     fun getInscriptosUnauthorized() = withTestApp {
         client.get("/eventos/${evento.id}/inscriptos").apply {
-            assertEquals(io.ktor.http.HttpStatusCode.Unauthorized, status, "Should return 401 Unauthorized")
+            assertEquals(HttpStatusCode.Unauthorized, status, "Should return 401 Unauthorized")
         }
     }
 }

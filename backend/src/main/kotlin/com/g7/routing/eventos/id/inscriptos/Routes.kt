@@ -6,7 +6,6 @@ import com.g7.repo.UsuarioRepo
 import com.g7.routing.eventos.id.inscriptos.userId.eventosIdInscripcionUserId
 import com.g7.application.middleware.login.loggedUser
 import com.g7.application.requireIdParam
-import com.g7.usuario.dto.toResponseDto
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.response.respond
@@ -27,10 +26,11 @@ fun Route.eventosIdInscriptos() {
                 throw IllegalAccessException("Solo el organizador puede ver los inscriptos")
             }
 
-            val inscriptos = EventoRepo.batchGetInscripcion(id)
-            val usuariosMap = UsuarioRepo.batchGetFromId(inscriptos.map { it.usuario }
-                .toSet()).mapValues {it.value.toResponseDto()}
-            call.respond(HttpStatusCode.OK, inscriptos.map { it.toDto(usuariosMap[it.usuario]!!) })
+            val inscriptos = EventoRepo.batchGetInscripto(id)
+            val usuarios = inscriptos.inscriptos + inscriptos.esperas
+
+            val usuariosMap = UsuarioRepo.batchGetFromId(usuarios.toSet())
+            call.respond(HttpStatusCode.OK, inscriptos.toDto(usuariosMap))
 
         }
         post {

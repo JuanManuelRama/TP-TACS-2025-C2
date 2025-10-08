@@ -2,13 +2,12 @@ package com.g7.routing.eventos
 
 import com.g7.BaseMongoTest
 import com.g7.addAuth
-import com.g7.application.middleware.login.JwtConfig
 import com.g7.evento.EventoResponseDto
 import com.g7.evento.toDto
 import com.g7.repo.EventoRepo
 import com.g7.repo.UsuarioRepo
 import com.g7.usuario.Usuario
-import com.g7.usuario.dto.toResponseDto
+import com.g7.usuario.toResponseDto
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText

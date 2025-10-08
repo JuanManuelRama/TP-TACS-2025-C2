@@ -2,8 +2,7 @@ package com.g7.routing.usuarios
 
 import com.g7.BaseMongoTest
 import com.g7.repo.UsuarioRepo
-import com.g7.usuario.dto.LoginResponseDto
-import com.g7.usuario.dto.UsuarioResponseDto
+import com.g7.usuario.LoginResponseDto
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText

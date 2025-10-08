@@ -2,7 +2,8 @@ package com.g7.repo
 
 import com.g7.exception.InvalidCredentialsException
 import com.g7.usuario.Usuario
-import com.g7.usuario.dto.UsuarioInputDto
+import com.g7.usuario.UsuarioEventos
+import com.g7.usuario.UsuarioInputDto
 import com.mongodb.MongoWriteException
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.Filters
@@ -45,8 +46,14 @@ object UsuarioRepo {
         collection.find(Filters.eq("_id", id)).projection(projection).first()
             ?: throw NoSuchElementException("Usuario with id $id not found")
 
-    fun batchGetFromId(ids: Set<ObjectId>): Map<ObjectId, Usuario> =
-        collection.find(Filters.`in`("_id", ids)).projection(projection).into(HashSet()).associateBy { it.id }
+    fun batchGetFromId(ids: Set<ObjectId>): Map<ObjectId, Usuario> {
+        if (ids.isEmpty()) return emptyMap()
+        return collection
+            .find(Filters.`in`("_id", ids))
+            .projection(projection)
+            .into(HashSet()).associateBy { it.id }
+    }
+
 
     fun getFromUsername(username: String): Usuario =
         collection.find(Filters.eq("username", username)).projection(projection).first()
@@ -69,7 +76,7 @@ object UsuarioRepo {
         }
         else {
             collection.findOneAndUpdate(Filters.eq("_id", userId),
-                Updates.push("EventosEnEspera", id))
+                Updates.push("eventosEnEspera", id))
         }
     }
 
@@ -77,7 +84,7 @@ object UsuarioRepo {
         collection.updateOne(Filters.eq("_id", userId),
             Updates.combine(
                 Updates.pull("eventosConfirmados", eventoId),
-                Updates.pull("EventosEnEspera", eventoId)
+                Updates.pull("eventosEnEspera", eventoId)
             ))
     }
 
@@ -85,7 +92,19 @@ object UsuarioRepo {
         collection.updateMany(Filters.`in`("_id", userIds),
             Updates.combine(
                 Updates.pull("eventosConfirmados", eventoId),
-                Updates.pull("EventosEnEspera", eventoId)
+                Updates.pull("eventosEnEspera", eventoId)
             ))
+    }
+
+    fun getEventos(userId: ObjectId): UsuarioEventos {
+        return collection.withDocumentClass(UsuarioEventos::class.java)
+            .find(Filters.eq("_id", userId))
+            .projection(Projections.include(
+                "eventosCreados",
+                "eventosConfirmados",
+                "eventosEnEspera")
+            )
+            .first() ?: throw NoSuchElementException("Usuario with id $userId not found")
+
     }
 }

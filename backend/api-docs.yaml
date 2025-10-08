@@ -266,25 +266,15 @@ components:
     InscriptionDetail:
       type: object
       properties:
-        usuario:
-          $ref: '#/components/schemas/User'
-        horaInscripcion:
-          type: string
-          format: date-time
-          description: Fecha y hora de la inscripción
-        tipo:
-          $ref: '#/components/schemas/InscriptionType'
-      required:
-        - usuario
-        - horaInscripcion
-        - tipo
-      example:
-        usuario:
-          id: "ac0c2ba5-4139-46d2-b095-e38383a5d9fb"
-          username: "newUser-a4fb7cc8-5aa1-49ad-99ba-90d81880d68a"
-          type: "PARTICIPANTE"
-        horaInscripcion: "2025-09-03T12:01:26.569835"
-        tipo: "CONFIRMACION"
+        inscriptos:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        esperas:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+
     EvenStasts:
       type: object
       properties:
@@ -302,7 +292,27 @@ components:
           format: float
           description: Porcentaje esperas que han sido canceladas
           required: false
-
+    UserEvents:
+      type: object
+      properties:
+        eventosCreados:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+          description: Eventos creados por el usuario
+          required: true
+        eventosConfirmados:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+          description: Eventos en los que su inscripción está confirmada
+          required: true
+        eventosEnEspera:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+          description: Eventos en los que está en lista de espera
+          required: true
 
 
 paths:

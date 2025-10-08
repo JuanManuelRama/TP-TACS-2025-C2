@@ -9,7 +9,7 @@ import com.g7.application.middleware.installContentNegotiation
 import com.g7.application.middleware.installStatusPages
 import com.g7.application.middleware.login.JwtConfig
 import com.g7.usuario.Usuario
-import com.g7.usuario.dto.UsuarioInputDto
+import com.g7.usuario.UsuarioInputDto
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.server.application.*
 import io.ktor.server.config.*

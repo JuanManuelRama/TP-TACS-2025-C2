@@ -4,6 +4,7 @@ import com.g7.evento.Evento
 import com.g7.evento.EventoInputDto
 import com.g7.evento.FiltroEvento
 import com.g7.evento.Inscripcion
+import com.g7.evento.Inscriptos
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.*
 import org.bson.Document
@@ -11,9 +12,10 @@ import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
 data class Inscripciones (
-    val inscriptos: List<Inscripcion.Confirmada> = emptyList(),
-    val esperas: List<Inscripcion.Espera> = emptyList()
+    val inscriptos: List<Inscripcion.Confirmada>? = emptyList(),
+    val esperas: List<Inscripcion.Espera>? = emptyList()
 )
+
 
 object EventoRepo {
     private lateinit var collection: MongoCollection<Evento>
@@ -171,15 +173,6 @@ object EventoRepo {
         collection.deleteOne(Filters.eq("_id", id))
     }
 
-    fun batchGetInscripcion(eventoId: ObjectId): List<Inscripcion> {
-        val inscriptos = collection.withDocumentClass(Inscripciones::class.java)
-            .find(Filters.eq("_id", eventoId))
-            .projection(Projections.include("inscriptos", "esperas"))
-            .first() ?: throw NoSuchElementException("Evento con id $eventoId no encontrado")
-
-        return inscriptos.inscriptos + inscriptos.esperas
-    }
-
     fun getInscripcion(eventoId: ObjectId, usuarioId: ObjectId): Inscripcion {
         val inscripciones = collection.withDocumentClass(Inscripciones::class.java)
             .find(Filters.eq("_id", eventoId))
@@ -191,8 +184,26 @@ object EventoRepo {
             )
             .first() ?: throw NoSuchElementException("Evento con id $eventoId no encontrado")
 
-        return inscripciones.inscriptos.firstOrNull()
-            ?: inscripciones.esperas.firstOrNull()
+        return inscripciones.inscriptos?.first()
+            ?: inscripciones.esperas?.first()
             ?: throw NoSuchElementException("Usuario $usuarioId no está inscripto en el evento $eventoId")
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun batchGetInscripto(eventoId: ObjectId): Inscriptos {
+        val inscriptos = collection.withDocumentClass(Document::class.java)
+            .find(Filters.eq("_id", eventoId))
+            .projection(Projections.include("inscriptos.usuario", "esperas.usuario"))
+            .first() ?: throw NoSuchElementException("Evento con id $eventoId no encontrado")
+
+        return Inscriptos(
+            inscriptos = (inscriptos["inscriptos"] as List<Document>).map { it.getObjectId("usuario") },
+            esperas = (inscriptos["esperas"] as List<Document>).map { it.getObjectId("usuario") }
+        )
+    }
+
+    fun batchGetFromId(ids: Set<ObjectId>): Map<ObjectId, Evento> {
+        return collection.find(Filters.`in`("_id", ids)).projection(projection)
+            .into(HashSet()).associateBy { it.id }
     }
 }

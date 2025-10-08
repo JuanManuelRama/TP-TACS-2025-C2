@@ -3,9 +3,9 @@ package com.g7.routing.usuarios.login
 import com.g7.exception.InvalidCredentialsException
 import com.g7.repo.UsuarioRepo
 import com.g7.application.middleware.login.JwtConfig
-import com.g7.usuario.dto.LoginRequestDto
-import com.g7.usuario.dto.LoginResponseDto
-import com.g7.usuario.dto.toResponseDto
+import com.g7.usuario.LoginRequestDto
+import com.g7.usuario.LoginResponseDto
+import com.g7.usuario.toResponseDto
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond

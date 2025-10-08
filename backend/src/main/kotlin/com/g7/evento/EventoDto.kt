@@ -3,8 +3,8 @@ package com.g7.evento
 import com.g7.repo.UsuarioRepo
 import com.g7.serializable.LocalDateTimeSerializer
 import com.g7.serializable.ObjectIdSerializer
-import com.g7.usuario.dto.UsuarioResponseDto
-import com.g7.usuario.dto.toResponseDto
+import com.g7.usuario.UsuarioResponseDto
+import com.g7.usuario.toResponseDto
 import kotlinx.serialization.Serializable
 import org.bson.types.ObjectId
 import java.time.LocalDateTime

@@ -6,7 +6,7 @@ import com.g7.evento.EventoResponseDto
 import com.g7.repo.EventoRepo
 import com.g7.repo.UsuarioRepo
 import com.g7.usuario.Usuario
-import com.g7.usuario.dto.toResponseDto
+import com.g7.usuario.toResponseDto
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json

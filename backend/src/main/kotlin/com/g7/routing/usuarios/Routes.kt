@@ -1,15 +1,22 @@
 package com.g7.routing.usuarios
 
 import com.g7.application.middleware.login.JwtConfig
+import com.g7.application.middleware.login.loggedUser
+import com.g7.evento.toDto
+import com.g7.repo.EventoRepo
 import com.g7.repo.UsuarioRepo
+import com.g7.routing.usuarios.eventos.usuariosEventos
 import com.g7.routing.usuarios.id.usuariosId
 import com.g7.routing.usuarios.login.usuariosLogin
-import com.g7.usuario.dto.LoginResponseDto
-import com.g7.usuario.dto.UsuarioInputDto
-import com.g7.usuario.dto.toResponseDto
+import com.g7.usuario.LoginResponseDto
+import com.g7.usuario.UsuarioInputDto
+import com.g7.usuario.toDto
+import com.g7.usuario.toResponseDto
 import io.ktor.http.*
+import io.ktor.server.auth.authenticate
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 
 fun Route.usuarios() {
@@ -31,4 +38,7 @@ fun Route.usuarios() {
         usuariosLogin()
     }
 
+    route("/eventos"){
+        usuariosEventos()
+    }
 }
