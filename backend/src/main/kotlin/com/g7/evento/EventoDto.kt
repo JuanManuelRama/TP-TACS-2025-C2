@@ -22,7 +22,7 @@ data class EventoResponseDto (
     val cupoMaximo: Int,
     val cupoMinimo: Int? = null,
     val precio: Float,
-    val categorias: List<Categoria> = ArrayList(),
+    val categorias: List<String> = ArrayList(),
     )
 
 fun Evento.toDto(repo: UsuarioRepo): EventoResponseDto = EventoResponseDto(
@@ -61,5 +61,5 @@ data class EventoInputDto(
     val cupoMaximo: Int,
     val cupoMinimo: Int? = null,
     val precio: Float,
-    val categorias: List<Categoria> = ArrayList(),
+    val categorias: List<String> = ArrayList(),
 )

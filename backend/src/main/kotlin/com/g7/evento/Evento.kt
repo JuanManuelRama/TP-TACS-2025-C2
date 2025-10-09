@@ -5,12 +5,6 @@ import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
-@Serializable
-enum class Categoria {
-    FIESTA,
-    CONCIERTO,
-}
-
 data class Evento (
     @param:BsonId val id: ObjectId = ObjectId(),
     val organizador: ObjectId,
@@ -21,7 +15,7 @@ data class Evento (
     val cupoMaximo: Int,
     val cupoMinimo: Int?,
     val precio: Float,
-    val categorias: List<Categoria>,
+    val categorias: List<String>,
     val cantInscripciones: Int = 0,
     var cantEspera: Int = 0,
     var cantEsperaExitosas: Int = 0,

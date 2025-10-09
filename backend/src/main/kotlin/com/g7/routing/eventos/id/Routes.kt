@@ -6,6 +6,7 @@ import com.g7.repo.UsuarioRepo
 import com.g7.routing.eventos.id.inscriptos.eventosIdInscriptos
 import com.g7.application.middleware.login.loggedUser
 import com.g7.application.requireIdParam
+import com.g7.routing.eventos.id.estadisticas.eventosIdEstadisticas
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.response.respond
@@ -39,5 +40,8 @@ fun Route.eventosId() {
     }
     route("/inscriptos") {
         eventosIdInscriptos()
+    }
+    route("/estadisticas") {
+        eventosIdEstadisticas()
     }
 }
