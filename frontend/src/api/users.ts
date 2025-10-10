@@ -11,3 +11,9 @@ export const register = (username: string, password: string) => {
         .post("/usuarios", { username, password , type: "PARTICIPANTE" })
         .then(res => res.data);
 }
+
+export const getEvents = () => {
+    return axiosInstance
+        .get("usuarios/eventos")
+        .then(res => res.data);
+}
