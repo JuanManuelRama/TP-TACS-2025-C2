@@ -22,6 +22,7 @@ import io.ktor.server.routing.*
 fun Route.usuarios() {
     post {
         val usuarioDto = call.receive<UsuarioInputDto>()
+        usuarioDto.validate()
 
         val newUsuario = UsuarioRepo.save(usuarioDto)
         val response = LoginResponseDto(

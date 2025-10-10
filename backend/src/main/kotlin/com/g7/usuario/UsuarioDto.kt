@@ -3,6 +3,7 @@ package com.g7.usuario
 import com.g7.serializable.ObjectIdSerializer
 import com.g7.application.middleware.login.LoggedUser
 import com.g7.evento.EventoResponseDto
+import com.g7.exception.InvalidConstructorException
 import kotlinx.serialization.Serializable
 import org.bson.types.ObjectId
 import org.mindrot.jbcrypt.BCrypt
@@ -27,6 +28,15 @@ data class UsuarioInputDto(
     val type: UserType,
 ) {
     fun hashPassword(): String = BCrypt.hashpw(password, BCrypt.gensalt())
+
+    fun validate() {
+        if (username.length !in 3..40) {
+            throw InvalidConstructorException("El nombre de usuario debe tener entre 3 y 30 caracteres")
+        }
+        if (password.length < 6) {
+            throw InvalidConstructorException("La contraseña debe tener al menos 6 caracteres")
+        }
+    }
 }
 
 

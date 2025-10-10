@@ -25,7 +25,7 @@
       {
         "titulo": "Concierto de Rock",
         "descripcion": "Un show en vivo",
-        "inicio": "2025-09-10T20:00:00",
+        "inicio": "2030-09-10T20:00:00",
         "duracion": 7200,
         "cupoMaximo": 1,
         "cupoMinimo": 1,
@@ -38,7 +38,7 @@
       {
         "titulo": "Feria de Tecnología",
         "descripcion": "Exposición de innovaciones tecnológicas",
-        "inicio": "2025-10-05T10:00:00",
+        "inicio": "2030-10-05T10:00:00",
         "duracion": 14400,
         "cupoMaximo": 100,
         "cupoMinimo": 10,

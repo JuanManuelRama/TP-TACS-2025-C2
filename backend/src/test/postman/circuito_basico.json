@@ -36,8 +36,8 @@
 					"script": {
 						"exec": [
 							"const randomized = crypto.randomUUID()\r",
-							"pm.environment.set(\"username\", \"newUser-\" + randomized)\r",
-							"pm.environment.set(\"password\", \"newPasword-\" + randomized)\r",
+							"pm.environment.set(\"username\", randomized)\r",
+							"pm.environment.set(\"password\", randomized)\r",
 							""
 						],
 						"type": "text/javascript",
@@ -210,7 +210,10 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							""
+							"const today = new Date();\r",
+							"const tomorrow = new Date(today);\r",
+							"tomorrow.setDate(today.getDate() + 1);\r",
+							"pm.environment.set(\"date\", tomorrow.toISOString().slice(0, -5))"
 						],
 						"type": "text/javascript",
 						"packages": {},
@@ -232,7 +235,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "    {\r\n        \"titulo\": \"Concierto de Rock\",\r\n        \"descripcion\": \"Un show en vivo\",\r\n        \"inicio\": \"2025-09-10T20:00:00\",\r\n        \"duracion\": 7200,\r\n        \"cupoMaximo\": 2,\r\n        \"cupoMinimo\": null,\r\n        \"precio\": 1500.5,\r\n        \"categorias\": [\r\n            \"FIESTA\",\r\n            \"CONCIERTO\"\r\n        ]\r\n    }",
+					"raw": "    {\r\n        \"titulo\": \"Concierto de Rock\",\r\n        \"descripcion\": \"Un show en vivo\",\r\n        \"inicio\": \"{{date}}\",\r\n        \"duracion\": 7200,\r\n        \"cupoMaximo\": 7,\r\n        \"cupoMinimo\": 3,\r\n        \"precio\": 1500.5,\r\n        \"categorias\": [\r\n            \"FIESTA\",\r\n            \"CONCIERTO\"\r\n        ]\r\n    }",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -333,8 +336,8 @@
 					"script": {
 						"exec": [
 							"const randomized = crypto.randomUUID()\r",
-							"pm.environment.set(\"username\", \"newUser-\" + randomized)\r",
-							"pm.environment.set(\"password\", \"newPasword-\" + randomized)\r",
+							"pm.environment.set(\"username\",  randomized)\r",
+							"pm.environment.set(\"password\", randomized)\r",
 							""
 						],
 						"type": "text/javascript",
@@ -558,6 +561,53 @@
 			"response": []
 		},
 		{
+			"name": "usuario-eventos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains single evento with matching id\", function() {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    const eventosEnEspera = responseJson.eventosEnEspera\r",
+							"    pm.expect(eventosEnEspera).to.be.an('array').that.has.lengthOf(1);\r",
+							"    pm.expect(eventosEnEspera[0].id).to.equal(pm.environment.get(\"eventoId\"));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwtInscripto}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{tacs-url}}/usuarios/eventos",
+					"host": [
+						"{{tacs-url}}"
+					],
+					"path": [
+						"usuarios",
+						"eventos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "evento",
 			"event": [
 				{
@@ -585,7 +635,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"titulo\": \"Concierto de Rock\",\r\n    \"descripcion\": \"Un show en vivo\",\r\n    \"inicio\": \"2025-09-10T20:00:00\",\r\n    \"duracion\": 7200,\r\n    \"cupoMaximo\": 100,\r\n    \"cupoMinimo\": null,\r\n    \"precio\": 1500.5,\r\n    \"categorias\": [\r\n        \"FIESTA\",\r\n        \"CONCIERTO\"\r\n    ]\r\n}"
+					"raw": "{\r\n    \"titulo\": \"Concierto de Rock\",\r\n    \"descripcion\": \"Un show en vivo\",\r\n    \"inicio\": \"2025-09-10T20:00:00\",\r\n    \"duracion\": 7200,\r\n    \"cupoMaximo\": 100,\r\n    \"cupoMinimio\": null,\r\n    \"precio\": 1500.5,\r\n    \"categorias\": [\r\n        \"FIESTA\",\r\n        \"CONCIERTO\"\r\n    ]\r\n}"
 				},
 				"url": {
 					"raw": "{{tacs-url}}/eventos/:id",

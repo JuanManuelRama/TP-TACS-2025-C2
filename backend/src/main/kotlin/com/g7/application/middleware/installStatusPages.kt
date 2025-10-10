@@ -27,6 +27,11 @@ fun Application.installStatusPages() {
         exception<InvalidIdException> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, mapOf("error" to cause.message))
         }
+
+        exception<InvalidConstructorException> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to cause.message))
+        }
+
         exception<IllegalAccessException> { call, cause ->
             call.respond(HttpStatusCode.Forbidden, mapOf("error" to (cause.message ?: "Forbidden")))
         }

@@ -27,6 +27,7 @@ fun Route.eventos() {
         post {
             val user = call.loggedUser()
             val eventoDto = call.receive<EventoInputDto>()
+            eventoDto.validate()
             val evento = EventoRepo.save(user.id, eventoDto)
             UsuarioRepo.crearEvento(user.id, evento.id)
             call.respond(HttpStatusCode.Created, evento.toDto(user.toResponseDto()))
