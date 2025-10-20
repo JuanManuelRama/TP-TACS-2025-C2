@@ -18,7 +18,8 @@ import io.ktor.server.routing.route
 
 fun Route.eventos() {
     get {
-        val eventos = EventoRepo.getEventos()
+        val params = call.parseEventoParams()
+        val eventos = EventoRepo.getEventos(params)
         val maps = UsuarioRepo.batchGetFromId(eventos.map { it.organizador }.toSet())
         val dtos = eventos.map { evento -> evento.toDto(maps[evento.organizador]!!.toResponseDto()) }
         call.respond(HttpStatusCode.OK, dtos)

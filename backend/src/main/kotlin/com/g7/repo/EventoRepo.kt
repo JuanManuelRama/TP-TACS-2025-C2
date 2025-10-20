@@ -2,14 +2,16 @@ package com.g7.repo
 
 import com.g7.evento.Evento
 import com.g7.evento.EventoInputDto
-import com.g7.evento.FiltroEvento
 import com.g7.evento.Inscripcion
 import com.g7.evento.Inscriptos
+import com.g7.routing.eventos.EventoParams
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.*
 import org.bson.Document
+import org.bson.conversions.Bson
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
+import kotlin.collections.listOf
 
 data class Inscripciones (
     val inscriptos: List<Inscripcion.Confirmada>? = emptyList(),
@@ -25,8 +27,36 @@ object EventoRepo {
         collection = MongoProvider.eventoCollection
     }
 
-    fun getEventos(): List<Evento> {
-        return collection.find().projection(projection).toList()
+    fun getEventos(params: EventoParams = EventoParams()): List<Evento> {
+        val filters = mutableListOf<Bson>()
+
+        params.keywords?.let { it.forEach { keyword ->
+            filters.add(
+                Filters.or(
+                    Filters.regex("titulo", keyword, "i"),
+                    Filters.regex("descripcion", keyword, "i")
+                )
+            )
+        }}
+
+        params.category?.let { filters.add(Filters.eq("categorias", it))
+        }
+        params.maxPrice?.let { filters.add(Filters.lte("precio", it)) }
+
+        params.minPrice?.let { filters.add(Filters.gte("precio", it)) }
+
+        val finalFilter = if (filters.isNotEmpty()) {
+            Filters.and(filters)
+        } else {
+            Document()
+        }
+
+        return collection.find(finalFilter)
+            .sort(Sorts.ascending("_id"))
+            .projection(projection)
+            .skip((params.page - 1) * params.limit)
+            .limit(params.limit)
+            .toList()
     }
 
     fun save(usuario: ObjectId, evento: EventoInputDto): Evento {
@@ -163,10 +193,6 @@ object EventoRepo {
                 )
             )
         }
-    }
-
-    fun getEventosFiltrado(filtro: FiltroEvento): List<Evento> {
-        TODO("Not yet implemented")
     }
 
     fun deleteEvento(id: ObjectId) {

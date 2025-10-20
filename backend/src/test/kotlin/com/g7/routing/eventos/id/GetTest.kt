@@ -26,9 +26,7 @@ class GetTest: BaseMongoTest() {
 
     @Test
     fun getEventoById() = withTestApp {
-        client.get("/eventos/${evento1.id}"){
-
-        }.apply {
+        client.get("/eventos/${evento1.id}").apply {
             assertEquals(io.ktor.http.HttpStatusCode.OK, status)
             val fetchedEvento = Json.decodeFromString<EventoResponseDto>(bodyAsText())
             assertEquals(evento1.titulo, fetchedEvento.titulo, "Fetched title should match")

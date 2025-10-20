@@ -430,6 +430,60 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /eventos:
+    get:
+      tags:
+        - Events
+      summary: Lista eventos filtrados
+      parameters:
+        - in: query
+          name: keywords
+          schema:
+            type: array
+            items:
+              type: string
+          description: Lista de palabras clave a buscar en titulo/descripcion
+          required: false
+
+        - in: query
+          name: category
+          schema:
+            type: string
+          required: false
+
+        - in: query
+          name: maxPrice
+          schema:
+            type: number
+          required: false
+
+        - in: query
+          name: minPrice
+          schema:
+            type: number
+          required: false
+
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          required: false
+
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+          required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
     post:
       tags:
         - Events
@@ -462,22 +516,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-    get:
-      tags:
-        - Events
-      summary: Obtener eventos
-      description: Obtiene todos los eventos
-      security: []
-      responses:
-        '200':
-          description: Lista de eventos
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Event'
 
   /eventos/{id}:
     get:
