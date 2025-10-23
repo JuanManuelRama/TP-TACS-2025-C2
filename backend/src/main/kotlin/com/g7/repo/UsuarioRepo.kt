@@ -9,7 +9,6 @@ import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Projections
 import com.mongodb.client.model.Updates
-import org.bson.types.ObjectId
 
 object UsuarioRepo {
     private lateinit var collection: MongoCollection<Usuario>
@@ -42,11 +41,11 @@ object UsuarioRepo {
         return newUsuario
     }
 
-    fun getFromId(id: ObjectId): Usuario =
+    fun getFromId(id: String): Usuario =
         collection.find(Filters.eq("_id", id)).projection(projection).first()
             ?: throw NoSuchElementException("Usuario with id $id not found")
 
-    fun batchGetFromId(ids: Set<ObjectId>): Map<ObjectId, Usuario> {
+    fun batchGetFromId(ids: Set<String>): Map<String, Usuario> {
         if (ids.isEmpty()) return emptyMap()
         return collection
             .find(Filters.`in`("_id", ids))
@@ -59,17 +58,17 @@ object UsuarioRepo {
         collection.find(Filters.eq("username", username)).projection(projection).first()
             ?: throw InvalidCredentialsException()
 
-    fun crearEvento(usuarioId: ObjectId, eventoId: ObjectId) {
+    fun crearEvento(usuarioId: String, eventoId: String) {
         collection.findOneAndUpdate(Filters.eq("_id", usuarioId),
             Updates.push("eventosCreados", eventoId))
     }
 
-    fun borrarEventoCreado(usuarioId: ObjectId, eventoId: ObjectId) {
+    fun borrarEventoCreado(usuarioId: String, eventoId: String) {
         collection.updateOne(Filters.eq("_id", usuarioId),
             Updates.pull("eventosCreados", eventoId))
     }
 
-    fun inscribirEvento(userId: ObjectId, id: ObjectId, confirmado: Boolean) {
+    fun inscribirEvento(userId: String, id: String, confirmado: Boolean) {
         if (confirmado){
             collection.findOneAndUpdate(Filters.eq("_id", userId),
                 Updates.push("eventosConfirmados", id))
@@ -80,7 +79,7 @@ object UsuarioRepo {
         }
     }
 
-    fun descinscribirEvento(userId: ObjectId, eventoId: ObjectId) {
+    fun descinscribirEvento(userId: String, eventoId: String) {
         collection.updateOne(Filters.eq("_id", userId),
             Updates.combine(
                 Updates.pull("eventosConfirmados", eventoId),
@@ -88,7 +87,7 @@ object UsuarioRepo {
             ))
     }
 
-    fun batchDescinscribirEvento(userIds: Set<ObjectId>, eventoId: ObjectId) {
+    fun batchDescinscribirEvento(userIds: Set<String>, eventoId: String) {
         collection.updateMany(Filters.`in`("_id", userIds),
             Updates.combine(
                 Updates.pull("eventosConfirmados", eventoId),
@@ -96,7 +95,7 @@ object UsuarioRepo {
             ))
     }
 
-    fun getEventos(userId: ObjectId): UsuarioEventos {
+    fun getEventos(userId: String): UsuarioEventos {
         return collection.withDocumentClass(UsuarioEventos::class.java)
             .find(Filters.eq("_id", userId))
             .projection(Projections.include(

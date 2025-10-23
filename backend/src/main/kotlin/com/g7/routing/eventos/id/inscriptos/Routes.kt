@@ -6,6 +6,8 @@ import com.g7.repo.UsuarioRepo
 import com.g7.routing.eventos.id.inscriptos.userId.eventosIdInscripcionUserId
 import com.g7.application.middleware.login.loggedUser
 import com.g7.application.requireIdParam
+import com.g7.service.EventoService
+import com.g7.service.UsuarioService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.response.respond
@@ -20,7 +22,7 @@ fun Route.eventosIdInscriptos() {
         get {
             val id = call.requireIdParam("id")
             val user = call.loggedUser()
-            val owner = EventoRepo.getOwnerFromId(id)
+            val owner = EventoService.getEventOwner(id)
 
             if (user.id != owner) {
                 throw IllegalAccessException("Solo el organizador puede ver los inscriptos")
@@ -29,14 +31,19 @@ fun Route.eventosIdInscriptos() {
             val inscriptos = EventoRepo.batchGetInscripto(id)
             val usuarios = inscriptos.inscriptos + inscriptos.esperas
 
-            val usuariosMap = UsuarioRepo.batchGetFromId(usuarios.toSet())
+            if (usuarios.isEmpty()) {
+                call.respond(HttpStatusCode.OK, emptyList<Any>())
+                return@get
+            }
+
+            val usuariosMap = UsuarioService.getUsuarios(usuarios.toSet())
             call.respond(HttpStatusCode.OK, inscriptos.toDto(usuariosMap))
 
         }
         post {
             val eventoId = call.requireIdParam("id")
             val userId = call.loggedUser().id
-            val owner = EventoRepo.getOwnerFromId(eventoId)
+            val owner = EventoService.getEventOwner(eventoId)
 
             if (userId == owner) {
                 throw IllegalStateException("El organizador no puede inscribirse a su propio evento")

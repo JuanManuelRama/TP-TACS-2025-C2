@@ -4,6 +4,7 @@ import com.g7.application.middleware.login.loggedUser
 import com.g7.evento.toDto
 import com.g7.repo.EventoRepo
 import com.g7.repo.UsuarioRepo
+import com.g7.service.EventoService
 import com.g7.usuario.toDto
 import com.g7.usuario.toResponseDto
 import io.ktor.http.HttpStatusCode
@@ -20,18 +21,10 @@ fun Route.usuariosEventos() {
             val ids = (eventos.eventosCreados ?: emptyList()) +
                     (eventos.eventosConfirmados ?: emptyList()) +
                     (eventos.eventosEnEspera ?: emptyList())
-            val eventosMap = EventoRepo.batchGetFromId(ids.toSet())
-            val organizadorIds = eventosMap.values.map { it.organizador }.toSet()
-            val organizadoresMap = UsuarioRepo
-                .batchGetFromId(organizadorIds)
-                .mapValues { it.value.toResponseDto() }
 
-            val eventoDtos = eventosMap.mapValues { (_, evento) ->
-                val organizadorDto = organizadoresMap[evento.organizador]
-                evento.toDto(organizadorDto!!)
-            }
+            val eventosMap = EventoService.getEventos(ids.toSet())
 
-            call.respond(HttpStatusCode.OK, eventos.toDto(eventoDtos))
+            call.respond(HttpStatusCode.OK, eventos.toDto(eventosMap))
         }
     }
 }

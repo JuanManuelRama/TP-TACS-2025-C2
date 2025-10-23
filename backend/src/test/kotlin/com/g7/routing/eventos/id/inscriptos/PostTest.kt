@@ -39,7 +39,7 @@ class PostTest: BaseMongoTest() {
 
     @Test
     fun waitlistToEvent() = withTestApp {
-        EventoRepo.inscribirUsuario(evento.id, ObjectId())
+        EventoRepo.inscribirUsuario(evento.id, ObjectId().toHexString())
 
         val subscriber = UsuarioRepo.save(dataset.usuarios[1])
 

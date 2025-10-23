@@ -10,12 +10,13 @@ import org.bson.types.ObjectId
  * @throws MissingParameterException si no se encuentra el parámetro
  * @throws InvalidIdException si el parámetro no es un ObjectId válido
 * */
-fun ApplicationCall.requireIdParam(name: String): ObjectId {
+fun ApplicationCall.requireIdParam(name: String): String {
     val raw = parameters[name] ?: run {
         throw MissingParameterException(name)
 }
+
     return try {
-        ObjectId(raw)
+        ObjectId(raw).toHexString()
     } catch (_: IllegalArgumentException) {
         throw InvalidIdException(raw)
     }

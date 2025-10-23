@@ -2,21 +2,20 @@ package com.g7.evento
 
 import com.g7.repo.UsuarioRepo
 import com.g7.serializable.LocalDateTimeSerializer
-import com.g7.usuario.Usuario
+import com.g7.usuario.UnknownUser
 import com.g7.usuario.UsuarioResponseDto
 import com.g7.usuario.toResponseDto
 import kotlinx.serialization.Serializable
-import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
 sealed class Inscripcion {
-    abstract val usuario: ObjectId
+    abstract val usuario: String
     abstract val horaInscripcion: LocalDateTime
     abstract val confirmado: Boolean
     abstract val tipo: String
 
     data class Confirmada(
-        override val usuario: ObjectId,
+        override val usuario: String,
         override val horaInscripcion: LocalDateTime,
         val horaConfirmacion: LocalDateTime
     ) : Inscripcion() {
@@ -25,7 +24,7 @@ sealed class Inscripcion {
     }
 
     data class Espera(
-        override val usuario: ObjectId,
+        override val usuario: String,
         override val horaInscripcion: LocalDateTime
     ) : Inscripcion() {
         override val confirmado: Boolean = false
@@ -65,12 +64,12 @@ fun Inscripcion.toDto(usuario: UsuarioResponseDto): InscripcionDto {
 }
 
 data class Inscriptos (
-    val inscriptos: List<ObjectId> = emptyList(),
-    val esperas: List<ObjectId> = emptyList()
+    val inscriptos: List<String> = emptyList(),
+    val esperas: List<String> = emptyList()
 ) {
     val size get() = inscriptos.size + esperas.size
     fun isEmpty() = inscriptos.isEmpty() && esperas.isEmpty()
-    fun none(predicate: (ObjectId) -> Boolean) = inscriptos.none(predicate) && esperas.none(predicate)
+    fun none(predicate: (String) -> Boolean) = inscriptos.none(predicate) && esperas.none(predicate)
 }
 
 @Serializable
@@ -79,10 +78,10 @@ data class InscriptosDto (
     val esperas: List<UsuarioResponseDto>
 )
 
-fun Inscriptos.toDto (map: Map<ObjectId, Usuario>): InscriptosDto {
+fun Inscriptos.toDto (map: Map<String, UsuarioResponseDto>): InscriptosDto {
     return InscriptosDto(
-        inscriptos = this.inscriptos.map { map[it]!!.toResponseDto() },
-        esperas = this.esperas.map { map[it]!!.toResponseDto() }
+        inscriptos = this.inscriptos.map { map[it] ?: UnknownUser.toResponseDto() },
+        esperas = this.esperas.map { map[it] ?: UnknownUser.toResponseDto() }
     )
 }
 

@@ -7,6 +7,7 @@ import com.g7.routing.eventos.id.inscriptos.eventosIdInscriptos
 import com.g7.application.middleware.login.loggedUser
 import com.g7.application.requireIdParam
 import com.g7.routing.eventos.id.estadisticas.eventosIdEstadisticas
+import com.g7.service.EventoService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.response.respond
@@ -18,14 +19,14 @@ import io.ktor.server.routing.route
 fun Route.eventosId() {
     get {
         val id = call.requireIdParam("id")
-        val evento = EventoRepo.getFromId(id)
-        call.respond(HttpStatusCode.OK, evento.toDto(UsuarioRepo))
+        val evento = EventoService.getEvento(id)
+        call.respond(HttpStatusCode.OK, evento)
     }
     authenticate("auth-jwt") {
         delete {
             val id = call.requireIdParam("id")
             val user = call.loggedUser()
-            val organizador = EventoRepo.getOwnerFromId(id)
+            val organizador = EventoService.getEventOwner(id)
 
             if (user.id != organizador) {
                 throw IllegalAccessException("Solo el organizador puede eliminar el evento")

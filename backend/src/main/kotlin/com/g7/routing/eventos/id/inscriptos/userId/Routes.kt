@@ -5,6 +5,8 @@ import com.g7.repo.EventoRepo
 import com.g7.repo.UsuarioRepo
 import com.g7.application.middleware.login.loggedUser
 import com.g7.application.requireIdParam
+import com.g7.service.EventoService
+import com.g7.service.UsuarioService
 import com.g7.usuario.toResponseDto
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
@@ -25,21 +27,21 @@ fun Route.eventosIdInscripcionUserId() {
                 call.respond(HttpStatusCode.OK, inscripcion.toDto(loggedUser.toResponseDto()))
             }
 
-            val owner = EventoRepo.getOwnerFromId(eventoId)
+            val owner = EventoService.getEventOwner(eventoId)
 
             if (loggedUser.id != owner)  {
                 throw IllegalAccessException("No podes ver la inscripcion de otro usuario")
             }
+
             val inscripcion = EventoRepo.getInscripcion(eventoId, userId)
-            val inscripto = UsuarioRepo.getFromId(userId).toResponseDto()
+            val inscripto = UsuarioService.getUsuario(userId)
             call.respond(HttpStatusCode.OK, inscripcion.toDto(inscripto))
         }
 
         delete {
             val eventoId = call.requireIdParam("id")
             val loggedUser = call.loggedUser()
-
-            val owner = EventoRepo.getOwnerFromId(eventoId)
+            val owner = EventoService.getEventOwner(eventoId)
 
             if (loggedUser.id != owner) {
                 throw IllegalAccessException("Solo el organizador puede dar de baja a un inscripto")

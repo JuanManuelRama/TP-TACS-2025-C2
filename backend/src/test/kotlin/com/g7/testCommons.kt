@@ -4,6 +4,7 @@ import com.g7.evento.EventoInputDto
 import com.g7.repo.MongoProvider
 import com.g7.application.infra.configureDb
 import com.g7.application.configureRouting
+import com.g7.application.infra.configureCache
 import com.g7.application.middleware.installAuth
 import com.g7.application.middleware.installContentNegotiation
 import com.g7.application.middleware.installStatusPages
@@ -21,9 +22,11 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
+import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import org.testcontainers.utility.DockerImageName
 
 val testConfig = MapApplicationConfig(
     "jwt.secret" to "super-secret-test",
@@ -51,6 +54,10 @@ data class Dataset(
 @Container
 val mongoContainer: MongoDBContainer = MongoDBContainer("mongo:8.0.14")
 
+@Container
+val redis = GenericContainer(DockerImageName.parse("redis:8.2.2"))
+    .withExposedPorts(6379)
+
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class BaseMongoTest {
@@ -63,6 +70,7 @@ abstract class BaseMongoTest {
     @BeforeAll
     fun setup() {
         mongoContainer.start()
+        redis.start()
     }
 
     @AfterEach
@@ -81,6 +89,12 @@ abstract class BaseMongoTest {
             configureDb(MapApplicationConfig(
                 "mongo.uri" to mongoContainer.connectionString,
                 "mongo.db" to "test"))
+            val host = redis.host
+            val port = redis.getMappedPort(6379)
+
+            configureCache(MapApplicationConfig(
+                "redis.host" to "redis://$host:$port"
+            ))
             JwtConfig.init(testConfig)
         }
         application {

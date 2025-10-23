@@ -9,7 +9,6 @@ import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.*
 import org.bson.Document
 import org.bson.conversions.Bson
-import org.bson.types.ObjectId
 import java.time.LocalDateTime
 import kotlin.collections.listOf
 
@@ -59,7 +58,7 @@ object EventoRepo {
             .toList()
     }
 
-    fun save(usuario: ObjectId, evento: EventoInputDto): Evento {
+    fun save(usuario: String, evento: EventoInputDto): Evento {
         val newEvento = Evento(
             organizador = usuario,
             titulo = evento.titulo,
@@ -82,22 +81,22 @@ object EventoRepo {
         return newEvento
     }
 
-    fun getFromId(id: ObjectId): Evento {
+    fun getFromId(id: String): Evento {
         return collection.find(Filters.eq("_id", id)).projection(projection).first()
             ?: throw NoSuchElementException("Evento con id $id no encontrado")
     }
 
-    fun getOwnerFromId(id: ObjectId): ObjectId {
+    fun getOwnerFromId(id: String): String {
         val doc = collection.withDocumentClass(Document::class.java)
             .find(Filters.eq("_id", id))
             .projection(Projections.include("organizador"))
             .first()
             ?: throw NoSuchElementException("Evento con id $id no encontrado")
 
-        return doc.getObjectId("organizador")
+        return doc.getString("organizador")
     }
 
-    fun inscribirUsuario(eventoId: ObjectId, usuarioId: ObjectId): Inscripcion {
+    fun inscribirUsuario(eventoId: String, usuarioId: String): Inscripcion {
         val now = LocalDateTime.now()
 
         val confirmed = collection.updateOne(
@@ -138,7 +137,7 @@ object EventoRepo {
         val esperas: List<Inscripcion.Espera>
     )
 
-    fun cancelarInscripcion(eventoId: ObjectId, usuarioId: ObjectId) {
+    fun cancelarInscripcion(eventoId: String, usuarioId: String) {
         //Asume user is waitlisted
         val result = collection.updateOne(
             Filters.and(
@@ -195,11 +194,11 @@ object EventoRepo {
         }
     }
 
-    fun deleteEvento(id: ObjectId) {
+    fun deleteEvento(id: String) {
         collection.deleteOne(Filters.eq("_id", id))
     }
 
-    fun getInscripcion(eventoId: ObjectId, usuarioId: ObjectId): Inscripcion {
+    fun getInscripcion(eventoId: String, usuarioId: String): Inscripcion {
         val inscripciones = collection.withDocumentClass(Inscripciones::class.java)
             .find(Filters.eq("_id", eventoId))
             .projection(
@@ -216,19 +215,19 @@ object EventoRepo {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun batchGetInscripto(eventoId: ObjectId): Inscriptos {
+    fun batchGetInscripto(eventoId: String): Inscriptos {
         val inscriptos = collection.withDocumentClass(Document::class.java)
             .find(Filters.eq("_id", eventoId))
             .projection(Projections.include("inscriptos.usuario", "esperas.usuario"))
             .first() ?: throw NoSuchElementException("Evento con id $eventoId no encontrado")
 
         return Inscriptos(
-            inscriptos = (inscriptos["inscriptos"] as List<Document>).map { it.getObjectId("usuario") },
-            esperas = (inscriptos["esperas"] as List<Document>).map { it.getObjectId("usuario") }
+            inscriptos = (inscriptos["inscriptos"] as List<Document>).map { it.getString("usuario") },
+            esperas = (inscriptos["esperas"] as List<Document>).map { it.getString("usuario") }
         )
     }
 
-    fun batchGetFromId(ids: Set<ObjectId>): Map<ObjectId, Evento> {
+    fun batchGetFromId(ids: Set<String>): Map<String, Evento> {
         return collection.find(Filters.`in`("_id", ids)).projection(projection)
             .into(HashSet()).associateBy { it.id }
     }

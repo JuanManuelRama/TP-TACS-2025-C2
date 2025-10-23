@@ -1,6 +1,5 @@
 package com.g7.usuario
 
-import com.g7.serializable.ObjectIdSerializer
 import com.g7.application.middleware.login.LoggedUser
 import com.g7.evento.EventoResponseDto
 import com.g7.exception.InvalidConstructorException
@@ -10,8 +9,7 @@ import org.mindrot.jbcrypt.BCrypt
 
 @Serializable
 data class UsuarioResponseDto(
-    @Serializable(with = ObjectIdSerializer::class)
-    val id: ObjectId,
+    val id: String,
     val username: String,
     val type: UserType? = null
 )
@@ -59,7 +57,7 @@ data class UsuarioEventosDto (
     val eventosCreados: List<EventoResponseDto>
 )
 
-fun UsuarioEventos.toDto(map: Map<ObjectId, EventoResponseDto>): UsuarioEventosDto = UsuarioEventosDto(
+fun UsuarioEventos.toDto(map: Map<String, EventoResponseDto>): UsuarioEventosDto = UsuarioEventosDto(
     eventosConfirmados = eventosConfirmados?.map { map[it]!! } ?: emptyList(),
     eventosEnEspera = eventosEnEspera?.map { map[it]!! } ?: emptyList(),
     eventosCreados = eventosCreados?.map { map[it]!! } ?: emptyList()

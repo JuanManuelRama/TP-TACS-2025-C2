@@ -8,7 +8,7 @@ import org.bson.types.ObjectId
 import javax.naming.AuthenticationException
 
 data class LoggedUser(
-    val id: ObjectId,
+    val id: String,
     val username: String,
     val type: String
 )
@@ -30,5 +30,5 @@ fun ApplicationCall.loggedUser(): LoggedUser {
         throw BadRequestException("Invalid user ID format")
     }
 
-    return LoggedUser(id, username, type)
+    return LoggedUser(id.toHexString(), username, type)
 }

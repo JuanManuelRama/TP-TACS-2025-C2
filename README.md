@@ -25,5 +25,6 @@ docker compose up --build
 - [Backend](/backend/README.md)
 - [Frontend](/frontend/README.md)
 - [Persistencia](persistencia.md)
+- [Cache](cache.md)
 - [API](api-docs.md)
 - [APP](app-docs.md)

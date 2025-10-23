@@ -1,5 +1,6 @@
 package com.g7.application
 
+import com.g7.application.infra.configureCache
 import com.g7.application.infra.configureDb
 import com.g7.application.middleware.*
 import io.ktor.server.application.Application
@@ -13,6 +14,7 @@ fun main(args: Array<String>) {
 fun Application.module() {
     //Infra
     configureDb(environment.config)
+    configureCache(environment.config)
 
     //Middleware
     installAuth(environment.config)

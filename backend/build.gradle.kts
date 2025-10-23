@@ -110,4 +110,7 @@ dependencies {
     implementation("org.mongodb:bson:${mongo_version}")
     implementation("org.mongodb:bson-kotlin:${mongo_version}")
 
+    // Redis
+    implementation("io.lettuce:lettuce-core:6.8.1.RELEASE")
+
 }

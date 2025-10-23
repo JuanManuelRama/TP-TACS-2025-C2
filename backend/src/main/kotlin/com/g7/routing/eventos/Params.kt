@@ -3,15 +3,13 @@ package com.g7.routing.eventos
 import io.ktor.server.application.*
 
 data class EventoParams(
-    val keywords: List<String>?,
-    val category: String?,
-    val maxPrice: Double?,
-    val minPrice: Double?,
+    val keywords: List<String>? = null,
+    val category: String? = null,
+    val maxPrice: Double? = null,
+    val minPrice: Double? = null,
     val limit: Int = 10,
     val page: Int = 1
-) {
-    constructor() : this(null, null, null, null)
-}
+)
 
 fun ApplicationCall.parseEventoParams(): EventoParams {
     val category = parameters["category"]
@@ -20,6 +18,7 @@ fun ApplicationCall.parseEventoParams(): EventoParams {
     val minPrice = request.queryParameters["minPrice"]?.toDoubleOrNull()
 
     var limit = request.queryParameters["limit"]?.toIntOrNull() ?: 10
+
     if(limit == 0 || limit > 20) {
         limit = 10
     }

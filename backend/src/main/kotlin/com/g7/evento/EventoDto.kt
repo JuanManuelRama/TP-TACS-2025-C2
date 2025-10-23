@@ -3,19 +3,15 @@ package com.g7.evento
 import com.g7.exception.InvalidConstructorException
 import com.g7.repo.UsuarioRepo
 import com.g7.serializable.LocalDateTimeSerializer
-import com.g7.serializable.ObjectIdSerializer
 import com.g7.usuario.UsuarioResponseDto
 import com.g7.usuario.toResponseDto
 import kotlinx.serialization.Serializable
-import org.bson.types.ObjectId
 import java.time.LocalDateTime
-import kotlin.compareTo
-import kotlin.text.compareTo
+
 
 @Serializable
 data class EventoResponseDto (
-    @Serializable(with = ObjectIdSerializer::class)
-    val id: ObjectId,
+    val id: String,
     var organizador: UsuarioResponseDto,
     val titulo: String,
     val descripcion: String,

@@ -1,6 +1,7 @@
 # Persistencia
 
-Para persistir la información, decidimos utilizar MongoDb, por consigna debía ser NoSQL, y entre las opciones nos pareció la más adecuada. \
+Para persistir la información, decidimos utilizar MongoDb, por consigna debía ser NoSQL, y entre las opciones nos pareció la más adecuada.
+
 Mongo provee garantías de atomicidad y concurrencia para operaciones básicas ($push, $poll, $inc) sobre un documento, lo que permite asegurarnos que la cantidad de inscriptos nunca supere el límite.
 
 ## Sharding
@@ -11,7 +12,8 @@ Este problema no puede ser resuelto dentro del esquema actual (o realizamos shar
 
 ## Límite de inscriptos
 
-Los documentos en Mongo tienen un hard limit de 16MB, los inscriptos y waitlisted actualmente están embedidos dentro del documetno principal de evento, por lo que eventualmente alcanzaríamos el límite, y todas las peticiones de inscripción fallarían. \
+Los documentos en Mongo tienen un hard limit de 16MB, los inscriptos y waitlisted actualmente están embedidos dentro del documetno principal de evento, por lo que eventualmente alcanzaríamos el límite, y todas las peticiones de inscripción fallarían.
+
 Esto no pasaría hasta ~ 400k inscriptos, pero igualmente debe ser tenido en cuenta.
 
 ## Relaciones
