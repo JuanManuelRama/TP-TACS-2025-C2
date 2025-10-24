@@ -11,21 +11,17 @@ RUN pnpm install
 COPY . .
 RUN pnpm run build
 
-# Stage 2: Serve using Nginx
+# ---------- Etapa 2: Servidor Nginx ----------
 FROM nginx:alpine
-WORKDIR /usr/share/nginx/html
 
-# Remove default nginx website
-RUN rm -rf ./*
-
-# Copy build output from previous stage
-COPY --from=builder /app/dist ./
-
-# Copy custom Nginx config
+# Remover configuración por defecto y agregar la tuya
+RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port
+# Copiar archivos estáticos desde la etapa anterior
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Exponer el puerto donde Nginx sirve el sitio
 EXPOSE 80
 
-# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
