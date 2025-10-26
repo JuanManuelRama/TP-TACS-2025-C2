@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAuthState } from "../store/index.ts";
+import { getAuthState } from "$store";
 import HttpError from "./HttpError.ts";
 
 const axiosInstance = axios.create({

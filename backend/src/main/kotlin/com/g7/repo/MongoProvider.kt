@@ -2,7 +2,10 @@ package com.g7.repo
 
 import com.g7.evento.Evento
 import com.g7.usuario.Usuario
+import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
+import com.mongodb.ServerApi
+import com.mongodb.ServerApiVersion
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoCollection
@@ -29,7 +32,18 @@ object MongoProvider {
     fun init(connectionString: String, dbName: String) {
         this.connectionString = connectionString
         this.dbName = dbName
-        client = MongoClients.create(connectionString)
+
+
+        val serverApi = ServerApi.builder()
+            .version(ServerApiVersion.V1)
+            .build()
+
+        val mongoClientSettings = MongoClientSettings.builder()
+            .applyConnectionString(ConnectionString(connectionString))
+            .serverApi(serverApi)
+            .build()
+
+        client = MongoClients.create(mongoClientSettings)
         db = client.getDatabase(dbName).withCodecRegistry(pojoCodecRegistry)
 
         usuarioCollection =db.getCollection("usuarios", Usuario::class.java)

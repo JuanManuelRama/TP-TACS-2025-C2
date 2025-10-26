@@ -15,17 +15,18 @@ RUN pnpm run build
 FROM nginx:alpine
 WORKDIR /usr/share/nginx/html
 
-# Remove default nginx website
-RUN rm -rf ./*
-
 # Copy build output from previous stage
 COPY --from=builder /app/dist ./
 
 # Copy custom Nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+RUN apk add gettext # Necesario para el comando envsubst
 
 # Expose port
 EXPOSE 80
 
-# Start Nginx
+# Use the new entrypoint script
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
