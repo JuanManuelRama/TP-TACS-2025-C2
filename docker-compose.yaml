@@ -53,6 +53,17 @@ services:
       - backend-network
     depends_on: 
       - backend
+  telegram:
+    build:
+      context: ./telegram
+      dockerfile: Dockerfile
+    environment:
+      API_BASE_URL: "http://backend:8080"
+      BOT_TOKEN: "hola"
+    networks:
+    - backend-network
+    depends_on:
+    - backend
 
 networks:
   db-network:
