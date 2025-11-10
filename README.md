@@ -18,6 +18,8 @@ docker compose up --build
 - Backend: Kotlin + Ktor
 - Frontend: TypeScrypt + React + Vite
 - Base de Datos: MongoDB
+- Cache: Redis
+- Deploy: AWS + Mongo Atlas
 
 ## Documentación Adicional
 
@@ -25,6 +27,7 @@ docker compose up --build
 - [Backend](/backend/README.md)
 - [Frontend](/frontend/README.md)
 - [Persistencia](persistencia.md)
+- [Deploy](deploy.md)
 - [Cache](cache.md)
 - [API](api-docs.md)
 - [APP](app-docs.md)
