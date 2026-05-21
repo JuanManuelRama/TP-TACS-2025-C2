@@ -1,33 +1,33 @@
-# Deploy
+# Deployment
 
-Realizamos el deploy en el ecosistema de AWS. El diagrama de despliegue buscado es el siguiente:
+We deployed the application within the AWS ecosystem. The target deployment diagram is as follows:
 
-![Diagrama-de-despliegue](despliegue.png)
+![Deployment-diagram](despliegue.png)
 
 ## ECS
 
-El principal servicio utilizado fue Elastic Container Service, que nos permite, a partir de una imágen de docker, levantar una cluster de contenedores, y gestiona el escalado. Esto lo utilizamos tanto para el backend como el frontend. Las imágenes de Docker están almacenadas en un Docker Registry privado que provee AWS
+The primary service used was Elastic Container Service (ECS), which allows us to spin up a container cluster from a Docker image and manages scaling. We used this for both the backend and the frontend. The Docker images are stored in a private Docker Registry provided by AWS.
 
 ## Redis
 
-Para esto utilizamos ElastiCache de AWS, generando una instancia de Redis en una subred privada, a la cuál solo el backend tiene acceso.
+For this, we utilized AWS ElastiCache, generating a Redis instance within a private subnet to which only the backend has access.
 
 ## Mongo
 
-AWS no cuenta con soporte nativo para MongoDB, por lo que decidimos utilizar el servicio de Mongo Atlas, aprovechando la tier gratuita. El servicio es fácil de utilizar, permitiendos tener una corta whitelist de ip autorizadas a entrar, garantizando seguridad.
+AWS does not offer native support for MongoDB, so we decided to use the Mongo Atlas service, taking advantage of the free tier. The service is easy to use, allowing us to maintain a short whitelist of authorized IP addresses, ensuring security.
 
-Dada la imposibilidad de whitelistear todas las IPs de contenedores dinámicos, en un escenario productivo utilizaríamos NAT Gateway para exponer una IP única hacia Atlas y evitar mantenimiento manual de la whitelist. Para esta versión, decidimos dejar 0.0.0.0 en whitelist, no es tan grave ya que mongo tiene contraseña, pero tampoco es ideal.
+Given the impossibility of whitelisting all dynamic container IPs, in a production scenario, we would use a NAT Gateway to expose a single IP to Atlas and avoid manual whitelist maintenance. For this version, we decided to leave 0.0.0.0/0 on the whitelist; it is not too severe since Mongo has a password, but it is not ideal either.
 
-Uno de los principales beneficios de MongoDB, especialmetne con Atlas, es la escala sencilla, añadir nuevos clusters a la DB es sencillo, y no afecta al backend, que siempre debe golpear a la misma ip.
+One of the main benefits of MongoDB, especially with Atlas, is seamless scaling. Adding new clusters to the DB is simple and does not affect the backend, which always targets the same IP address.
 
 ## Load Balancer
 
-Acá es donde surgen problemas, la tier gratuita de AWS no permite crear un ALB. Esto dificulta fuertemente el modelo de clusters.
+This is where problems arise; the AWS free tier does not allow the creation of an ALB (Application Load Balancer). This heavily hinders the cluster model.
 
-### Solución
+### Solution
 
-Un parche encontrardo es mantener la escala automática en el back, con un Service Finder que los identifique, nginx se conecta a este finder para recivir un container. De esta forma, aún si muriese un backend el front va a encontrar remplazo, pero no es un load balancer, los pedidos no serán distribuidos de fomra eficiente, sino que cada 30 segundos el proxy inverso cambiará a que container le pega
+A workaround we found is to maintain automatic scaling on the backend with a Service Discovery/Finder that identifies them. Nginx connects to this finder to receive a container destination. This way, even if a backend instance dies, the frontend will find a replacement. However, it is not a true load balancer: requests will not be distributed efficiently; instead, every 30 seconds the reverse proxy will change which container it hits.
 
-## DNS y Frontend Estable
+## DNS and Stable Frontend
 
-La versión que tenemos de AWS no nos pemrite elegir un nombre de domiño y asociarlo a nuestra instancia de front (o varias si necesitacemos escalar eso también). Tenemos un container de front levantado, y para conectarse se entra a esa ruta.
+The AWS version we have does not allow us to choose a domain name and associate it with our frontend instance (or multiple instances if we needed to scale that as well). We have a single frontend container up and running, and users connect by accessing that specific route directly.

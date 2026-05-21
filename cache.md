@@ -1,19 +1,19 @@
 # Cache
 
-Para la capa de caché decidimos utilizar Redis, aprovechando su popularidad, soporte en la industria y facilidad de integración.
+For the caching layer, we decided to use Redis, taking advantage of its popularity, industry support, and ease of integration.
 
-## Expiración
+## Expiration
 
-Dado que los atributos principales de Usuario y Evento son esencialmente estáticos (no cambian el nombre, descripción, etc.), optamos por no asignar expiración a sus entradas en caché. En caso de ser necesario, se dispone de una función explícita para invalidar claves.
-Aun así, Redis está configurado con un límite de memoria, y al alcanzarse se aplica la política LRU (Least Recently Used) para desalojar entradas automáticamente.
+Since the core attributes of both User and Event are essentially static (usernames, descriptions, etc., do not change frequently), we opted not to assign an expiration time to their cache entries. Should it be necessary, an explicit function is available to invalidate keys manually.
+Even so, Redis is configured with a memory limit, and upon reaching it, the LRU (Least Recently Used) policy is applied to evict entries automatically.
 
-## Estrategia
+## Strategy
 
-Adoptamos el patrón Cache-Aside por su simpleza: la caché se usa exclusivamente como optimización de rendimiento y no participa en la lógica de negocio.
+We adopted the Cache-Aside pattern due to its simplicity: the cache is used exclusively for performance optimization and does not participate in the core business logic.
 
-Por ejemplo, aunque técnicamente podríamos cachear datos relacionados con inscripciones (como el cupo restante) aprovechando operaciones atómicas de Redis, decidimos no coordinar estado entre dos fuentes (DB + cache). Consideramos que la complejidad extra no justifica el beneficio marginal.
-Como consecuencia, el sistema puede funcionar normalmente incluso si Redis está caído.
+For instance, although we could technically cache registration-related data (such as remaining capacity) by leveraging Redis's atomic operations, we decided against coordinating state across two separate sources (DB + cache). We determined that the added complexity does not justify the marginal benefit.
+As a consequence, the system can continue to operate normally even if Redis goes down.
 
-## Almacenamiento
+## Storage
 
-Dado que las entidades son simples, se serializan como JSON en texto plano dentro de Redis. En un escenario de mayor escala o demanda de eficiencia, podría evaluarse un formato binario más compacto o un esquema más especializado.
+Given that the entities are simple, they are serialized as plain text JSON within Redis. In a higher-scale scenario or one demanding greater efficiency, a more compact binary format or a more specialized schema could be evaluated.

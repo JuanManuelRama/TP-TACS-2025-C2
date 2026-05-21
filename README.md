@@ -1,33 +1,30 @@
 # Trabajo Práctico TACS 2025 C2
 
-Este proyecto se corresponde al trabajo práctico del segundo cuatrimestre de TACS, UTN FRBA.
+This project corresponds to the coursework for the second semester of TACS at UTN FRBA.
 
 ## Build & Run
 
-Contamos con un `docker-compose.yaml` para poder levantar todo el proyecto en contenedores, el mismo se ejectua:
+We provide a `docker-compose.yaml` file to run the entire project inside containers. It can be executed with:
 
 ```bash
 docker compose up --build
 ```
 
 - [Backend](/backend/README.md)
-- [Frontend](/frontend/README.md)
 
-## Tecnologías
+## Tech stack
 
 - Backend: Kotlin + Ktor
 - Frontend: TypeScrypt + React + Vite
-- Base de Datos: MongoDB
+- Database: MongoDB
 - Cache: Redis
 - Deploy: AWS + Mongo Atlas
 
-## Documentación Adicional
+## Technical Details
 
-- [Consigna](https://docs.google.com/document/d/e/2PACX-1vRKgz7eEA1fIByKMtXKxA6-Vs1rSst8cwUeTkMnZyYrDPkzkUECyK7WXqXWFSh5jwnxJMdanffdyWzB/pub)
+- [Requirements specification](https://docs.google.com/document/d/e/2PACX-1vRKgz7eEA1fIByKMtXKxA6-Vs1rSst8cwUeTkMnZyYrDPkzkUECyK7WXqXWFSh5jwnxJMdanffdyWzB/pub)
 - [Backend](/backend/README.md)
-- [Frontend](/frontend/README.md)
-- [Persistencia](persistencia.md)
-- [Deploy](deploy.md)
-- [Cache](cache.md)
-- [API](api-docs.md)
-- [APP](app-docs.md)
+- [Persistence Strategy](persistence.md)
+- [Deployment Architecture](deploy.md)
+- [Cache Implementation](cache.md)
+- [API usage](api-docs.md)
